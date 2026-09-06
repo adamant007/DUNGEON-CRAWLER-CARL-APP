@@ -17,5 +17,17 @@ function restore(prefix, output) {
   console.log(`Restored ${output}`);
 }
 
+function injectCoreIntegration(output) {
+  const file = path.join(root, output);
+  let source = fs.readFileSync(file, "utf8");
+  const marker = "import './core-hp-integration';";
+  if (!source.includes(marker)) {
+    source += `\n\n// Build-time core integration: all HP damage controls route through Damage Resist.\n${marker}\n`;
+    fs.writeFileSync(file, source);
+    console.log(`Integrated HP/Damage Resist into ${output}`);
+  }
+}
+
 restore("main", "src/main.tsx");
 restore("styles", "src/styles.css");
+injectCoreIntegration("src/main.tsx");
