@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test';
 import fs from 'node:fs';
 
+function navButton(nav:any,label:string){
+  return nav.locator('button').filter({hasText:new RegExp(`^${label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}`)}).first();
+}
+
 test('cloud client requires campaign-scoped crawlers and leaderboard', async () => {
   const cloud=fs.readFileSync('src/cloud.ts','utf8');
   expect(cloud).toContain("from('campaign_characters')");
@@ -29,11 +33,11 @@ test('tutorial tab explains campaign privacy and opens features', async ({page})
   const link=page.getByRole('link',{name:/Crawler Companion/i});
   if(await link.count()) await link.first().click();
   const nav=page.getByRole('navigation',{name:'Primary navigation'});
-  await expect(nav.getByRole('button',{name:'Tutorial',exact:true})).toBeVisible();
-  await nav.getByRole('button',{name:'Tutorial',exact:true}).click();
+  await expect(navButton(nav,'Tutorial')).toBeVisible();
+  await navButton(nav,'Tutorial').click();
   await expect(page.getByText('🎓 Crawler Companion Tutorial',{exact:true})).toBeVisible();
   await expect(page.getByText(/GM only sees crawler sheets assigned to that GM’s campaign/i)).toBeVisible();
   await expect(page.getByText(/each campaign has its own leaderboard/i).first()).toBeVisible();
   await page.getByRole('button',{name:'Show me →'}).first().click();
-  await expect(nav.getByRole('button',{name:'Character',exact:true})).toHaveClass(/active/);
+  await expect(navButton(nav,'Character')).toHaveClass(/active/);
 });
