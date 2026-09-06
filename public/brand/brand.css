@@ -16,7 +16,7 @@
 
 /* Dragon-scale / ember navigation treatment. */
 .app>nav{display:flex;flex-wrap:wrap;gap:9px;padding-top:13px;padding-bottom:13px;border-top:1px solid rgba(229,164,73,.18);border-bottom:1px solid rgba(229,164,73,.28);background:linear-gradient(180deg,rgba(25,14,12,.97),rgba(10,12,17,.96));box-shadow:0 10px 28px rgba(0,0,0,.28),inset 0 1px rgba(255,194,92,.05)}
-.app>nav button{position:relative;isolation:isolate;overflow:hidden;border:1px solid rgba(214,145,57,.48);border-radius:14px 14px 8px 8px;padding:10px 14px;min-height:42px;background:radial-gradient(circle at 25% 15%,rgba(255,136,53,.16),transparent 34%),radial-gradient(circle at 75% 80%,rgba(116,31,21,.28),transparent 42%),linear-gradient(155deg,#211511,#11151c 58%,#17100e);color:#f4dfbd;font-size:14px;line-height:1.2;font-weight:700;letter-spacing:.01em;text-shadow:0 1px 0 #000;box-shadow:inset 0 1px rgba(255,225,164,.08),0 5px 14px rgba(0,0,0,.24);transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease,background .16s ease;white-space:normal;text-align:center}
+.app>nav button{position:relative;isolation:isolate;overflow:hidden;border:1px solid rgba(214,145,57,.48);border-radius:14px 14px 8px 8px;padding:10px 14px;min-height:42px;background:radial-gradient(circle at 25% 15%,rgba(255,136,53,.16),transparent 34%),radial-gradient(circle at 75% 80%,rgba(116,31,21,.28),transparent 42%),linear-gradient(155deg,#211511,#11151c 58%,#17100e);color:#f4dfbd;font-size:14px;line-height:1.2;font-weight:700;letter-spacing:.01em;text-shadow:0 1px 0 #000;box-shadow:inset 0 1px rgba(255,225,164,.08),0 5px 14px rgba(0,0,0,.24);transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease,background .16s ease;white-space:normal;text-align:center;scroll-margin-inline:12px}
 .app>nav button::before{content:"";position:absolute;inset:0;z-index:-1;opacity:.42;background:radial-gradient(ellipse at 20% 0%,transparent 0 28%,rgba(240,159,63,.12) 30% 34%,transparent 36%),radial-gradient(ellipse at 70% 0%,transparent 0 28%,rgba(240,159,63,.09) 30% 34%,transparent 36%);background-size:26px 19px}
 .app>nav button:hover{transform:translateY(-1px);border-color:#e7ae59;box-shadow:inset 0 1px rgba(255,232,188,.12),0 7px 18px rgba(0,0,0,.32),0 0 16px rgba(216,81,29,.12)}
 .app>nav button.active{border-color:#f2c06a;background:radial-gradient(circle at 50% 120%,rgba(255,91,31,.46),transparent 54%),linear-gradient(155deg,#5f2117,#2a1713 55%,#15171d);color:#fff1cf;box-shadow:inset 0 0 0 1px rgba(255,224,153,.18),0 0 0 1px rgba(124,44,21,.28),0 8px 22px rgba(0,0,0,.34),0 0 22px rgba(229,87,27,.2)}
@@ -33,13 +33,15 @@
   .dragon-mark{width:min(430px,94vw);border-radius:20px}
   .app>header>div:first-child h1::before{width:42px;height:42px;flex-basis:42px;border-radius:11px}
   .app>header>div:first-child h1::after{font-size:22px}
-  .app>nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;gap:8px;padding:10px;overflow:visible}
-  .app>nav button{width:100%;min-width:0;min-height:48px;padding:10px 8px;border-radius:12px 12px 7px 7px;font-size:13px;line-height:1.15;white-space:normal;overflow-wrap:anywhere;text-overflow:clip}
+  .app>nav{display:flex;flex-wrap:nowrap;position:sticky;top:0;z-index:50;width:100%;gap:8px;padding:9px 10px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scrollbar-width:thin}
+  .app>nav button{flex:0 0 auto;width:auto;min-width:118px;max-width:154px;min-height:46px;padding:9px 11px;border-radius:12px 12px 7px 7px;font-size:13px;line-height:1.15;white-space:normal;overflow-wrap:normal;text-overflow:clip;scroll-snap-align:center}
   .app>nav button:nth-child(11)::after{font-size:13px}
+  .app>.character-bar{position:relative;z-index:10}
+  .app>main{scroll-margin-top:72px}
 }
 @media(max-width:380px){
-  .app>nav{grid-template-columns:1fr 1fr;gap:6px;padding:8px}
-  .app>nav button{font-size:12px;padding:9px 6px}
+  .app>nav{gap:6px;padding:8px}
+  .app>nav button{min-width:108px;max-width:142px;font-size:12px;padding:8px 9px}
   .app>nav button:nth-child(11)::after{font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
