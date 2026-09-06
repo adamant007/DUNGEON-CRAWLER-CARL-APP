@@ -20,11 +20,20 @@ function restore(prefix, output) {
 function injectCoreIntegration(output) {
   const file = path.join(root, output);
   let source = fs.readFileSync(file, "utf8");
-  const marker = "import './core-hp-integration';";
-  if (!source.includes(marker)) {
-    source += `\n\n// Build-time core integration: all HP damage controls route through Damage Resist.\n${marker}\n`;
+  const integrations = [
+    ["import './core-hp-integration';", '// Build-time core integration: all HP damage controls route through Damage Resist.'],
+    ["import './campaign-role-visibility';", '// Build-time campaign role guard: keep GM navigation available to local/GM users and hidden from confirmed players.']
+  ];
+  let changed = false;
+  for (const [marker, comment] of integrations) {
+    if (!source.includes(marker)) {
+      source += `\n\n${comment}\n${marker}\n`;
+      changed = true;
+    }
+  }
+  if (changed) {
     fs.writeFileSync(file, source);
-    console.log(`Integrated HP/Damage Resist into ${output}`);
+    console.log(`Integrated runtime guards into ${output}`);
   }
 }
 
