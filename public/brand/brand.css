@@ -1,5 +1,5 @@
 /* Ginger Dragon Fire Studios production branding */
-.dragon-mark{font-size:0!important;width:min(560px,92vw);aspect-ratio:1/1;margin:0 auto 18px;background:url('/brand/ginger-dragon-fire-full.webp') center/contain no-repeat;border-radius:28px;filter:drop-shadow(0 18px 34px rgba(0,0,0,.45)) drop-shadow(0 0 28px rgba(255,91,36,.22));border:1px solid rgba(255,205,112,.28)}
+.dragon-mark{font-size:0!important;width:min(560px,92vw);aspect-ratio:1/1;margin:0 auto 18px;background:url('/brand/ginger-dragon-fire-full.webp') center/contain no-repeat,url('/brand/app-icon.svg') center/contain no-repeat;border-radius:28px;filter:drop-shadow(0 18px 34px rgba(0,0,0,.45)) drop-shadow(0 0 28px rgba(255,91,36,.22));border:1px solid rgba(255,205,112,.28)}
 .app .dragon-mark{display:none!important}
 .app>header>div:first-child h1{font-size:0;display:flex;align-items:center;gap:12px}
 .app>header>div:first-child h1::before{content:"";display:block;width:52px;height:52px;flex:0 0 52px;background:url('/brand/app-icon.svg') center/cover no-repeat;border-radius:14px;box-shadow:0 7px 22px rgba(0,0,0,.35)}
