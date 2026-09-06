@@ -40,9 +40,8 @@ export async function cloudCreateCampaign(title:string){
 }
 export async function cloudJoinCampaign(inviteCode:string){
  const user=await cloudUser(); if(!user) throw new Error('Please log in before joining a campaign.');
- const {data:campaign,error}=await supabase.from('campaigns').select('id,name,invite_code,owner_id').eq('invite_code',inviteCode.trim().toUpperCase()).maybeSingle();
- if(error) throw error; if(!campaign) throw new Error('Campaign code not found.');
- const {error:joinError}=await supabase.from('campaign_members').upsert({campaign_id:campaign.id,user_id:user.id,role:'player'},{onConflict:'campaign_id,user_id'}); if(joinError) throw joinError;
+ const {data,error}=await supabase.rpc('join_campaign_by_code',{p_invite_code:inviteCode.trim().toUpperCase()});
+ if(error) throw error; const campaign=Array.isArray(data)?data[0]:data; if(!campaign) throw new Error('Campaign code not found.');
  return {...campaign,title:campaign.name};
 }
 export async function cloudListCampaigns(){
