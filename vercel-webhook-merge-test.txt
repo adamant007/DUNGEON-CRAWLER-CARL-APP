@@ -1,0 +1,1 @@
+This file exists only to generate a normal GitHub pull-request merge event for the repaired Vercel connection.
