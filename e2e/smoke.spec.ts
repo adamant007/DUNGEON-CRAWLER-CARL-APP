@@ -10,9 +10,9 @@ async function openApp(page:any){
 test('landing, public links and every primary tab open', async ({ page, request }) => {
   await openApp(page);
   const nav = page.getByRole('navigation', { name: 'Primary navigation' });
-  for (const tab of ['Dashboard','Character','Combat','Inventory','Equipment','Progression','Dice','Party','GM Tools','Rulebook','Campaign','Dungeon Live','Account']) {
+  for (const tab of ['Dashboard','Character','Combat','Inventory','Equipment','Progression','Dice','Party','Leaderboard','GM Tools','Rulebook','Campaign','Account','Tutorial']) {
     await nav.getByRole('button', { name: tab, exact: true }).click();
-    await expect(nav.getByRole('button', { name: tab, exact: true })).toHaveClass(/active/);
+    if(tab!=='Tutorial') await expect(nav.getByRole('button', { name: tab, exact: true })).toHaveClass(/active/);
   }
   for (const path of ['/privacy.html','/support.html','/manifest.webmanifest']) {
     const response = await request.get(path);
@@ -55,9 +55,10 @@ test('party and GM local flows survive rapid interaction', async ({ page }) => {
 test('refresh keeps local character data available', async ({ page }) => {
   await openApp(page);
   await page.getByRole('button', { name: 'Character', exact: true }).click();
-  const name = page.getByLabel('Name').first();
+  const name = page.locator('main label').filter({hasText:/^Name\s*$/}).locator('input').first();
+  await expect(name).toBeVisible();
   await name.fill('E2E Persistence Crawler');
   await page.reload();
   await page.getByRole('button', { name: 'Character', exact: true }).click();
-  await expect(page.getByLabel('Name').first()).toHaveValue('E2E Persistence Crawler');
+  await expect(page.locator('main label').filter({hasText:/^Name\s*$/}).locator('input').first()).toHaveValue('E2E Persistence Crawler');
 });
