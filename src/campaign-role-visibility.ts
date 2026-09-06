@@ -88,8 +88,10 @@ ensureStyle();
 window.addEventListener('cc:campaign-changed',queueRefresh);
 window.addEventListener('cc:campaign-role-changed',applyVisibility);
 window.addEventListener('storage',e=>{if(e.key===ACTIVE_KEY)queueRefresh()});
+// The restored React shell can replace the nav subtree a few times while mounting.
+// Keep this bounded and nav-specific: recreate/guard the GM tab for two seconds, then stop.
 let attempts=0;
-const mountTimer=window.setInterval(()=>{attempts++;applyVisibility();if(primaryNav()||attempts>=20)window.clearInterval(mountTimer)},100);
+const mountTimer=window.setInterval(()=>{attempts++;applyVisibility();if(attempts>=20)window.clearInterval(mountTimer)},100);
 setTimeout(()=>void refreshRole(),500);
 
 export { refreshRole as refreshCampaignRoleVisibility, applyVisibility as applyCampaignRoleVisibility };
