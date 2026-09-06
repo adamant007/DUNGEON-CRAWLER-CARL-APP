@@ -47,4 +47,9 @@ function previousNameForId(id:string){
   const cleanId=validId(id);return cleanId?localStorage.getItem(reverseKey(cleanId))||'':'';
 }
 
+const browserApi={candidateStableId,previousNameForId,rememberCharacterIdentity,stableCharacterId};
+if(typeof window!=='undefined'){
+  (window as any).__ccCharacterIdentity=browserApi;
+}
+
 export { candidateStableId, previousNameForId, rememberCharacterIdentity, stableCharacterId };
