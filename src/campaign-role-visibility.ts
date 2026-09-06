@@ -1,4 +1,4 @@
-import { cloudListCampaigns } from './cloud';
+import { cloudListCampaigns, cloudUser } from './cloud';
 
 const ACTIVE_KEY='cc-active-campaign-id';
 const ROLE_ATTR='data-cc-campaign-role';
@@ -87,11 +87,14 @@ async function refreshRole(){
  const id=activeCampaignId();
  if(!id){setRole('');applyVisibility();return;}
  try{
-  const campaigns=await cloudListCampaigns() as any[];
+  const [campaigns,user]=await Promise.all([cloudListCampaigns() as Promise<any[]>,cloudUser()]);
   const active=campaigns.find(c=>c.id===id);
-  // Only hide GM Tools when the cloud actually confirms this user is a player.
-  // A missing/stale campaign or unavailable beta cloud must not silently demote a local tester.
-  setRole(active?String(active.role||'player'):'');
+  // Campaign ownership is authoritative GM access, even if a stale membership row says player.
+  // Only a confirmed non-owner player should lose GM Tools.
+  const role=active
+    ? (user?.id&&active.owner_id===user.id?'gm':String(active.role||'player'))
+    : '';
+  setRole(role);
  }catch{
   setRole('');
  }
