@@ -4,6 +4,9 @@ const ACTIVE_KEY='cc-active-campaign-id';
 const ROLE_ATTR='data-cc-campaign-role';
 const STYLE_ID='cc-campaign-role-visibility-style';
 let refreshQueued=false;
+let observedNav:HTMLElement|null=null;
+let navObserver:MutationObserver|null=null;
+let applyQueued=false;
 
 function activeCampaignId(){return localStorage.getItem(ACTIVE_KEY)||''}
 function primaryNav(){return document.querySelector('[aria-label="Primary navigation"]') as HTMLElement|null}
@@ -27,10 +30,11 @@ function setRole(role:string){
 
 function ensureGmButton(nav:HTMLElement){
  let gm=[...nav.querySelectorAll<HTMLButtonElement>('button')].find(btn=>/^GM Tools$/i.test(btn.textContent?.trim()||''));
- if(gm)return gm;
+ if(gm){gm.setAttribute('aria-label','GM Tools');return gm;}
  gm=document.createElement('button');
  gm.type='button';
  gm.textContent='GM Tools';
+ gm.setAttribute('aria-label','GM Tools');
  gm.dataset.ccSyntheticGm='true';
  gm.dataset.ccRoleGuard='gm';
  const template=nav.querySelector<HTMLButtonElement>('button');
@@ -41,15 +45,31 @@ function ensureGmButton(nav:HTMLElement){
   });
   gm!.classList.add('active');
   gm!.setAttribute('aria-current','page');
+  document.body.dataset.ccPrimaryTab='gm-tools';
+  window.dispatchEvent(new CustomEvent('cc:primary-tab-changed',{detail:{tab:'GM Tools'}}));
  });
- nav.appendChild(gm);
+ const library=[...nav.querySelectorAll<HTMLButtonElement>('button')].find(btn=>/Library/i.test(btn.textContent||''));
+ nav.insertBefore(gm,library||null);
  return gm;
+}
+
+function watchNav(nav:HTMLElement){
+ if(observedNav===nav)return;
+ navObserver?.disconnect();
+ observedNav=nav;
+ navObserver=new MutationObserver(()=>{
+  if(applyQueued)return;
+  applyQueued=true;
+  queueMicrotask(()=>{applyQueued=false;applyVisibility()});
+ });
+ navObserver.observe(nav,{childList:true,subtree:false});
 }
 
 function applyVisibility(){
  ensureStyle();
  const hide=currentRole()==='player';
  const nav=primaryNav();
+ if(nav)watchNav(nav);
  const gm=nav?ensureGmButton(nav):null;
  if(gm){
   gm.dataset.ccRoleGuard='gm';
@@ -87,11 +107,10 @@ function queueRefresh(){
 ensureStyle();
 window.addEventListener('cc:campaign-changed',queueRefresh);
 window.addEventListener('cc:campaign-role-changed',applyVisibility);
+window.addEventListener('cc:character-updated',applyVisibility);
 window.addEventListener('storage',e=>{if(e.key===ACTIVE_KEY)queueRefresh()});
-// The restored React shell can replace the nav subtree a few times while mounting.
-// Keep this bounded and nav-specific: recreate/guard the GM tab for two seconds, then stop.
 let attempts=0;
-const mountTimer=window.setInterval(()=>{attempts++;applyVisibility();if(attempts>=20)window.clearInterval(mountTimer)},100);
+const mountTimer=window.setInterval(()=>{attempts++;applyVisibility();if(attempts>=30)window.clearInterval(mountTimer)},100);
 setTimeout(()=>void refreshRole(),500);
 
 export { refreshRole as refreshCampaignRoleVisibility, applyVisibility as applyCampaignRoleVisibility };
