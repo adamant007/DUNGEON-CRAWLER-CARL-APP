@@ -5,6 +5,7 @@ test('spell system is wired and follows starter rules', async () => {
   const html=fs.readFileSync('index.html','utf8');
   const spells=fs.readFileSync('src/spell-system.ts','utf8');
   expect(html).toContain('/src/spell-system.ts');
+  expect(html).toContain('/src/character-sheet-spells.ts');
   expect(spells).toContain('const HEAL_MANA_COST=2');
   expect(spells).toContain('const HEAL_BAR_SLOTS=2');
   expect(spells).toContain("defaultKnown(){return isAnimalCrawler()?[]:['Heal']}");
@@ -21,13 +22,16 @@ test('rulebook spell library and floor choices are present', async () => {
   expect(spells).toContain('claimedFloors');
 });
 
-test('mana bar and spell library render in crawler UI', async ({page}) => {
+test('mana and known spells render on the Character sheet', async ({page}) => {
   await page.goto('/');
   const link=page.getByRole('link',{name:/Crawler Companion/i});
   if(await link.count()) await link.first().click();
-  await expect(page.getByText('✨ Spells & Mana',{exact:true})).toBeVisible();
-  await expect(page.getByLabel('Max MP')).toBeVisible();
-  await expect(page.getByLabel('Current MP')).toBeVisible();
-  await expect(page.getByRole('button',{name:'Restore Mana'})).toBeVisible();
-  await expect(page.getByText('📚 Rulebook Spell Library',{exact:true})).toBeVisible();
+  const nav=page.getByRole('navigation',{name:'Primary navigation'});
+  await expect(nav).toBeVisible();
+  await nav.getByRole('button',{name:'Character',exact:true}).click();
+  await expect(page.locator('#cc-character-dashboard-v2')).toHaveAttribute('data-visible','true');
+  await expect(page.locator('#cc-character-sheet-spells')).toBeVisible();
+  await expect(page.locator('#cc-character-dashboard-v2 .cc2-resrow').filter({hasText:'Mana'})).toBeVisible();
+  await expect(page.locator('#cc-character-sheet-spells')).toContainText('SPELLS');
+  await expect(page.locator('#cc-character-sheet-spells')).toContainText('Mana:');
 });
