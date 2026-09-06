@@ -1,10 +1,8 @@
 const REVEAL_ID='cc-loot-box-reveal';
 
 function inGmContext(){
-  const main=document.querySelector('.app>main') as HTMLElement|null;
-  if(!main)return false;
-  if(document.getElementById('cc-runtime-gm-tools'))return true;
-  return /GM Command Center|GM Tools/i.test(main.innerText||'');
+  const role=document.documentElement.getAttribute('data-cc-campaign-role')||'';
+  return /^(gm|owner)$/i.test(role);
 }
 
 function suppressGmReveal(){
@@ -20,8 +18,9 @@ function queue(){
   requestAnimationFrame(()=>{queued=false;suppressGmReveal()});
 }
 
-new MutationObserver(queue).observe(document.documentElement,{subtree:true,childList:true});
+new MutationObserver(queue).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['data-cc-campaign-role']});
 document.addEventListener('click',queue,true);
+window.addEventListener('cc:campaign-role-changed',queue);
 setTimeout(suppressGmReveal,900);
 
 export { suppressGmReveal };
