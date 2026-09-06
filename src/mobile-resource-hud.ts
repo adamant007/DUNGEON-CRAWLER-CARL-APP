@@ -32,15 +32,15 @@ function manaFrom(name:string,c:any){
 function addStyles(){
  if(document.getElementById(STYLE_ID))return;
  const s=document.createElement('style');s.id=STYLE_ID;s.textContent=`
- #${HUD_ID}{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.09);background:linear-gradient(180deg,rgba(16,14,18,.96),rgba(10,11,15,.96));position:relative;z-index:11}
- #${HUD_ID} .cc-hud-resource{min-width:0}
+ #${HUD_ID}{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;width:100%;box-sizing:border-box;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.09);background:linear-gradient(180deg,rgba(16,14,18,.96),rgba(10,11,15,.96));position:relative;z-index:11}
+ #${HUD_ID} .cc-hud-resource{min-width:0;width:100%}
  #${HUD_ID} .cc-hud-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px;font-size:12px;font-weight:900;letter-spacing:.03em}
- #${HUD_ID} .cc-hud-track{height:14px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.12);box-shadow:inset 0 1px 4px rgba(0,0,0,.55)}
+ #${HUD_ID} .cc-hud-track{height:14px;width:100%;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.12);box-shadow:inset 0 1px 4px rgba(0,0,0,.55)}
  #${HUD_ID} .cc-hud-fill{height:100%;min-width:0;transition:width .25s ease}
  #${HUD_ID} .cc-hud-hp .cc-hud-fill{background:linear-gradient(90deg,#8d1d20,#ed4f55)}
  #${HUD_ID} .cc-hud-mp .cc-hud-fill{background:linear-gradient(90deg,#4d35bd,#a56cff)}
- @media(min-width:721px){#${HUD_ID}{max-width:720px;margin:0 auto 8px;border:1px solid rgba(255,255,255,.08);border-radius:12px}}
- @media(max-width:430px){#${HUD_ID}{grid-template-columns:1fr;gap:7px;padding:8px 10px}#${HUD_ID} .cc-hud-track{height:12px}}
+ @media(min-width:721px){#${HUD_ID}{margin:0 0 8px;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)}}
+ @media(max-width:430px){#${HUD_ID}{gap:7px;padding:8px 10px}#${HUD_ID} .cc-hud-track{height:12px}}
  `;document.head.appendChild(s);
 }
 function ensureHud(){
