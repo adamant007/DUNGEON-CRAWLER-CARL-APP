@@ -1,1 +1,1 @@
-{"framework":"vite","buildCommand":"npm run build","outputDirectory":"dist","rewrites":[{"source":"/brand/hero.webp","destination":"/brand/app-icon.svg"},{"source":"/brand/icon-96.webp","destination":"/brand/app-icon.svg"},{"source":"/(.*)","destination":"/index.html"}]}
+{"framework":"vite","buildCommand":"npm run build","outputDirectory":"dist","rewrites":[{"source":"/(.*)","destination":"/index.html"}]}
