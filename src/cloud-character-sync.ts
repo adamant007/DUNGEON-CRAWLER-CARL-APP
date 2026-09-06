@@ -1,4 +1,5 @@
 import { cloudAuthChanges, cloudListCharacters, cloudSaveCharacter, cloudUser } from './cloud';
+import { rememberCharacterIdentity, stableCharacterId } from './character-identity';
 
 const PORTRAIT_PREFIX='cc-character-portrait:';
 const CLOUD_ID_PREFIX='cc-character-cloud-id:';
@@ -16,7 +17,6 @@ function activeCharacterName(){
   return nameInput?.value?.trim()||'';
 }
 
-function cloudIdKey(name:string){return CLOUD_ID_PREFIX+encodeURIComponent(name)}
 function hashKey(name:string){return LAST_HASH_PREFIX+encodeURIComponent(name)}
 function portraitKey(name:string){return PORTRAIT_PREFIX+encodeURIComponent(name)}
 
@@ -71,16 +71,19 @@ async function syncActiveCharacter(){
   syncing=true;
   try{
     const cloud=await cloudListCharacters() as any[];
-    const existing=cloud.find(c=>String(c?.name||'').trim()===name);
-    const id=existing?.id||local.id||localStorage.getItem(cloudIdKey(name))||crypto.randomUUID();
-    localStorage.setItem(cloudIdKey(name),String(id));
+    const localStableId=stableCharacterId(name,local,false);
+    const existingById=localStableId?cloud.find(c=>String(c?.id||'')===localStableId):undefined;
+    const existingByName=cloud.find(c=>String(c?.name||'').trim()===name);
+    const existing=existingById||existingByName;
+    const id=localStableId||existing?.id||stableCharacterId(name,local,true);
+    rememberCharacterIdentity(name,String(id));
     const portrait=localStorage.getItem(portraitKey(name));
-    const payload={...existing,...local,id,name,ccCloudSyncedAt:new Date().toISOString()};
+    const payload={...existing,...local,id,name,ccStableId:id,ccCloudSyncedAt:new Date().toISOString()};
     if(portrait&&!payload.portrait)payload.portrait=portrait;
     const fingerprint=hashString(stableStringify(payload));
     if(localStorage.getItem(hashKey(name))===fingerprint)return;
     const saved=await cloudSaveCharacter(payload);
-    if((saved as any)?.id)localStorage.setItem(cloudIdKey(name),String((saved as any).id));
+    if((saved as any)?.id)rememberCharacterIdentity(name,String((saved as any).id));
     localStorage.setItem(hashKey(name),fingerprint);
     window.dispatchEvent(new CustomEvent('cc:cloud-character-synced',{detail:{name,id}}));
   }catch(e){console.warn('Automatic character backup skipped:',e)}finally{syncing=false}
