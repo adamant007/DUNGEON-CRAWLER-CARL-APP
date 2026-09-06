@@ -1,3 +1,4 @@
 Vercel automatic deployment trigger test.
 Created after disabling root-directory deployment skipping on 2026-09-06.
+Second trigger created after reconnecting the GitHub repository to the existing Vercel project.
 No application behavior changes.
