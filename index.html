@@ -19,36 +19,6 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
-  <script>
-    (()=>{
-      const enhance=()=>{
-        const footer=document.querySelector('.app>footer, footer');
-        if(footer && !footer.querySelector('[data-gdf-copyright]')){
-          const line=document.createElement('div');
-          line.dataset.gdfCopyright='true';
-          line.textContent='© 2026 Ginger Dragon Fire Studios';
-          line.style.cssText='margin-top:10px;opacity:.75;font-size:12px;text-align:center';
-          footer.appendChild(line);
-        }
-        document.querySelectorAll('button,span,div').forEach(el=>{
-          if(el.children.length===0 && el.textContent?.trim()==='Roadmap Build') el.style.display='none';
-        });
-      };
-      document.addEventListener('click',event=>{
-        const button=event.target instanceof Element ? event.target.closest('.app>nav button') : null;
-        if(!button) return;
-        requestAnimationFrame(()=>{
-          button.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-          if(matchMedia('(max-width:720px)').matches){
-            document.querySelector('.app>main')?.scrollIntoView({behavior:'smooth',block:'start'});
-          }
-        });
-      },true);
-      const observer=new MutationObserver(enhance);
-      observer.observe(document.documentElement,{subtree:true,childList:true});
-      addEventListener('DOMContentLoaded',enhance,{once:true});
-      setTimeout(enhance,250);
-    })();
-  </script>
+  <script type="module" src="/src/runtime-fixes.ts"></script>
 </body>
 </html>
