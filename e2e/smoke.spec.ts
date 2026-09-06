@@ -1,0 +1,63 @@
+import { expect, test } from '@playwright/test';
+
+async function openApp(page:any){
+  await page.goto('/');
+  await expect(page.getByText('Ginger Dragon Fire', { exact: false }).first()).toBeVisible();
+  await page.getByRole('link', { name: /Crawler Companion/i }).click();
+  await expect(page.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible();
+}
+
+test('landing, public links and every primary tab open', async ({ page, request }) => {
+  await openApp(page);
+  const nav = page.getByRole('navigation', { name: 'Primary navigation' });
+  for (const tab of ['Dashboard','Character','Combat','Inventory','Equipment','Progression','Dice','Party','GM Tools','Rulebook','Campaign','Dungeon Live','Account']) {
+    await nav.getByRole('button', { name: tab, exact: true }).click();
+    await expect(nav.getByRole('button', { name: tab, exact: true })).toHaveClass(/active/);
+  }
+  for (const path of ['/privacy.html','/support.html','/manifest.webmanifest']) {
+    const response = await request.get(path);
+    expect(response.ok(), `${path} should load`).toBeTruthy();
+  }
+});
+
+test('dice supports multiple dice and edge bounds', async ({ page }) => {
+  await openApp(page);
+  await page.getByRole('button', { name: 'Dice', exact: true }).click();
+  const select = page.getByLabel('Number of dice');
+  await select.selectOption('20');
+  await expect(page.getByRole('button', { name: '20d100' })).toBeVisible();
+  await page.getByRole('button', { name: '20d100' }).click();
+  await expect(page.locator('.result')).toContainText('20d100:');
+  await select.selectOption('1');
+  await page.getByRole('button', { name: '−' }).click();
+  await expect(page.getByText('1 dice', { exact: true })).toBeVisible();
+});
+
+test('party and GM local flows survive rapid interaction', async ({ page }) => {
+  await openApp(page);
+  await page.getByRole('button', { name: 'Party', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Party Board' })).toBeVisible();
+  await page.getByRole('button', { name: 'Side-by-Side' }).click();
+  await expect(page.getByRole('button', { name: 'Party Board' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'GM Tools', exact: true }).click();
+  const drops = page.getByLabel('Number of Drops');
+  await drops.fill('20');
+  await page.getByRole('button', { name: /Generate Loot/i }).click();
+  await expect(page.locator('.loot-results .generator-result')).toHaveCount(20);
+  const names = await page.locator('.loot-results .generator-result b').allTextContents();
+  expect(new Set(names).size).toBe(names.length);
+  await drops.fill('');
+  await drops.blur();
+  await expect(drops).toHaveValue('1');
+});
+
+test('refresh keeps local character data available', async ({ page }) => {
+  await openApp(page);
+  await page.getByRole('button', { name: 'Character', exact: true }).click();
+  const name = page.getByLabel('Name').first();
+  await name.fill('E2E Persistence Crawler');
+  await page.reload();
+  await page.getByRole('button', { name: 'Character', exact: true }).click();
+  await expect(page.getByLabel('Name').first()).toHaveValue('E2E Persistence Crawler');
+});
