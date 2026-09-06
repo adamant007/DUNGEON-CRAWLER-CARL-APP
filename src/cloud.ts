@@ -33,25 +33,25 @@ export async function cloudDeleteCharacter(id:string){const user=await cloudUser
 export async function cloudCreateCampaign(title:string){
  const user=await cloudUser(); if(!user) throw new Error('Please log in before creating a campaign.');
  const invite=Math.random().toString(36).slice(2,6).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
- const {data,error}=await supabase.from('campaigns').insert({owner_id:user.id,title:title||'My Crawler Campaign',invite_code:invite}).select().single();
+ const {data,error}=await supabase.from('campaigns').insert({owner_id:user.id,name:title||'My Crawler Campaign',description:'',invite_code:invite}).select().single();
  if(error) throw error;
  const {error:memberError}=await supabase.from('campaign_members').upsert({campaign_id:data.id,user_id:user.id,role:'gm'},{onConflict:'campaign_id,user_id'}); if(memberError) throw memberError;
- return data;
+ return {...data,title:data.name};
 }
 export async function cloudJoinCampaign(inviteCode:string){
  const user=await cloudUser(); if(!user) throw new Error('Please log in before joining a campaign.');
- const {data:campaign,error}=await supabase.from('campaigns').select('id,title,invite_code,owner_id').eq('invite_code',inviteCode.trim().toUpperCase()).maybeSingle();
+ const {data:campaign,error}=await supabase.from('campaigns').select('id,name,invite_code,owner_id').eq('invite_code',inviteCode.trim().toUpperCase()).maybeSingle();
  if(error) throw error; if(!campaign) throw new Error('Campaign code not found.');
  const {error:joinError}=await supabase.from('campaign_members').upsert({campaign_id:campaign.id,user_id:user.id,role:'player'},{onConflict:'campaign_id,user_id'}); if(joinError) throw joinError;
- return campaign;
+ return {...campaign,title:campaign.name};
 }
 export async function cloudListCampaigns(){
  const user=await cloudUser(); if(!user) return [];
- const {data:members,error}=await supabase.from('campaign_members').select('campaign_id,role,campaigns(id,title,invite_code,owner_id,created_at)').eq('user_id',user.id);
+ const {data:members,error}=await supabase.from('campaign_members').select('campaign_id,role,campaigns(id,name,invite_code,owner_id,created_at)').eq('user_id',user.id);
  if(error) throw error;
- return (members||[]).map((m:any)=>({...m.campaigns,role:m.role})).filter(Boolean);
+ return (members||[]).map((m:any)=>m.campaigns?({...m.campaigns,title:m.campaigns.name,role:m.role}):null).filter(Boolean);
 }
-export async function cloudCampaignMembers(campaignId:string){const {data,error}=await supabase.from('campaign_members').select('user_id,role,profiles(display_name)').eq('campaign_id',campaignId);if(error)throw error;return data||[];}
+export async function cloudCampaignMembers(campaignId:string){const {data,error}=await supabase.from('campaign_members').select('user_id,role').eq('campaign_id',campaignId);if(error)throw error;const rows=data||[];const ids=rows.map((r:any)=>r.user_id);if(!ids.length)return rows;const {data:profiles}=await supabase.from('profiles').select('user_id,display_name').in('user_id',ids);const names=new Map((profiles||[]).map((p:any)=>[p.user_id,p.display_name]));return rows.map((r:any)=>({...r,profiles:{display_name:names.get(r.user_id)||'Crawler'}}));}
 
 export async function cloudPushEvent(campaignId:string,type:string,payload:any,targetCharacterId?:string){
  const user=await cloudUser(); if(!user) throw new Error('Please log in first.');
@@ -69,5 +69,18 @@ export function cloudSubscribeCharacters(userId:string,cb:(row:any)=>void){
 }
 
 export async function cloudPublicAccountCount(){try{const {data,error}=await supabase.rpc('public_account_count');if(error)return null;return Number(data)||0}catch{return null}}
-export async function cloudTrackOpen(){try{let device=localStorage.getItem('cc-device-id');if(!device){device=crypto.randomUUID();localStorage.setItem('cc-device-id',device)}await supabase.from('app_visits').upsert({device_id:device,last_seen:new Date().toISOString()},{onConflict:'device_id'});}catch{}}
+export async function cloudTrackOpen(){try{let device=localStorage.getItem('cc-device-id');if(!device){device=crypto.randomUUID();localStorage.setItem('cc-device-id',device)}await supabase.from('app_visits').upsert({device_id:device,last_seen:new Date().toISOString()},{onConflict:'device_id'});const user=await cloudUser();await supabase.from('app_activity').insert({user_id:user?.id||null,device_id:device,event_type:'app_open',payload:{path:location.pathname}});}catch{}}
 export async function cloudOwnerAnalytics(){const {data,error}=await supabase.rpc('owner_analytics');if(error)throw error;return data;}
+
+export async function cloudPublishLeaderboard(character:any,campaignId:string|null){
+ const user=await cloudUser(); if(!user) throw new Error('Please log in before publishing to the leaderboard.');
+ const score=Math.max(0,Number(character.floor||0))*100000+Math.max(0,Number(character.level||0))*1000+Math.max(0,Number(character.popularity||0))*10+Math.max(0,Number(character.aiFavor||0));
+ const row={character_id:character.id,user_id:user.id,campaign_id:campaignId||null,crawler_name:character.name||'Unnamed Crawler',display_name:user.user_metadata?.display_name||user.email?.split('@')[0]||'Crawler',floor:Number(character.floor||0),level:Number(character.level||0),popularity:Number(character.popularity||0),ai_favor:Number(character.aiFavor||0),score,updated_at:new Date().toISOString(),is_public:true};
+ const {error}=await supabase.from('leaderboard_entries').upsert(row,{onConflict:'character_id'}); if(error)throw error; return row;
+}
+export async function cloudLeaderboard(campaignId:string|null,sort='score'){
+ const allowed=['score','floor','level','popularity','ai_favor']; const order=allowed.includes(sort)?sort:'score';
+ const {data,error}=await supabase.rpc('public_leaderboard',{p_campaign:campaignId||null,p_sort:order,p_limit:100}); if(error)throw error; return data||[];
+}
+export async function cloudTrackActivity(eventType:string,payload:any={}){try{const user=await cloudUser();await supabase.from('app_activity').insert({user_id:user?.id||null,event_type:eventType,payload});}catch{}}
+export async function cloudOwnerActivity(limit=200){const {data,error}=await supabase.rpc('owner_activity_log',{p_limit:limit});if(error)throw error;return data||[];}
