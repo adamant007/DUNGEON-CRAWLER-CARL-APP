@@ -4,5 +4,29 @@
 .app>header>div:first-child h1::before{content:"";display:block;width:52px;height:52px;flex:0 0 52px;background:url('/brand/app-icon.svg') center/cover no-repeat;border-radius:14px;box-shadow:0 7px 22px rgba(0,0,0,.35)}
 .app>header>div:first-child h1::after{content:"Ginger Dragon Fire";font-size:clamp(24px,4vw,36px);font-weight:800;line-height:1.05}
 .landing-app:first-child .landing-app-icon{font-size:0;background:url('/brand/app-icon.svg') center/cover no-repeat}
-@media(max-width:720px){.dragon-mark{width:min(430px,94vw);border-radius:20px}.app>header>div:first-child h1::before{width:44px;height:44px;flex-basis:44px;border-radius:11px}}
+
+/* Put the primary dragon navigation above the active crawler controls. */
+.app{display:flex;flex-direction:column}
+.app>header{order:1}
+.app>nav{order:2}
+.app>.character-bar{order:3}
+.app>main{order:4}
+.app>footer{order:5}
+
+/* Dragon-scale / ember navigation treatment. */
+.app>nav{gap:9px;padding-top:13px;padding-bottom:13px;border-top:1px solid rgba(229,164,73,.18);border-bottom:1px solid rgba(229,164,73,.28);background:linear-gradient(180deg,rgba(25,14,12,.97),rgba(10,12,17,.96));box-shadow:0 10px 28px rgba(0,0,0,.28),inset 0 1px rgba(255,194,92,.05)}
+.app>nav button{position:relative;isolation:isolate;overflow:hidden;border:1px solid rgba(214,145,57,.48);border-radius:14px 14px 8px 8px;padding:10px 14px;background:radial-gradient(circle at 25% 15%,rgba(255,136,53,.16),transparent 34%),radial-gradient(circle at 75% 80%,rgba(116,31,21,.28),transparent 42%),linear-gradient(155deg,#211511,#11151c 58%,#17100e);color:#f4dfbd;font-weight:700;letter-spacing:.01em;text-shadow:0 1px 0 #000;box-shadow:inset 0 1px rgba(255,225,164,.08),0 5px 14px rgba(0,0,0,.24);transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease,background .16s ease}
+.app>nav button::before{content:"";position:absolute;inset:0;z-index:-1;opacity:.42;background:radial-gradient(ellipse at 20% 0%,transparent 0 28%,rgba(240,159,63,.12) 30% 34%,transparent 36%),radial-gradient(ellipse at 70% 0%,transparent 0 28%,rgba(240,159,63,.09) 30% 34%,transparent 36%);background-size:26px 19px}
+.app>nav button:hover{transform:translateY(-1px);border-color:#e7ae59;box-shadow:inset 0 1px rgba(255,232,188,.12),0 7px 18px rgba(0,0,0,.32),0 0 16px rgba(216,81,29,.12)}
+.app>nav button.active{border-color:#f2c06a;background:radial-gradient(circle at 50% 120%,rgba(255,91,31,.46),transparent 54%),linear-gradient(155deg,#5f2117,#2a1713 55%,#15171d);color:#fff1cf;box-shadow:inset 0 0 0 1px rgba(255,224,153,.18),0 0 0 1px rgba(124,44,21,.28),0 8px 22px rgba(0,0,0,.34),0 0 22px rgba(229,87,27,.2)}
+.app>nav button.active::after{content:"✦";margin-left:7px;color:#ffc766;text-shadow:0 0 10px rgba(255,125,33,.8)}
+
+/* Rulebook tools are presented to players as their Library. */
+.app>nav button:nth-child(11){font-size:0}
+.app>nav button:nth-child(11)::after{content:"📚 Library";font-size:14px}
+.app>nav button:nth-child(11).active::after{content:"📚 Library  ✦";color:#fff1cf;text-shadow:0 1px 0 #000}
+
+.character-bar{border-bottom:1px solid rgba(229,164,73,.16);background:linear-gradient(180deg,rgba(22,18,16,.72),rgba(12,15,20,.92));box-shadow:inset 0 1px rgba(255,210,128,.04)}
+
+@media(max-width:720px){.dragon-mark{width:min(430px,94vw);border-radius:20px}.app>header>div:first-child h1::before{width:44px;height:44px;flex-basis:44px;border-radius:11px}.app>nav{padding-left:10px;padding-right:10px}.app>nav button{padding:9px 12px;border-radius:12px 12px 7px 7px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
