@@ -1,0 +1,8 @@
+const ID='cc-mobile-brand-image';
+const STYLE='cc-mobile-brand-style';
+function addStyle(){if(document.getElementById(STYLE))return;const s=document.createElement('style');s.id=STYLE;s.textContent=`
+ #${ID}{display:none;width:56px;height:56px;object-fit:contain;border-radius:14px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));flex:0 0 56px}
+ @media(max-width:720px){#${ID}{display:block}.app>header>div:first-child h1::before{display:none!important}.app>header>div:first-child{display:flex!important;align-items:center!important;gap:10px!important}.app .dragon-mark{display:block!important;width:min(220px,58vw)!important;aspect-ratio:1/1!important;margin:8px auto 12px!important;background-image:url('/brand/app-icon.svg')!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}}
+ `;document.head.appendChild(s)}
+function inject(){addStyle();if(document.getElementById(ID))return;const header=document.querySelector('.app>header>div:first-child') as HTMLElement|null;if(!header)return;const img=document.createElement('img');img.id=ID;img.src='/brand/app-icon.svg';img.alt='Ginger Dragon Fire';img.width=56;img.height=56;img.loading='eager';img.decoding='async';img.onerror=()=>{img.style.display='none';const mark=document.querySelector('.dragon-mark') as HTMLElement|null;if(mark)mark.style.display='block'};header.prepend(img)}
+let queued=false;new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;inject()})}).observe(document.documentElement,{subtree:true,childList:true});setTimeout(inject,300);
