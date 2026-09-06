@@ -1,4 +1,5 @@
 import { cloudAuthChanges, cloudListCharacters, cloudSaveCharacter, cloudUser } from './cloud';
+import { rememberCharacterIdentity, stableCharacterId } from './character-identity';
 
 const PORTRAIT_PREFIX='cc-character-portrait:';
 const CLOUD_ID_PREFIX='cc-character-cloud-id:';
@@ -15,8 +16,6 @@ function activeCharacterName(){
   return nameInput?.value?.trim()||'Crawler';
 }
 function portraitKey(name:string){return PORTRAIT_PREFIX+encodeURIComponent(name||'Crawler')}
-function cloudIdKey(name:string){return CLOUD_ID_PREFIX+encodeURIComponent(name||'Crawler')}
-function stableCloudId(name:string){let id=localStorage.getItem(cloudIdKey(name));if(!id){id=crypto.randomUUID();localStorage.setItem(cloudIdKey(name),id)}return id}
 
 function looksCharacterLike(value:any,name:string){
   if(!value||typeof value!=='object'||Array.isArray(value))return false;
@@ -58,32 +57,37 @@ async function compactPortrait(data:string){
 }
 
 async function syncActivePortraitToCloud(name=activeCharacterName()){
-  if(syncing)return;
+  const user=await cloudUser();if(!user||syncing)return;
+  const local=findLocalCharacter(name);
+  const id=stableCharacterId(name,local,true);
+  rememberCharacterIdentity(name,id);
   const portrait=localStorage.getItem(portraitKey(name));if(!portrait)return;
-  const user=await cloudUser();if(!user)return;
   syncing=true;
   try{
-    const rows=await cloudListCharacters();
-    const existing=(rows as any[]).find(c=>String(c?.name||'').trim()===name);
-    const base=existing||findLocalCharacter(name)||{id:stableCloudId(name),name};
+    const rows=await cloudListCharacters() as any[];
+    const existing=rows.find(c=>String(c?.id||'')===id)||rows.find(c=>String(c?.name||'').trim()===name);
+    const base=existing||local||{id,name};
     const compact=await compactPortrait(portrait);
     if(compact!==portrait)localStorage.setItem(portraitKey(name),compact);
-    const saved=await cloudSaveCharacter({...base,name,portrait:compact,portraitUpdatedAt:new Date().toISOString()});
-    const id=(saved as any)?.id||base.id;if(id)localStorage.setItem(cloudIdKey(name),String(id));
+    const saved=await cloudSaveCharacter({...base,id,name,ccStableId:id,portrait:compact,portraitUpdatedAt:new Date().toISOString()});
+    if((saved as any)?.id)rememberCharacterIdentity(name,String((saved as any).id));
     window.dispatchEvent(new CustomEvent('cc:character-updated',{detail:{name,source:'cloud-portrait-sync'}}));
   }catch(e){console.warn('Portrait cloud sync skipped:',e)}finally{syncing=false}
 }
 
 async function hydrateActivePortraitFromCloud(name=activeCharacterName()){
-  if(localStorage.getItem(portraitKey(name)))return;
   const user=await cloudUser();if(!user)return;
   try{
-    const rows=await cloudListCharacters();
-    const existing=(rows as any[]).find(c=>String(c?.name||'').trim()===name);
+    const local=findLocalCharacter(name);
+    const mappedId=stableCharacterId(name,local,false);
+    if(mappedId)rememberCharacterIdentity(name,mappedId);
+    if(localStorage.getItem(portraitKey(name)))return;
+    const rows=await cloudListCharacters() as any[];
+    const existing=(mappedId?rows.find(c=>String(c?.id||'')===mappedId):undefined)||rows.find(c=>String(c?.name||'').trim()===name);
+    if(existing?.id)rememberCharacterIdentity(name,String(existing.id));
     const portrait=existing?.portrait||existing?.portraitDataUrl||existing?.image||existing?.photo||existing?.avatar;
     if(typeof portrait==='string'&&portrait.startsWith('data:image/')){
       localStorage.setItem(portraitKey(name),portrait);
-      if(existing?.id)localStorage.setItem(cloudIdKey(name),String(existing.id));
       window.dispatchEvent(new CustomEvent('cc:character-portrait-updated',{detail:{name,source:'cloud'}}));
     }
   }catch(e){console.warn('Portrait cloud restore skipped:',e)}
