@@ -48,8 +48,12 @@ async function refreshRole(){
  try{
   const campaigns=await cloudListCampaigns() as any[];
   const active=campaigns.find(c=>c.id===id);
-  setRole(String(active?.role||'player'));
- }catch{setRole('player')}
+  // Only hide GM Tools when the cloud actually confirms this user is a player.
+  // A missing/stale campaign or unavailable beta cloud must not silently demote a local tester.
+  setRole(active?String(active.role||'player'):'');
+ }catch{
+  setRole('');
+ }
  applyVisibility();
 }
 
@@ -63,8 +67,6 @@ ensureStyle();
 window.addEventListener('cc:campaign-changed',queueRefresh);
 window.addEventListener('cc:campaign-role-changed',applyVisibility);
 window.addEventListener('storage',e=>{if(e.key===ACTIVE_KEY)queueRefresh()});
-// React may mount the primary nav after this module. Poll briefly instead of observing
-// the whole document; a global MutationObserver can race React and make the nav vanish.
 let attempts=0;
 const mountTimer=window.setInterval(()=>{attempts++;applyVisibility();if(primaryNav()||attempts>=20)window.clearInterval(mountTimer)},100);
 setTimeout(()=>void refreshRole(),500);
