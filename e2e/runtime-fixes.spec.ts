@@ -27,15 +27,17 @@ test('runtime fixes are wired into the build', async () => {
 test('GM quick generators are usable', async ({page}) => {
   await openCompanion(page);
   await page.getByRole('button',{name:'GM Tools',exact:true}).click();
-  await expect(page.getByRole('button',{name:'🧑 Generate NPC'})).toBeVisible();
-  await page.getByRole('button',{name:'🧑 Generate NPC'}).click();
-  await expect(page.locator('.cc-runtime-output')).toContainText('NPC:');
-  await page.getByRole('button',{name:'🚪 Generate Room'}).click();
-  await expect(page.locator('.cc-runtime-output')).toContainText('ROOM:');
-  await page.getByRole('button',{name:'📜 Generate Quest'}).click();
-  await expect(page.locator('.cc-runtime-output')).toContainText('QUEST:');
-  await page.getByRole('button',{name:'⚔️ Generate Encounter'}).click();
-  await expect(page.locator('.cc-runtime-output')).toContainText('ENCOUNTER:');
+  const panel=page.locator('#cc-runtime-gm-tools');
+  await expect(panel).toBeVisible();
+  const output=panel.locator(':scope > .cc-runtime-output').first();
+  await panel.getByRole('button',{name:'🧑 Generate NPC'}).click();
+  await expect(output).toContainText('NPC:');
+  await panel.getByRole('button',{name:'🚪 Generate Room'}).click();
+  await expect(output).toContainText('ROOM:');
+  await panel.getByRole('button',{name:'📜 Generate Quest'}).click();
+  await expect(output).toContainText('QUEST:');
+  await panel.getByRole('button',{name:'⚔️ Generate Encounter'}).click();
+  await expect(output).toContainText('ENCOUNTER:');
   await expect(page.getByLabel('Announcement message')).toBeVisible();
 });
 
@@ -50,7 +52,7 @@ test('mobile tab navigation keeps selected section reachable', async ({page},tes
   await openCompanion(page);
   const nav=page.getByRole('navigation',{name:'Primary navigation'});
   await nav.getByRole('button',{name:'GM Tools',exact:true}).click();
-  await expect(page.getByText('GM Command Center',{exact:false})).toBeVisible();
+  await expect(page.locator('#cc-runtime-gm-tools')).toBeVisible();
   const box=await page.locator('.app>main').boundingBox();
   expect(box).not.toBeNull();
   expect(box!.y).toBeLessThan(page.viewportSize()!.height);
