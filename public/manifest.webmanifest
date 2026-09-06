@@ -1,1 +1,14 @@
-{"name":"Crawler Companion","short_name":"Crawler Companion","start_url":"/","display":"standalone","background_color":"#10131a","theme_color":"#10131a","description":"Mobile-first tabletop RPG companion."}
+{
+  "name": "Crawler Companion — Ginger Dragon Fire Studios",
+  "short_name": "Crawler Companion",
+  "description": "Mobile-first tabletop RPG companion by Ginger Dragon Fire Studios.",
+  "start_url": "/crawler-companion",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0c0f14",
+  "theme_color": "#17130d",
+  "icons": [
+    {"src":"/brand/app-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"},
+    {"src":"/brand/app-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
+  ]
+}
