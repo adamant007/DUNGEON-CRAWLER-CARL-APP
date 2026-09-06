@@ -30,9 +30,9 @@ jobs:
           retention-days: 7
 
   production-smoke:
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -40,9 +40,12 @@ jobs:
           node-version: 20
       - run: npm install
       - run: npx playwright install --with-deps chromium
-      - name: Test live Ginger Dragon Fire site
+      - name: Wait for production deployment propagation
+        if: github.event_name == 'push'
+        run: sleep 45
+      - name: Test live Ginger Dragon Studios site
         env:
-          E2E_BASE_URL: https://gingerdragonfire.com
+          E2E_BASE_URL: https://gingerdragonstudios.com
           E2E_GM_EMAIL: ${{ secrets.E2E_GM_EMAIL }}
           E2E_GM_PASSWORD: ${{ secrets.E2E_GM_PASSWORD }}
           E2E_PLAYER_EMAIL: ${{ secrets.E2E_PLAYER_EMAIL }}
