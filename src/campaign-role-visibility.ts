@@ -25,11 +25,32 @@ function setRole(role:string){
  if(previous!==normalized)window.dispatchEvent(new CustomEvent('cc:campaign-role-changed',{detail:{role:normalized}}));
 }
 
+function ensureGmButton(nav:HTMLElement){
+ let gm=[...nav.querySelectorAll<HTMLButtonElement>('button')].find(btn=>/^GM Tools$/i.test(btn.textContent?.trim()||''));
+ if(gm)return gm;
+ gm=document.createElement('button');
+ gm.type='button';
+ gm.textContent='GM Tools';
+ gm.dataset.ccSyntheticGm='true';
+ gm.dataset.ccRoleGuard='gm';
+ const template=nav.querySelector<HTMLButtonElement>('button');
+ if(template)gm.className=template.className.replace(/\bactive\b/g,'').trim();
+ gm.addEventListener('click',()=>{
+  nav.querySelectorAll<HTMLButtonElement>('button').forEach(btn=>{
+   if(btn!==gm){btn.classList.remove('active');btn.removeAttribute('aria-current')}
+  });
+  gm!.classList.add('active');
+  gm!.setAttribute('aria-current','page');
+ });
+ nav.appendChild(gm);
+ return gm;
+}
+
 function applyVisibility(){
  ensureStyle();
  const hide=currentRole()==='player';
  const nav=primaryNav();
- const gm=[...(nav?.querySelectorAll<HTMLButtonElement>('button')||[])].find(btn=>/^GM Tools$/i.test(btn.textContent?.trim()||''));
+ const gm=nav?ensureGmButton(nav):null;
  if(gm){
   gm.dataset.ccRoleGuard='gm';
   gm.hidden=hide;
