@@ -115,6 +115,23 @@ grant execute on function public.public_account_count() to anon, authenticated;
 drop policy if exists "studio admins can view own admin flag" on public.studio_admins;
 create policy "studio admins can view own admin flag" on public.studio_admins for select to authenticated using ((select auth.uid())=user_id);
 
+-- Prevent privilege escalation through campaign membership writes.
+drop policy if exists "Users can join campaigns" on public.campaign_members;
+create policy "Users can join campaigns" on public.campaign_members
+for insert to authenticated
+with check ((select auth.uid())=user_id and role='player');
+
+drop policy if exists "Campaign owner can add gm membership" on public.campaign_members;
+create policy "Campaign owner can add gm membership" on public.campaign_members
+for insert to authenticated
+with check (
+  role='gm'
+  and exists(
+    select 1 from public.campaigns c
+    where c.id=campaign_id and c.owner_id=(select auth.uid())
+  )
+);
+
 -- Least-privilege Data API grants.
 revoke all on table public.campaigns, public.campaign_members, public.campaign_events, public.campaign_characters, public.crawler_characters, public.characters, public.leaderboard_entries, public.profiles, public.studio_admins from anon;
 revoke all on table public.app_activity, public.app_visits from anon;
