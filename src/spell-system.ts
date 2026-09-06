@@ -3,59 +3,44 @@ const STYLE_ID='cc-spell-system-style';
 const HEAL_MANA_COST=2;
 const HEAL_BAR_SLOTS=2;
 
+type Spell={name:string;mana:number;range:string;tags:string[];favored?:string[];minFloor?:number;description:string};
+const RULEBOOK_SPELLS:Spell[]=[
+ {name:'Heal',mana:2,range:'Self only',tags:['Heal','Interrupt','Passive'],minFloor:1,description:'Restore 2 Health Bar slots (20% Health).'},
+ {name:'Fire Fingers',mana:3,range:'Melee',tags:['Attack','Fire'],minFloor:1,description:'1d4 + Int Fire damage.'},
+ {name:'Frost Scar',mana:2,range:'Melee',tags:['Attack','Ice'],minFloor:1,description:'1d4 + Int Ice damage.'},
+ {name:'Magic Missile',mana:5,range:'Line of sight',tags:['Attack','Force'],minFloor:1,description:'1d4 + Int Force damage.'},
+ {name:'Drain Life',mana:14,range:'30 feet',tags:['Attack','Necrotic'],minFloor:2,description:'1d6 + Int Necrotic damage; later ranks can heal the caster.'},
+ {name:'Heal Others',mana:6,range:'30 feet',tags:['Heal','Interrupt','Passive'],favored:['Cleric','Paladin'],minFloor:2,description:'Heal another crawler; cannot target self, pets, or minions.'},
+ {name:'Heal Critter',mana:8,range:'30 feet',tags:['Heal','Interrupt','Passive'],minFloor:2,description:'Restore a pet or minion to full Health Bar.'},
+ {name:'Heal Self',mana:1,range:'Self only',tags:['Heal','Interrupt','Passive'],favored:['Cleric','Paladin'],minFloor:2,description:'Heal yourself by 1d4 Health Bar slots at base rank.'},
+ {name:'Holy Aura',mana:7,range:'5ft Burst',tags:['Attack','Holy','Area of Effect'],favored:['Cleric','Paladin'],minFloor:3,description:'Holy burst that damages enemies around you.'},
+ {name:'Hot Stuff Aura',mana:8,range:'5ft Burst',tags:['Passive','Area of Effect'],favored:['Bard'],minFloor:3,description:'Protective aura that shields the caster and nearby allies.'},
+ {name:'Ice Blast',mana:9,range:'40 feet',tags:['Attack','Ice'],minFloor:3,description:'1d8 + Int Ice damage.'},
+ {name:'Icicles',mana:19,range:'60 feet',tags:['Attack','Ice'],minFloor:5,description:'1d12 + Int Ice damage; higher ranks add control and armor piercing.'},
+ {name:'Intimate Touches',mana:8,range:'5 feet',tags:['Heal','Passive'],favored:['Cleric','Paladin'],minFloor:4,description:'Heal Health Bar slots equal to Cha Mod.'},
+ {name:'Lightning Bolt',mana:15,range:'100 feet',tags:['Attack','Electric'],minFloor:4,description:'1d10 + Int Electric damage; improves substantially at higher ranks.'},
+ {name:'Hole',mana:12,range:'10 feet',tags:['Passive'],minFloor:4,description:'Create a temporary cylindrical hole in a surface; cannot target saferoom doors or living things.'}
+];
 const animalTerms=['animal crawler','animal','dog','cat','labradoodle','wolf','bear','horse','bird','rabbit','rat','mouse','ferret','reptile','lizard','snake'];
-
-function activeName(){
- const bar=document.querySelector('.character-bar');
- const selected=bar?.querySelector('select option:checked')?.textContent?.trim();
- if(selected)return selected;
- const candidates=[...(bar?.querySelectorAll('button,b,strong')||[])].map(x=>x.textContent?.trim()||'').filter(x=>x&&!/character|switch|new|add|cloud|save|delete|side/i.test(x));
- return candidates[0]||document.querySelector('.app>main h2')?.textContent?.trim()||'Crawler';
-}
-
-function pageText(){return (document.querySelector('.app>main')?.textContent||'').toLowerCase()}
-function isAnimalCrawler(){
- const text=pageText();
- if(/animal crawler/.test(text))return true;
- const race=text.match(/race\s*[:\-]?\s*([a-z][a-z -]{1,24})/i)?.[1]?.trim()||'';
- return animalTerms.some(t=>race===t||race.includes(t));
-}
-function numberNear(label:string){
- const text=document.querySelector('.app>main')?.textContent||'';
- const m=text.match(new RegExp(`${label}\\s*[:\\-/]?\\s*(\\d+)`,'i'));
- return m?Number(m[1]):0;
-}
-function enhancedInt(){
- const text=document.querySelector('.app>main')?.textContent||'';
- const direct=text.match(/(?:enhanced\s+intelligence|intelligence\s+enhanced)\s*[:\-/]?\s*(\d+)/i);
- return direct?Number(direct[1]):numberNear('Mana');
-}
+function activeName(){const bar=document.querySelector('.character-bar');const selected=bar?.querySelector('select option:checked')?.textContent?.trim();if(selected)return selected;const candidates=[...(bar?.querySelectorAll('button,b,strong')||[])].map(x=>x.textContent?.trim()||'').filter(x=>x&&!/character|switch|new|add|cloud|save|delete|side/i.test(x));return candidates[0]||document.querySelector('.app>main h2')?.textContent?.trim()||'Crawler'}
+function pageText(){return (document.querySelector('.app>main')?.textContent||'')}
+function lowerText(){return pageText().toLowerCase()}
+function isAnimalCrawler(){const text=lowerText();if(/animal crawler/.test(text))return true;const race=text.match(/race\s*[:\-]?\s*([a-z][a-z -]{1,24})/i)?.[1]?.trim()||'';return animalTerms.some(t=>race===t||race.includes(t))}
+function numberNear(label:string){const m=pageText().match(new RegExp(`${label}\\s*[:\\-/]?\\s*(\\d+)`,'i'));return m?Number(m[1]):0}
+function textNear(label:string){const m=pageText().match(new RegExp(`${label}\\s*[:\\-/]?\\s*([A-Za-z][A-Za-z &/-]{1,40})`,'i'));return m?.[1]?.trim()||''}
+function enhancedInt(){const direct=pageText().match(/(?:enhanced\s+intelligence|intelligence\s+enhanced)\s*[:\-/]?\s*(\d+)/i);return direct?Number(direct[1]):numberNear('Mana')}
+function currentFloor(){return Math.max(1,numberNear('Floor')||1)}
+function currentClass(){return textNear('Class')}
 function storageKey(){return `cc-spell-state:${activeName()}`}
-type SpellState={maxMana:number;currentMana:number;maxHealth:number;currentHealth:number};
-function loadState():SpellState{
- const detectedMana=enhancedInt();const detectedHealth=numberNear('Health');
- try{const s=JSON.parse(localStorage.getItem(storageKey())||'{}');return {maxMana:Number(s.maxMana||detectedMana||0),currentMana:Number(s.currentMana??s.maxMana??detectedMana??0),maxHealth:Number(s.maxHealth||detectedHealth||0),currentHealth:Number(s.currentHealth??s.maxHealth??detectedHealth??0)}}catch{return {maxMana:detectedMana,currentMana:detectedMana,maxHealth:detectedHealth,currentHealth:detectedHealth}}
-}
+type SpellState={maxMana:number;currentMana:number;maxHealth:number;currentHealth:number;known:string[];claimedFloors:number[]};
+function defaultKnown(){return isAnimalCrawler()?[]:['Heal']}
+function loadState():SpellState{const detectedMana=enhancedInt(),detectedHealth=numberNear('Health');try{const s=JSON.parse(localStorage.getItem(storageKey())||'{}');const known=Array.isArray(s.known)?s.known:defaultKnown();if(!isAnimalCrawler()&&!known.includes('Heal'))known.unshift('Heal');if(isAnimalCrawler())for(let i=known.length-1;i>=0;i--)if(known[i]==='Heal')known.splice(i,1);return {maxMana:Number(s.maxMana||detectedMana||0),currentMana:Number(s.currentMana??s.maxMana??detectedMana??0),maxHealth:Number(s.maxHealth||detectedHealth||0),currentHealth:Number(s.currentHealth??s.maxHealth??detectedHealth??0),known,claimedFloors:Array.isArray(s.claimedFloors)?s.claimedFloors:[]}}catch{return {maxMana:detectedMana,currentMana:detectedMana,maxHealth:detectedHealth,currentHealth:detectedHealth,known:defaultKnown(),claimedFloors:[]}}}
 function saveState(s:SpellState){localStorage.setItem(storageKey(),JSON.stringify(s));window.dispatchEvent(new CustomEvent('cc-resource-change',{detail:{character:activeName(),...s}}))}
 function clamp(n:number,min:number,max:number){return Math.max(min,Math.min(max,n))}
-function addStyles(){if(document.getElementById(STYLE_ID))return;const s=document.createElement('style');s.id=STYLE_ID;s.textContent=`
-#${PANEL_ID}{margin:16px 0;padding:16px;border:1px solid rgba(132,102,255,.4);border-radius:14px;background:rgba(20,17,31,.94)}
-#${PANEL_ID} h3{margin:0 0 10px}.cc-resource-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;margin:9px 0}.cc-resource-bar{height:16px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.11)}.cc-resource-fill{height:100%;background:linear-gradient(90deg,#6547d8,#b17cff);transition:width .35s ease}.cc-resource-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}.cc-resource-controls input{width:74px}.cc-spell-card{padding:13px;border-radius:12px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.1)}.cc-spell-card button{font-weight:800}.cc-spell-status{min-height:1.4em;margin-top:8px}.cc-animal-note{opacity:.82}
-`;document.head.appendChild(s)}
-function render(){
- addStyles();const main=document.querySelector('.app>main') as HTMLElement|null;if(!main)return;
- const old=document.getElementById(PANEL_ID);if(old)old.remove();
- const s=loadState(),animal=isAnimalCrawler();
- const panel=document.createElement('section');panel.id=PANEL_ID;panel.innerHTML=`<h3>✨ Spells & Mana</h3><div class="cc-resource-row"><strong>MP</strong><div class="cc-resource-bar"><div class="cc-resource-fill" data-mana-fill></div></div><span data-mana-label></span></div><div class="cc-resource-controls"><label>Max MP <input data-max-mana type="number" min="0" step="1" value="${s.maxMana}"></label><label>Current MP <input data-current-mana type="number" min="0" step="1" value="${s.currentMana}"></label><button data-restore-mana>Restore Mana</button></div>${animal?'<div class="cc-spell-card cc-animal-note">Animal crawler: no automatic starter Heal spell.</div>':'<div class="cc-spell-card"><strong>Heal · Rank 1 (max)</strong><div>Interrupt · Self only · 2 Mana</div><div>Restores 2 Health Bar slots (20% Health).</div><button data-cast-heal>✨ CAST HEAL</button><div class="cc-spell-status" data-spell-status aria-live="polite"></div></div>'}`;
- main.prepend(panel);
- const refresh=()=>{const st=loadState();const pct=st.maxMana?clamp(st.currentMana/st.maxMana*100,0,100):0;(panel.querySelector('[data-mana-fill]') as HTMLElement).style.width=`${pct}%`;(panel.querySelector('[data-mana-label]') as HTMLElement).textContent=`${st.currentMana} / ${st.maxMana} MP`;const cast=panel.querySelector<HTMLButtonElement>('[data-cast-heal]');if(cast){cast.disabled=st.currentMana<HEAL_MANA_COST;cast.title=cast.disabled?'Not enough Mana':''}};
- panel.querySelectorAll<HTMLInputElement>('input').forEach(i=>i.onchange=()=>{const st=loadState();if(i.hasAttribute('data-max-mana')){st.maxMana=Math.max(0,Number(i.value)||0);st.currentMana=clamp(st.currentMana,0,st.maxMana)}else st.currentMana=clamp(Number(i.value)||0,0,st.maxMana);saveState(st);render()});
- panel.querySelector<HTMLButtonElement>('[data-restore-mana]')!.onclick=()=>{const st=loadState();st.currentMana=st.maxMana;saveState(st);render()};
- const cast=panel.querySelector<HTMLButtonElement>('[data-cast-heal]');if(cast)cast.onclick=()=>{const st=loadState(),status=panel.querySelector('[data-spell-status]') as HTMLElement;if(st.currentMana<HEAL_MANA_COST){status.textContent='Not enough Mana to cast Heal.';refresh();return}st.currentMana-=HEAL_MANA_COST;if(st.maxHealth>0)st.currentHealth=clamp(st.currentHealth+Math.ceil(st.maxHealth*.2),0,st.maxHealth);saveState(st);status.textContent=`Heal cast. −${HEAL_MANA_COST} MP · restored ${HEAL_BAR_SLOTS} Health Bar slots.`;refresh()};
- refresh();
-}
-let queued=false;const queue=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;render()})};
-new MutationObserver(queue).observe(document.documentElement,{subtree:true,childList:true});
-window.addEventListener('storage',queue);setTimeout(render,500);
-
-export { HEAL_MANA_COST, HEAL_BAR_SLOTS, isAnimalCrawler };
+function classMatches(spell:Spell,cls:string){if(!spell.favored?.length)return false;const c=cls.toLowerCase();return spell.favored.some(f=>c.includes(f.toLowerCase()))}
+function floorChoices(state:SpellState){const floor=currentFloor(),cls=currentClass();return RULEBOOK_SPELLS.filter(s=>s.name!=='Heal'&&!state.known.includes(s.name)&&(s.minFloor||1)<=floor).sort((a,b)=>Number(classMatches(b,cls))-Number(classMatches(a,cls))||a.mana-b.mana).slice(0,3)}
+function addStyles(){if(document.getElementById(STYLE_ID))return;const s=document.createElement('style');s.id=STYLE_ID;s.textContent=`#${PANEL_ID}{margin:16px 0;padding:16px;border:1px solid rgba(132,102,255,.4);border-radius:14px;background:rgba(20,17,31,.94)}#${PANEL_ID} h3{margin:0 0 10px}.cc-resource-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;margin:9px 0}.cc-resource-bar{height:16px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.11)}.cc-resource-fill{height:100%;background:linear-gradient(90deg,#6547d8,#b17cff);transition:width .35s ease}.cc-resource-controls,.cc-spell-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}.cc-resource-controls input{width:74px}.cc-spell-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.cc-spell-card{padding:13px;border-radius:12px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.1)}.cc-spell-card button{font-weight:800}.cc-spell-status{min-height:1.4em;margin-top:8px}.cc-animal-note{opacity:.82}.cc-spell-library{margin-top:16px}.cc-spell-library details{margin:7px 0}.cc-favored{font-size:12px;opacity:.78}.cc-choice{border-color:rgba(238,188,91,.45)}`;document.head.appendChild(s)}
+function castSpell(spell:Spell,panel:HTMLElement){const st=loadState(),status=panel.querySelector('[data-spell-status]') as HTMLElement;if(st.currentMana<spell.mana){status.textContent=`Not enough Mana to cast ${spell.name}.`;return}st.currentMana-=spell.mana;if(spell.name==='Heal'&&st.maxHealth>0)st.currentHealth=clamp(st.currentHealth+Math.ceil(st.maxHealth*.2),0,st.maxHealth);saveState(st);status.textContent=`${spell.name} cast. −${spell.mana} MP.`;render()}
+function render(){addStyles();const main=document.querySelector('.app>main') as HTMLElement|null;if(!main)return;document.getElementById(PANEL_ID)?.remove();const st=loadState(),animal=isAnimalCrawler(),cls=currentClass(),floor=currentFloor(),choices=floorChoices(st);const knownSpells=st.known.map(n=>RULEBOOK_SPELLS.find(s=>s.name===n)).filter(Boolean) as Spell[];const canChoose=!st.claimedFloors.includes(floor)&&choices.length>0;const panel=document.createElement('section');panel.id=PANEL_ID;panel.innerHTML=`<h3>✨ Spells & Mana</h3><div class="cc-resource-row"><strong>MP</strong><div class="cc-resource-bar"><div class="cc-resource-fill" data-mana-fill></div></div><span data-mana-label></span></div><div class="cc-resource-controls"><label>Max MP <input data-max-mana type="number" min="0" step="1" value="${st.maxMana}"></label><label>Current MP <input data-current-mana type="number" min="0" step="1" value="${st.currentMana}"></label><button data-restore-mana>Restore Mana</button></div>${animal?'<div class="cc-spell-card cc-animal-note">Animal crawler: no automatic starter Heal spell.</div>':''}<div class="cc-spell-grid" data-known>${knownSpells.length?knownSpells.map(s=>`<div class="cc-spell-card"><strong>${s.name}</strong><div>${s.tags.join(' · ')} · ${s.mana} Mana · ${s.range}</div>${s.favored?.length?`<div class="cc-favored">Favored: ${s.favored.join(' & ')}</div>`:''}<div>${s.description}</div><button data-cast="${s.name}">✨ CAST</button></div>`).join(''):'<div class="cc-spell-card">No known spells yet.</div>'}</div>${canChoose?`<h3 style="margin-top:18px">🎁 Floor ${floor} Spell Choice</h3><p>House-rule progression inspired by the novels: choose one eligible rulebook spell for this floor. Class-favored spells are offered first.</p><div class="cc-spell-grid">${choices.map(s=>`<div class="cc-spell-card cc-choice"><strong>${s.name}</strong><div>${s.mana} Mana · ${s.range}</div>${classMatches(s,cls)?`<div class="cc-favored">Favored for ${cls||'your class'}</div>`:''}<div>${s.description}</div><button data-learn="${s.name}">Learn ${s.name}</button></div>`).join('')}</div>`:''}<div class="cc-spell-library"><h3>📚 Rulebook Spell Library</h3>${RULEBOOK_SPELLS.map(s=>`<details><summary>${s.name} · ${s.mana} MP${s.favored?.length?' · Favored: '+s.favored.join('/') :''}</summary><div>${s.tags.join(' · ')} · Range ${s.range}</div><div>${s.description}</div></details>`).join('')}</div><div class="cc-spell-status" data-spell-status aria-live="polite"></div>`;main.prepend(panel);const refresh=()=>{const s=loadState(),pct=s.maxMana?clamp(s.currentMana/s.maxMana*100,0,100):0;(panel.querySelector('[data-mana-fill]') as HTMLElement).style.width=`${pct}%`;(panel.querySelector('[data-mana-label]') as HTMLElement).textContent=`${s.currentMana} / ${s.maxMana} MP`;panel.querySelectorAll<HTMLButtonElement>('[data-cast]').forEach(b=>{const sp=RULEBOOK_SPELLS.find(x=>x.name===b.dataset.cast);if(sp)b.disabled=s.currentMana<sp.mana})};panel.querySelectorAll<HTMLInputElement>('input').forEach(i=>i.onchange=()=>{const s=loadState();if(i.hasAttribute('data-max-mana')){s.maxMana=Math.max(0,Number(i.value)||0);s.currentMana=clamp(s.currentMana,0,s.maxMana)}else s.currentMana=clamp(Number(i.value)||0,0,s.maxMana);saveState(s);render()});panel.querySelector<HTMLButtonElement>('[data-restore-mana]')!.onclick=()=>{const s=loadState();s.currentMana=s.maxMana;saveState(s);render()};panel.querySelectorAll<HTMLButtonElement>('[data-cast]').forEach(b=>b.onclick=()=>{const sp=RULEBOOK_SPELLS.find(x=>x.name===b.dataset.cast);if(sp)castSpell(sp,panel)});panel.querySelectorAll<HTMLButtonElement>('[data-learn]').forEach(b=>b.onclick=()=>{const s=loadState(),name=b.dataset.learn||'';if(name&&!s.known.includes(name))s.known.push(name);if(!s.claimedFloors.includes(floor))s.claimedFloors.push(floor);saveState(s);render()});refresh()}
+let queued=false;const queue=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;render()})};new MutationObserver(queue).observe(document.documentElement,{subtree:true,childList:true});window.addEventListener('storage',queue);setTimeout(render,500);
+export { HEAL_MANA_COST, HEAL_BAR_SLOTS, RULEBOOK_SPELLS, isAnimalCrawler, floorChoices };
