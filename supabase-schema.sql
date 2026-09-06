@@ -20,9 +20,19 @@ create table if not exists public.campaigns (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references auth.users(id) on delete cascade,
   title text not null default 'My Crawler Campaign',
+  name text not null default 'My Crawler Campaign',
   invite_code text not null unique,
   created_at timestamptz not null default now()
 );
+
+-- Migration-safe compatibility for databases created by earlier roadmap builds.
+-- The application uses campaigns.name; older schema revisions only had campaigns.title.
+alter table public.campaigns add column if not exists name text not null default 'My Crawler Campaign';
+update public.campaigns
+set name=title
+where title is not null
+  and btrim(title)<>''
+  and (name is null or btrim(name)='' or name='My Crawler Campaign');
 
 create table if not exists public.campaign_members (
   campaign_id uuid not null references public.campaigns(id) on delete cascade,
