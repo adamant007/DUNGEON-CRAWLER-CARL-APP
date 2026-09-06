@@ -72,6 +72,7 @@ export async function cloudPublicAccountCount(){try{const {data,error}=await sup
 export async function cloudTrackOpen(){try{let device=localStorage.getItem('cc-device-id');if(!device){device=crypto.randomUUID();localStorage.setItem('cc-device-id',device)}await supabase.from('app_visits').upsert({device_id:device,last_seen:new Date().toISOString()},{onConflict:'device_id'});const user=await cloudUser();await supabase.from('app_activity').insert({user_id:user?.id||null,device_id:device,event_type:'app_open',payload:{path:location.pathname}});}catch{}}
 export async function cloudOwnerAnalytics(){const {data,error}=await supabase.rpc('owner_analytics');if(error)throw error;return data;}
 
+
 export async function cloudPublishLeaderboard(character:any,campaignId:string|null){
  const user=await cloudUser(); if(!user) throw new Error('Please log in before publishing to the leaderboard.');
  const score=Math.max(0,Number(character.floor||0))*100000+Math.max(0,Number(character.level||0))*1000+Math.max(0,Number(character.popularity||0))*10+Math.max(0,Number(character.aiFavor||0));
