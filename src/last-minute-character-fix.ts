@@ -1,0 +1,20 @@
+const STYLE='cc-last-minute-character-fix-style';
+const HP='cc2-hp:';
+const MP='cc2-mp:';
+const PROFILE='cc-character-profile:';
+const enc=(s:string)=>encodeURIComponent(s||'Crawler');
+function root(){return document.getElementById('cc-character-dashboard-v2') as HTMLElement|null}
+function name(){return root()?.querySelector('.cc2-name')?.textContent?.trim()||document.querySelector('.character-bar select option:checked')?.textContent?.trim()||'Crawler'}
+function profile(){try{return JSON.parse(localStorage.getItem(PROFILE+enc(name()))||'{}')}catch{return {}}}
+function value(prefix:string,def:number){const n=Number(localStorage.getItem(prefix+enc(name())));return Number.isFinite(n)?Math.max(0,Math.min(10,n)):def}
+function save(prefix:string,kind:string,n:number){const v=Math.max(0,Math.min(10,Math.round(n)));localStorage.setItem(prefix+enc(name()),String(v));window.dispatchEvent(new CustomEvent('cc-resource-change',{detail:{kind,current:v,max:10,character:name()}}));paint()}
+function row(i:number){return root()?.querySelectorAll<HTMLElement>('.cc2-resrow')[i]||null}
+function ensure(r:HTMLElement,cls:string){const t=r.querySelector('.cc2-track') as HTMLElement|null;if(!t)return [] as HTMLElement[];if(t.children.length!==10)t.innerHTML=Array.from({length:10},()=>`<i class="cc2-seg ${cls}"></i>`).join('');return [...t.querySelectorAll<HTMLElement>('.cc2-seg')]}
+function wire(r:HTMLElement,kind:'health'|'mana',prefix:string,def:number,cls:string){const v=value(prefix,def), seg=ensure(r,cls);seg.forEach((e,i)=>{e.classList.toggle('on',i<v);e.setAttribute('role','button');e.tabIndex=0;e.style.pointerEvents='auto';e.style.cursor='pointer';const set=()=>save(prefix,kind,i+1);e.onclick=set;e.onkeydown=x=>{if(x.key==='Enter'||x.key===' '){x.preventDefault();set()}}});const out=r.querySelector('.cc2-resval');if(out)out.textContent=`${v} / 10`}
+function lockFloor3(){const r=root();if(!r)return;const p=profile(),floor=Number(p.floor||1);const cards=[...r.querySelectorAll<HTMLElement>('.cc2-card')];if(floor<3){cards.slice(0,2).forEach((c,i)=>{let h=c.querySelector('h3');if(h)h.textContent=i===0?'🔒 Race — unlocks on Floor 3':'🔒 Class — unlocks on Floor 3';let q=c.querySelector('p');if(q)q.textContent=i===0?'Race selection is locked until the crawler reaches Floor 3.':'Class selection is locked until the crawler reaches Floor 3.'});const meta=r.querySelector('.cc2-meta');if(meta)meta.textContent=`Level ${p.level||1} Crawler • Race locked • Class locked`;const er=document.getElementById('cc-character-editor');er?.querySelectorAll<HTMLInputElement>('[data-cc-field="race"],[data-cc-field="class"]').forEach(x=>{x.disabled=true;x.title='Unlocks on Floor 3'})}}
+function paint(){const r=root();if(!r)return;const a=row(0),b=row(1);if(a)wire(a,'health',HP,7,'hp');if(b)wire(b,'mana',MP,10,'mp');lockFloor3()}
+function style(){if(document.getElementById(STYLE))return;const s=document.createElement('style');s.id=STYLE;s.textContent=`#cc-mobile-resource-hud{display:none!important}#cc-character-dashboard-v2 .cc2-track{grid-template-columns:repeat(10,minmax(22px,1fr))!important;gap:6px!important}#cc-character-dashboard-v2 .cc2-seg{display:block!important;min-height:30px!important;pointer-events:auto!important;touch-action:manipulation!important}#cc-character-dashboard-v2 .cc2-banner::after{background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}`;document.head.appendChild(s)}
+function apply(){style();paint()}
+window.addEventListener('cc-resource-change',(e:any)=>{if(e?.detail?.kind==='mana'&&Number.isFinite(Number(e.detail.current))){localStorage.setItem(MP+enc(name()),String(Math.max(0,Math.min(10,Number(e.detail.current)))))}setTimeout(paint,0)});
+window.addEventListener('cc:character-updated',()=>setTimeout(paint,20));document.addEventListener('click',e=>{if((e.target as Element)?.closest('[aria-label="Primary navigation"],.character-bar'))setTimeout(paint,100)},true);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(apply,750),{once:true});else setTimeout(apply,750);
+export {apply as applyLastMinuteCharacterFix};
