@@ -1,5 +1,9 @@
 import { expect, test } from '@playwright/test';
 
+function navButton(nav:any,label:string){
+  return nav.locator('button').filter({hasText:new RegExp(`^${label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}`)}).first();
+}
+
 async function openApp(page:any){
   await page.goto('/');
   await expect(page.getByText('Ginger Dragon Fire', { exact: false }).first()).toBeVisible();
@@ -11,8 +15,8 @@ test('landing, public links and every primary tab open', async ({ page, request 
   await openApp(page);
   const nav = page.getByRole('navigation', { name: 'Primary navigation' });
   for (const tab of ['Dashboard','Character','Combat','Inventory','Equipment','Progression','Dice','Party','Leaderboard','GM Tools','Rulebook','Campaign','Account','Tutorial']) {
-    await nav.getByRole('button', { name: tab, exact: true }).click();
-    if(tab!=='Tutorial') await expect(nav.getByRole('button', { name: tab, exact: true })).toHaveClass(/active/);
+    await navButton(nav,tab).click();
+    if(tab!=='Tutorial') await expect(navButton(nav,tab)).toHaveClass(/active/);
   }
   for (const path of ['/privacy.html','/support.html','/manifest.webmanifest']) {
     const response = await request.get(path);
