@@ -13,6 +13,8 @@ test('clean app shell is isolated and navigates without legacy panels', async ({
   await expect(shell.getByRole('heading', { name: 'Crawler Companion', exact: true })).toBeVisible();
   await expect(shell.getByRole('heading', { name: 'Character', exact: true })).toBeVisible();
 
+  await page.screenshot({ path: 'test-results/clean-app-shell-main.png', fullPage: true });
+
   const cleanNav = shell.getByRole('navigation', { name: 'Clean app navigation' });
   await cleanNav.getByRole('button', { name: 'GM Tools', exact: true }).click();
   await expect(shell.getByRole('heading', { name: 'GM Tools', exact: true })).toBeVisible();
