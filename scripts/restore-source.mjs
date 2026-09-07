@@ -39,16 +39,8 @@ function cleanLandingSource(output) {
     ['<div className="landing-card">', '<div className="landing-card landing-card-v2">']
   ];
   for(const [from,to] of replacements) if(source.includes(from)) source=source.replace(from,to);
-
   const landingStart=source.indexOf('function Landing(');
-  if(landingStart!==-1){
-    const landingEnd=source.indexOf('\nfunction ',landingStart+10);
-    const end=landingEnd===-1?source.length:landingEnd;
-    let landing=source.slice(landingStart,end);
-    landing=landing.replace(/<img(?![^>]*className=["']studio-hero-art["'])[^>]*src=["'][^"']*(?:app-icon\.svg|icon-96\.webp|ginger-dragon-fire[^"']*|\/brand\/hero\.webp)[^"']*["'][^>]*\/?>(?:<\/img>)?/gi,'');
-    source=source.slice(0,landingStart)+landing+source.slice(end);
-  }
-
+  if(landingStart!==-1){const landingEnd=source.indexOf('\nfunction ',landingStart+10);const end=landingEnd===-1?source.length:landingEnd;let landing=source.slice(landingStart,end);landing=landing.replace(/<img(?![^>]*className=["']studio-hero-art["'])[^>]*src=["'][^"']*(?:app-icon\.svg|icon-96\.webp|ginger-dragon-fire[^"']*|\/brand\/hero\.webp)[^"']*["'][^>]*\/?>(?:<\/img>)?/gi,'');source=source.slice(0,landingStart)+landing+source.slice(end);}
   const hero='<img className="studio-hero-art" src="/brand/ginger-dragon-studios-hero.webp" alt="Ginger Dragon Studios dragon artwork"/>';
   if(!source.includes('className="studio-hero-art"')){const marker='<div className="landing-card landing-card-v2">';if(!source.includes(marker))throw new Error('Landing card marker not found');source=source.replace(marker,marker+hero);}
   fs.writeFileSync(file,source);console.log('Rebuilt Ginger Dragon Studios landing shell without legacy landing icon');
@@ -58,21 +50,30 @@ function makeCharacterPrimary(output){
   const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");
   const start=source.indexOf('function Dashboard('), end=source.indexOf('\nfunction Combat(',start);
   if(start!==-1&&end!==-1){source=source.slice(0,start)+'function Dashboard({c,update}:{c:Character;update:(f:any)=>void;setTab:(t:Tab)=>void}){return <CharacterSheet c={c} update={update}/>}'+source.slice(end);}
-  source=source.replace(/useState<Tab>\(['"]Dashboard['"]\)/g,"useState<Tab>('Character')");
-  source=source.replace(/useState\(['"]Dashboard['"]\)/g,"useState('Character')");
-  source=source.replace(/['"]Dashboard['"]\s*,\s*/g,'');
-  source=source.replace(/,\s*['"]Dashboard['"]/g,'');
-  source=source.replace(/(['"]Account['"]\s*,\s*)(['"]Tutorial['"])/g,'$2');
+  source=source.replace(/useState<Tab>\(['"]Dashboard['"]\)/g,"useState<Tab>('Character')");source=source.replace(/useState\(['"]Dashboard['"]\)/g,"useState('Character')");source=source.replace(/['"]Dashboard['"]\s*,\s*/g,'');source=source.replace(/,\s*['"]Dashboard['"]/g,'');source=source.replace(/(['"]Account['"]\s*,\s*)(['"]Tutorial['"])/g,'$2');
   fs.writeFileSync(file,source);console.log('Character is now the primary workspace; redundant Dashboard/Account navigation removed');
 }
 
-function injectLandingHeroStyles(output){
- const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");
- const marker='/* ginger-dragon-studios-clean-hero */';if(!source.includes(marker))source+=`\n${marker}\n.studio-hero-art{display:block;width:min(360px,72vw);height:auto;object-fit:contain;object-position:center;margin:0 auto 28px;border:0;border-radius:0;background:transparent;box-shadow:none}\n@media(max-width:760px){.studio-hero-art{width:min(300px,74vw);margin-bottom:22px}}\n`;
- const v2='/* ginger-dragon-studios-landing-v2 */';if(!source.includes(v2))source+=`\n${v2}\n.landing-card-v2{max-width:980px}\n.landing-card-v2 .studio-hero-art{display:block!important;width:min(512px,90vw)!important;max-width:100%!important;height:auto!important;aspect-ratio:auto!important;object-fit:contain!important;object-position:center!important;margin:0 auto 26px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 26px 60px rgba(0,0,0,.30)!important;image-rendering:auto!important}\n@media(max-width:760px){.landing-card-v2 .studio-hero-art{width:min(460px,90vw)!important;margin-bottom:20px!important}}\n`;
- fs.writeFileSync(file,source);console.log('Integrated Ginger Dragon Studios landing v2 styles');
+function installTestCharacter(output){
+  const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");
+  if(source.includes('function TestCharacterWorkspace(')){return;}
+  const component=`\nfunction TestCharacterWorkspace(){return <section className="test-char-workspace" data-testid="test-char-workspace"><div className="test-char-eyebrow">REBUILD WORKSPACE</div><h2>TEST CHAR.</h2><p>This is the clean replacement Character workspace. We will build it one approved piece at a time.</p><div className="test-char-empty">Ready for the first character component.</div></section>}\n`;
+  const combat=source.indexOf('\nfunction Combat(');if(combat===-1)throw new Error('Combat marker not found for TEST CHAR component');source=source.slice(0,combat)+component+source.slice(combat);
+  const arrays=[...source.matchAll(/\[(?:\s*['"][^'"\]]+['"]\s*,?)+\s*\]/g)].map(m=>m[0]).filter(x=>x.includes('Character')&&x.includes('Combat'));
+  if(!arrays.length)throw new Error('Primary tab array not found for TEST CHAR');
+  source=source.replace(arrays[0],arrays[0].replace(/(['"]Character['"]\s*,?)/,'$1"TEST CHAR.",'));
+  const renderPatterns=[
+    [/{tab===['"]Character['"]&&<CharacterSheet([^}]*)}/,m=>m+`{tab==='TEST CHAR.'&&<TestCharacterWorkspace/>}`],
+    [/{tab===['"]Combat['"]&&/,`{tab==='TEST CHAR.'&&<TestCharacterWorkspace/>}{tab==='Combat'&&`]
+  ];
+  let installed=false;
+  for(const [pattern,replacement] of renderPatterns){if(pattern.test(source)){source=source.replace(pattern,replacement);installed=true;break;}}
+  if(!installed)throw new Error('Could not locate tab render switch for TEST CHAR');
+  fs.writeFileSync(file,source);console.log('Installed isolated TEST CHAR workspace without modifying existing Character implementation');
 }
+
+function injectLandingHeroStyles(output){const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");const marker='/* ginger-dragon-studios-clean-hero */';if(!source.includes(marker))source+=`\n${marker}\n.studio-hero-art{display:block;width:min(360px,72vw);height:auto;object-fit:contain;object-position:center;margin:0 auto 28px;border:0;border-radius:0;background:transparent;box-shadow:none}\n@media(max-width:760px){.studio-hero-art{width:min(300px,74vw);margin-bottom:22px}}\n`;const v2='/* ginger-dragon-studios-landing-v2 */';if(!source.includes(v2))source+=`\n${v2}\n.landing-card-v2{max-width:980px}\n.landing-card-v2 .studio-hero-art{display:block!important;width:min(512px,90vw)!important;max-width:100%!important;height:auto!important;aspect-ratio:auto!important;object-fit:contain!important;object-position:center!important;margin:0 auto 26px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 26px 60px rgba(0,0,0,.30)!important;image-rendering:auto!important}\n@media(max-width:760px){.landing-card-v2 .studio-hero-art{width:min(460px,90vw)!important;margin-bottom:20px!important}}\n`;const test='/* test-character-rebuild-shell */';if(!source.includes(test))source+=`\n${test}\n.test-char-workspace{max-width:1100px;margin:24px auto;padding:28px;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:rgba(10,12,18,.78)}.test-char-eyebrow{font-size:12px;font-weight:800;letter-spacing:.16em;opacity:.62}.test-char-workspace h2{margin:8px 0 6px;font-size:30px}.test-char-workspace p{margin:0;opacity:.76}.test-char-empty{margin-top:24px;min-height:220px;display:grid;place-items:center;border:1px dashed rgba(255,255,255,.2);border-radius:14px;opacity:.58}@media(max-width:760px){.test-char-workspace{margin:12px;padding:18px}.test-char-empty{min-height:160px}}\n`;fs.writeFileSync(file,source);console.log('Integrated landing and TEST CHAR shell styles');}
 
 function injectCoreIntegration(output){const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");const integrations=[["import './core-hp-integration';",'// Build-time core integration: all HP damage controls route through Damage Resist.'],["import './campaign-role-visibility';",'// Build-time campaign role guard: keep GM navigation available to local/GM users and hidden from confirmed players.']];let changed=false;for(const [marker,comment] of integrations)if(!source.includes(marker)){source+=`\n\n${comment}\n${marker}\n`;changed=true;}if(changed){fs.writeFileSync(file,source);console.log(`Integrated runtime guards into ${output}`);}}
 
-restore("main","src/main.tsx");restore("styles","src/styles.css");restoreBrandAsset();cleanLandingSource("src/main.tsx");makeCharacterPrimary("src/main.tsx");injectLandingHeroStyles("src/styles.css");injectCoreIntegration("src/main.tsx");
+restore("main","src/main.tsx");restore("styles","src/styles.css");restoreBrandAsset();cleanLandingSource("src/main.tsx");makeCharacterPrimary("src/main.tsx");installTestCharacter("src/main.tsx");injectLandingHeroStyles("src/styles.css");injectCoreIntegration("src/main.tsx");
