@@ -72,8 +72,27 @@ function installTestCharacter(output){
   fs.writeFileSync(file,source);console.log('Installed isolated TEST CHAR workspace without modifying existing Character implementation');
 }
 
+function installCleanAppShell(output){
+  const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");
+  const importLine="import CleanAppShell from './clean-app-shell';";
+  if(!source.includes(importLine))source=importLine+'\n'+source;
+  const tabType=source.match(/type\s+Tab\s*=\s*([^;]+);/);
+  if(!tabType)throw new Error('Tab type not found for clean app shell');
+  if(!tabType[1].includes('TEST APP'))source=source.replace(tabType[0],`type Tab = ${tabType[1]} | 'TEST APP';`);
+  const arrays=[...source.matchAll(/\[(?:\s*['"][^'"\]]+['"]\s*,?)+\s*\]/g)].map(m=>m[0]).filter(x=>x.includes('Character')&&x.includes('Combat'));
+  if(!arrays.length)throw new Error('Primary tab array not found for clean app shell');
+  const navArray=arrays[0];
+  if(!navArray.includes('TEST APP'))source=source.replace(navArray,navArray.replace(/(['"]Character['"]\s*,?)/,'$1"TEST APP",'));
+  if(!source.includes("tab==='TEST APP'&&<CleanAppShell/>")){
+    const marker=/{tab===['"]Combat['"]&&/;
+    if(!marker.test(source))throw new Error('Tab render marker not found for clean app shell');
+    source=source.replace(marker,"{tab==='TEST APP'&&<CleanAppShell/>}{tab==='Combat'&&");
+  }
+  fs.writeFileSync(file,source);console.log('Installed isolated TEST APP entry point for the clean app shell');
+}
+
 function injectLandingHeroStyles(output){const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");const marker='/* ginger-dragon-studios-clean-hero */';if(!source.includes(marker))source+=`\n${marker}\n.studio-hero-art{display:block;width:min(360px,72vw);height:auto;object-fit:contain;object-position:center;margin:0 auto 28px;border:0;border-radius:0;background:transparent;box-shadow:none}\n@media(max-width:760px){.studio-hero-art{width:min(300px,74vw);margin-bottom:22px}}\n`;const v2='/* ginger-dragon-studios-landing-v2 */';if(!source.includes(v2))source+=`\n${v2}\n.landing-card-v2{max-width:980px}\n.landing-card-v2 .studio-hero-art{display:block!important;width:min(512px,90vw)!important;max-width:100%!important;height:auto!important;aspect-ratio:auto!important;object-fit:contain!important;object-position:center!important;margin:0 auto 26px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 26px 60px rgba(0,0,0,.30)!important;image-rendering:auto!important}\n@media(max-width:760px){.landing-card-v2 .studio-hero-art{width:min(460px,90vw)!important;margin-bottom:20px!important}}\n`;const test='/* test-character-rebuild-shell */';if(!source.includes(test))source+=`\n${test}\n.test-char-workspace{max-width:1100px;margin:24px auto;padding:28px;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:rgba(10,12,18,.78)}.test-char-eyebrow{font-size:12px;font-weight:800;letter-spacing:.16em;opacity:.62}.test-char-workspace h2{margin:8px 0 6px;font-size:30px}.test-char-workspace p{margin:0;opacity:.76}.test-char-empty{margin-top:24px;min-height:220px;display:grid;place-items:center;border:1px dashed rgba(255,255,255,.2);border-radius:14px;opacity:.58}@media(max-width:760px){.test-char-workspace{margin:12px;padding:18px}.test-char-empty{min-height:160px}}\n`;fs.writeFileSync(file,source);console.log('Integrated landing and TEST CHAR shell styles');}
 
 function injectCoreIntegration(output){const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");const integrations=[["import './core-hp-integration';",'// Build-time core integration: all HP damage controls route through Damage Resist.'],["import './campaign-role-visibility';",'// Build-time campaign role guard: keep GM navigation available to local/GM users and hidden from confirmed players.']];let changed=false;for(const [marker,comment] of integrations)if(!source.includes(marker)){source+=`\n\n${comment}\n${marker}\n`;changed=true;}if(changed){fs.writeFileSync(file,source);console.log(`Integrated runtime guards into ${output}`);}}
 
-restore("main","src/main.tsx");restore("styles","src/styles.css");restoreBrandAsset();cleanLandingSource("src/main.tsx");makeCharacterPrimary("src/main.tsx");installTestCharacter("src/main.tsx");injectLandingHeroStyles("src/styles.css");injectCoreIntegration("src/main.tsx");
+restore("main","src/main.tsx");restore("styles","src/styles.css");restoreBrandAsset();cleanLandingSource("src/main.tsx");makeCharacterPrimary("src/main.tsx");installTestCharacter("src/main.tsx");installCleanAppShell("src/main.tsx");injectLandingHeroStyles("src/styles.css");injectCoreIntegration("src/main.tsx");
