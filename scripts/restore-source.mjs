@@ -38,13 +38,20 @@ function cleanLandingSource(output) {
     ['<div className="landing-note">Independent studio • Built by Ginger Dragon Studios • © 2026 Ginger Dragon Studios</div>', '<div className="landing-note">© 2026 Ginger Dragon Studios</div>'],
     ['<div className="landing-card">', '<div className="landing-card landing-card-v2">']
   ];
-  let changed=false; for(const [from,to] of replacements) if(source.includes(from)){source=source.replace(from,to);changed=true;}
-  // Remove legacy small footer/brand icons; the approved master hero is the sole landing-page brand artwork.
-  source=source.replace(/<img[^>]+(?:brand|logo|dragon)[^>]*className=["'][^"']*(?:footer|landing-note|studio-footer)[^"']*["'][^>]*\/?>(?:<\/img>)?/gi,'');
-  source=source.replace(/<img[^>]+className=["'][^"']*(?:footer|landing-note|studio-footer)[^"']*["'][^>]+(?:brand|logo|dragon)[^>]*\/?>(?:<\/img>)?/gi,'');
+  for(const [from,to] of replacements) if(source.includes(from)) source=source.replace(from,to);
+
+  const landingStart=source.indexOf('function Landing(');
+  if(landingStart!==-1){
+    const landingEnd=source.indexOf('\nfunction ',landingStart+10);
+    const end=landingEnd===-1?source.length:landingEnd;
+    let landing=source.slice(landingStart,end);
+    landing=landing.replace(/<img(?![^>]*className=["']studio-hero-art["'])[^>]*src=["'][^"']*(?:app-icon\.svg|icon-96\.webp|ginger-dragon-fire[^"']*|\/brand\/hero\.webp)[^"']*["'][^>]*\/?>(?:<\/img>)?/gi,'');
+    source=source.slice(0,landingStart)+landing+source.slice(end);
+  }
+
   const hero='<img className="studio-hero-art" src="/brand/ginger-dragon-studios-hero.webp" alt="Ginger Dragon Studios dragon artwork"/>';
-  if(!source.includes('className="studio-hero-art"')){const marker='<div className="landing-card landing-card-v2">';if(!source.includes(marker))throw new Error('Landing card marker not found');source=source.replace(marker,marker+hero);changed=true;}
-  fs.writeFileSync(file,source);console.log('Rebuilt Ginger Dragon Studios landing shell without legacy footer icon');
+  if(!source.includes('className="studio-hero-art"')){const marker='<div className="landing-card landing-card-v2">';if(!source.includes(marker))throw new Error('Landing card marker not found');source=source.replace(marker,marker+hero);}
+  fs.writeFileSync(file,source);console.log('Rebuilt Ginger Dragon Studios landing shell without legacy landing icon');
 }
 
 function makeCharacterPrimary(output){
