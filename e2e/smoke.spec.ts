@@ -46,11 +46,11 @@ test('party and GM local flows survive rapid interaction', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Party Board' })).toBeVisible();
 
   await page.getByRole('button', { name: 'GM Tools', exact: true }).click();
-  const count = page.getByLabel('Loot item count');
+  const count = page.getByLabel('Loot box count');
   await expect(count).toBeVisible();
   await count.fill('12');
   await page.getByRole('button', { name: /Preview Box/i }).click();
-  await expect(page.locator('#cc-loot-boxes [data-preview]')).toContainText('12.');
+  await expect(page.locator('#cc-loot-boxes [data-box-preview]')).toContainText('12.');
   await count.fill('');
   await count.blur();
   await expect(count).not.toHaveValue('');
