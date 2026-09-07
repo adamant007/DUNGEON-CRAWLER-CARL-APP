@@ -26,8 +26,7 @@ function restoreBrandAsset() {
 }
 
 function cleanLandingSource(output) {
-  const file = path.join(root, output);
-  let source = fs.readFileSync(file, "utf8");
+  const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
   const replacements = [
     ['<img className="studio-hero-logo" src="/brand/hero.webp" alt="Ginger Dragon Fire Studios dragon logo"/>', ''],
     ['<div className="landing-kicker">GINGER DRAGON FIRE STUDIOS</div>', '<div className="landing-kicker">GINGER DRAGON STUDIOS</div>'],
@@ -39,50 +38,33 @@ function cleanLandingSource(output) {
     ['<div className="landing-note">Independent studio • Built by Ginger Dragon Studios • © 2026 Ginger Dragon Studios</div>', '<div className="landing-note">© 2026 Ginger Dragon Studios</div>'],
     ['<div className="landing-card">', '<div className="landing-card landing-card-v2">']
   ];
-  let changed = false;
-  for (const [from, to] of replacements) if (source.includes(from)) { source = source.replace(from, to); changed = true; }
-  const hero = '<img className="studio-hero-art" src="/brand/ginger-dragon-studios-hero.webp" alt="Ginger Dragon Studios dragon artwork"/>';
-  if (!source.includes('className="studio-hero-art"')) {
-    const marker = '<div className="landing-card landing-card-v2">';
-    if (!source.includes(marker)) throw new Error('Landing card marker not found');
-    source = source.replace(marker, marker + hero); changed = true;
-  }
-  if (changed) { fs.writeFileSync(file, source); console.log('Rebuilt Ginger Dragon Studios landing shell'); }
+  let changed=false; for(const [from,to] of replacements) if(source.includes(from)){source=source.replace(from,to);changed=true;}
+  const hero='<img className="studio-hero-art" src="/brand/ginger-dragon-studios-hero.webp" alt="Ginger Dragon Studios dragon artwork"/>';
+  if(!source.includes('className="studio-hero-art"')){const marker='<div className="landing-card landing-card-v2">';if(!source.includes(marker))throw new Error('Landing card marker not found');source=source.replace(marker,marker+hero);changed=true;}
+  if(changed){fs.writeFileSync(file,source);console.log('Rebuilt Ginger Dragon Studios landing shell');}
 }
 
-function simplifyDashboard(output) {
-  const file = path.join(root, output);
-  let source = fs.readFileSync(file, "utf8");
-  const start = source.indexOf('function Dashboard(');
-  const end = source.indexOf('\nfunction Combat(', start);
-  if (start === -1 || end === -1) throw new Error('Dashboard function boundary not found');
-  const replacement = 'function Dashboard({c,update}:{c:Character;update:(f:any)=>void;setTab:(t:Tab)=>void}){return <CharacterSheet c={c} update={update}/>}';
-  source = source.slice(0, start) + replacement + source.slice(end);
-  fs.writeFileSync(file, source);
-  console.log('Dashboard now renders the active character sheet');
+function makeCharacterPrimary(output){
+  const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");
+  const start=source.indexOf('function Dashboard('), end=source.indexOf('\nfunction Combat(',start);
+  if(start!==-1&&end!==-1){source=source.slice(0,start)+'function Dashboard({c,update}:{c:Character;update:(f:any)=>void;setTab:(t:Tab)=>void}){return <CharacterSheet c={c} update={update}/>}'+source.slice(end);}
+  // Dashboard is no longer a destination: existing persisted Dashboard state opens Character.
+  source=source.replace(/useState<Tab>\(['"]Dashboard['"]\)/g,"useState<Tab>('Character')");
+  source=source.replace(/useState\(['"]Dashboard['"]\)/g,"useState('Character')");
+  // Remove redundant Dashboard and Account entries from common literal navigation arrays while preserving the header Account control.
+  source=source.replace(/['"]Dashboard['"]\s*,\s*/g,'');
+  source=source.replace(/,\s*['"]Dashboard['"]/g,'');
+  source=source.replace(/(['"]Account['"]\s*,\s*)(['"]Tutorial['"])/g,'$2');
+  fs.writeFileSync(file,source);console.log('Character is now the primary workspace; redundant Dashboard/Account navigation removed');
 }
 
-function injectLandingHeroStyles(output) {
-  const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
-  const marker = '/* ginger-dragon-studios-clean-hero */';
-  if (!source.includes(marker)) source += `\n${marker}\n.studio-hero-art{display:block;width:min(360px,72vw);height:auto;object-fit:contain;object-position:center;margin:0 auto 28px;border:0;border-radius:0;background:transparent;box-shadow:none}\n@media(max-width:760px){.studio-hero-art{width:min(300px,74vw);margin-bottom:22px}}\n`;
-  const v2 = '/* ginger-dragon-studios-landing-v2 */';
-  if (!source.includes(v2)) source += `\n${v2}\n.landing-card-v2{max-width:980px}\n.landing-card-v2 .studio-hero-art{display:block!important;width:min(512px,90vw)!important;max-width:100%!important;height:auto!important;aspect-ratio:auto!important;object-fit:contain!important;object-position:center!important;margin:0 auto 26px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 26px 60px rgba(0,0,0,.30)!important;image-rendering:auto!important}\n@media(max-width:760px){.landing-card-v2 .studio-hero-art{width:min(460px,90vw)!important;margin-bottom:20px!important}}\n`;
-  fs.writeFileSync(file, source); console.log('Integrated Ginger Dragon Studios landing v2 styles');
+function injectLandingHeroStyles(output){
+ const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");
+ const marker='/* ginger-dragon-studios-clean-hero */';if(!source.includes(marker))source+=`\n${marker}\n.studio-hero-art{display:block;width:min(360px,72vw);height:auto;object-fit:contain;object-position:center;margin:0 auto 28px;border:0;border-radius:0;background:transparent;box-shadow:none}\n@media(max-width:760px){.studio-hero-art{width:min(300px,74vw);margin-bottom:22px}}\n`;
+ const v2='/* ginger-dragon-studios-landing-v2 */';if(!source.includes(v2))source+=`\n${v2}\n.landing-card-v2{max-width:980px}\n.landing-card-v2 .studio-hero-art{display:block!important;width:min(512px,90vw)!important;max-width:100%!important;height:auto!important;aspect-ratio:auto!important;object-fit:contain!important;object-position:center!important;margin:0 auto 26px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 26px 60px rgba(0,0,0,.30)!important;image-rendering:auto!important}\n@media(max-width:760px){.landing-card-v2 .studio-hero-art{width:min(460px,90vw)!important;margin-bottom:20px!important}}\n`;
+ fs.writeFileSync(file,source);console.log('Integrated Ginger Dragon Studios landing v2 styles');
 }
 
-function injectCoreIntegration(output) {
-  const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
-  const integrations = [["import './core-hp-integration';", '// Build-time core integration: all HP damage controls route through Damage Resist.'], ["import './campaign-role-visibility';", '// Build-time campaign role guard: keep GM navigation available to local/GM users and hidden from confirmed players.']];
-  let changed = false;
-  for (const [marker, comment] of integrations) if (!source.includes(marker)) { source += `\n\n${comment}\n${marker}\n`; changed = true; }
-  if (changed) { fs.writeFileSync(file, source); console.log(`Integrated runtime guards into ${output}`); }
-}
+function injectCoreIntegration(output){const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");const integrations=[["import './core-hp-integration';",'// Build-time core integration: all HP damage controls route through Damage Resist.'],["import './campaign-role-visibility';",'// Build-time campaign role guard: keep GM navigation available to local/GM users and hidden from confirmed players.']];let changed=false;for(const [marker,comment] of integrations)if(!source.includes(marker)){source+=`\n\n${comment}\n${marker}\n`;changed=true;}if(changed){fs.writeFileSync(file,source);console.log(`Integrated runtime guards into ${output}`);}}
 
-restore("main", "src/main.tsx");
-restore("styles", "src/styles.css");
-restoreBrandAsset();
-cleanLandingSource("src/main.tsx");
-simplifyDashboard("src/main.tsx");
-injectLandingHeroStyles("src/styles.css");
-injectCoreIntegration("src/main.tsx");
+restore("main","src/main.tsx");restore("styles","src/styles.css");restoreBrandAsset();cleanLandingSource("src/main.tsx");makeCharacterPrimary("src/main.tsx");injectLandingHeroStyles("src/styles.css");injectCoreIntegration("src/main.tsx");
