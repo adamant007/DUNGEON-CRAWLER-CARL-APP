@@ -39,19 +39,20 @@ function cleanLandingSource(output) {
     ['<div className="landing-card">', '<div className="landing-card landing-card-v2">']
   ];
   let changed=false; for(const [from,to] of replacements) if(source.includes(from)){source=source.replace(from,to);changed=true;}
+  // Remove legacy small footer/brand icons; the approved master hero is the sole landing-page brand artwork.
+  source=source.replace(/<img[^>]+(?:brand|logo|dragon)[^>]*className=["'][^"']*(?:footer|landing-note|studio-footer)[^"']*["'][^>]*\/?>(?:<\/img>)?/gi,'');
+  source=source.replace(/<img[^>]+className=["'][^"']*(?:footer|landing-note|studio-footer)[^"']*["'][^>]+(?:brand|logo|dragon)[^>]*\/?>(?:<\/img>)?/gi,'');
   const hero='<img className="studio-hero-art" src="/brand/ginger-dragon-studios-hero.webp" alt="Ginger Dragon Studios dragon artwork"/>';
   if(!source.includes('className="studio-hero-art"')){const marker='<div className="landing-card landing-card-v2">';if(!source.includes(marker))throw new Error('Landing card marker not found');source=source.replace(marker,marker+hero);changed=true;}
-  if(changed){fs.writeFileSync(file,source);console.log('Rebuilt Ginger Dragon Studios landing shell');}
+  fs.writeFileSync(file,source);console.log('Rebuilt Ginger Dragon Studios landing shell without legacy footer icon');
 }
 
 function makeCharacterPrimary(output){
   const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");
   const start=source.indexOf('function Dashboard('), end=source.indexOf('\nfunction Combat(',start);
   if(start!==-1&&end!==-1){source=source.slice(0,start)+'function Dashboard({c,update}:{c:Character;update:(f:any)=>void;setTab:(t:Tab)=>void}){return <CharacterSheet c={c} update={update}/>}'+source.slice(end);}
-  // Dashboard is no longer a destination: existing persisted Dashboard state opens Character.
   source=source.replace(/useState<Tab>\(['"]Dashboard['"]\)/g,"useState<Tab>('Character')");
   source=source.replace(/useState\(['"]Dashboard['"]\)/g,"useState('Character')");
-  // Remove redundant Dashboard and Account entries from common literal navigation arrays while preserving the header Account control.
   source=source.replace(/['"]Dashboard['"]\s*,\s*/g,'');
   source=source.replace(/,\s*['"]Dashboard['"]/g,'');
   source=source.replace(/(['"]Account['"]\s*,\s*)(['"]Tutorial['"])/g,'$2');
