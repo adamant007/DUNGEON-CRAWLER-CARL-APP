@@ -17,6 +17,30 @@ function restore(prefix, output) {
   console.log(`Restored ${output}`);
 }
 
+function cleanLandingSource(output) {
+  const file = path.join(root, output);
+  let source = fs.readFileSync(file, "utf8");
+  const replacements = [
+    ['<img className="studio-hero-logo" src="/brand/hero.webp" alt="Ginger Dragon Fire Studios dragon logo"/>', ''],
+    ['<div className="landing-kicker">GINGER DRAGON FIRE STUDIOS</div>', '<div className="landing-kicker">GINGER DRAGON STUDIOS</div>'],
+    ['<h1 className="sr-only">Ginger Dragon Fire</h1>', '<h1 className="sr-only">Ginger Dragon Studios</h1>'],
+    ['<span>New Ginger Dragon Fire projects will appear here.</span>', '<span>New Ginger Dragon projects will appear here.</span>'],
+    ['<div className="landing-features"><span>⚔️ Games</span><span>🛠️ Software</span><span>🔥 Adventures</span><span>🐉 Original Worlds</span></div>', ''],
+    ['<div className="landing-note">Independent studio • Built by Ginger Dragon Fire Studios</div>', '<div className="landing-note">Independent studio • Built by Ginger Dragon Studios</div>']
+  ];
+  let changed = false;
+  for (const [from, to] of replacements) {
+    if (source.includes(from)) {
+      source = source.replace(from, to);
+      changed = true;
+    }
+  }
+  if (changed) {
+    fs.writeFileSync(file, source);
+    console.log('Cleaned canonical landing source');
+  }
+}
+
 function injectCoreIntegration(output) {
   const file = path.join(root, output);
   let source = fs.readFileSync(file, "utf8");
@@ -37,27 +61,7 @@ function injectCoreIntegration(output) {
   }
 }
 
-function logLandingSource(output) {
-  const source = fs.readFileSync(path.join(root, output), "utf8");
-  const needles = [
-    "ginger-dragon-fire-full.webp",
-    "Ginger Dragon Fire",
-    "Games • Software • Adventures",
-    "Crawlers are entering the dungeon",
-    "A home for the tools, games, and adventures we forge"
-  ];
-  for (const needle of needles) {
-    const index = source.indexOf(needle);
-    if (index < 0) continue;
-    const start = Math.max(0, index - 900);
-    const end = Math.min(source.length, index + needle.length + 1400);
-    console.log(`LANDING_SOURCE_START ${needle}`);
-    console.log(source.slice(start, end));
-    console.log(`LANDING_SOURCE_END ${needle}`);
-  }
-}
-
 restore("main", "src/main.tsx");
 restore("styles", "src/styles.css");
+cleanLandingSource("src/main.tsx");
 injectCoreIntegration("src/main.tsx");
-logLandingSource("src/main.tsx");
