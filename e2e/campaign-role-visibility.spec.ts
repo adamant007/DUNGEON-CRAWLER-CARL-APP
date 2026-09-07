@@ -6,6 +6,11 @@ test('campaign role visibility hides GM UI for players and loot guard uses expli
   const gmButton=nav.getByRole('button',{name:'GM Tools',exact:true});
   await expect(gmButton).toBeVisible();
 
+  // Let the app's initial async campaign-role refresh finish before this test
+  // deliberately overrides the role. Otherwise that startup refresh can clear
+  // the synthetic player role mid-assertion and make this check flaky.
+  await page.waitForTimeout(800);
+
   await page.evaluate(() => {
     document.documentElement.setAttribute('data-cc-campaign-role','player');
     window.dispatchEvent(new CustomEvent('cc:campaign-role-changed',{detail:{role:'player'}}));
