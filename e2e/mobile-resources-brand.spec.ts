@@ -7,6 +7,7 @@ test('resource, brand, and final release modules are loaded', async () => {
   expect(html).toContain('/src/mobile-brand.ts');
   expect(html).toContain('/src/final-beta-stabilizer.ts');
   expect(html).toContain('/src/final-release-fix.ts');
+  expect(html).toContain('/src/exact-brand-banner.ts');
 });
 
 test('resource HUD contains both health and mana with ten-section tracks', async () => {
@@ -29,12 +30,12 @@ test('health and mana stay stacked, full width, and chunky', async () => {
   expect(src).not.toContain('grid-template-columns:1fr 1fr');
 });
 
-test('approved Ginger Dragon banner is promoted to a real image element', async () => {
-  const stabilizer=fs.readFileSync('src/final-beta-stabilizer.ts','utf8');
+test('approved Ginger Dragon hero uses the canonical brand asset without embedded banner data', async () => {
   const release=fs.readFileSync('src/final-release-fix.ts','utf8');
-  expect(stabilizer).toContain('data:image/webp;base64,');
-  expect(release).toContain("img.className='cc-final-banner-image'");
-  expect(release).toContain("img.alt='Ginger Dragon Studios dragon with long flowing mane'");
-  expect(release).toContain("document.getElementById('cc-final-beta-stabilizer-style')");
-  expect(release).not.toContain('Ginger Dragon Fire');
+  const exact=fs.readFileSync('src/exact-brand-banner.ts','utf8');
+  expect(fs.existsSync('public/brand/ginger-dragon-fire-full.webp')).toBeTruthy();
+  expect(release).toContain("const APPROVED_HERO='/brand/ginger-dragon-fire-full.webp'");
+  expect(release).toContain("img.alt='Ginger Dragon Studios approved dragon artwork'");
+  expect(exact).toContain('object-fit:contain!important');
+  expect(exact).not.toContain('data:image/webp;base64,');
 });
