@@ -37,6 +37,27 @@ function injectCoreIntegration(output) {
   }
 }
 
+function logLandingSource(output) {
+  const source = fs.readFileSync(path.join(root, output), "utf8");
+  const needles = [
+    "ginger-dragon-fire-full.webp",
+    "Ginger Dragon Fire",
+    "Games • Software • Adventures",
+    "Crawlers are entering the dungeon",
+    "A home for the tools, games, and adventures we forge"
+  ];
+  for (const needle of needles) {
+    const index = source.indexOf(needle);
+    if (index < 0) continue;
+    const start = Math.max(0, index - 900);
+    const end = Math.min(source.length, index + needle.length + 1400);
+    console.log(`LANDING_SOURCE_START ${needle}`);
+    console.log(source.slice(start, end));
+    console.log(`LANDING_SOURCE_END ${needle}`);
+  }
+}
+
 restore("main", "src/main.tsx");
 restore("styles", "src/styles.css");
 injectCoreIntegration("src/main.tsx");
+logLandingSource("src/main.tsx");
