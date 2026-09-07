@@ -4,9 +4,9 @@
   "version":"0.5.0",
   "type":"module",
   "scripts":{
-    "predev":"node scripts/restore-source.mjs",
+    "predev":"node scripts/restore-source.mjs && node scripts/landing-production.mjs",
     "dev":"vite",
-    "prebuild":"node scripts/restore-source.mjs",
+    "prebuild":"node scripts/restore-source.mjs && node scripts/landing-production.mjs",
     "build":"vite build",
     "preview":"vite preview",
     "test:e2e":"playwright test",
