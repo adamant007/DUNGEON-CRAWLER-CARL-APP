@@ -18,11 +18,15 @@ function restore(prefix, output) {
 }
 
 function restoreBrandAsset() {
-  const encoded = fs.readFileSync(path.join(payload, "ginger-dragon-studios-hero.b64"), "utf8").trim();
+  const parts = fs.readdirSync(payload)
+    .filter((name) => name.startsWith("ginger-dragon-master.") && name.endsWith(".b64part"))
+    .sort();
+  if (!parts.length) throw new Error("Missing Ginger Dragon master hero payload");
+  const encoded = parts.map((name) => fs.readFileSync(path.join(payload, name), "utf8").trim()).join("");
   const output = path.join(root, "public/brand/ginger-dragon-studios-hero.webp");
   fs.mkdirSync(path.dirname(output), { recursive: true });
   fs.writeFileSync(output, Buffer.from(encoded, "base64"));
-  console.log("Restored Ginger Dragon Studios hero asset");
+  console.log(`Restored Ginger Dragon Studios hero asset from ${parts.length} parts`);
 }
 
 function cleanLandingSource(output) {
@@ -36,7 +40,8 @@ function cleanLandingSource(output) {
     ['<div className="landing-features"><span>⚔️ Games</span><span>🛠️ Software</span><span>🔥 Adventures</span><span>🐉 Original Worlds</span></div>', ''],
     ['<div className="landing-note">Independent studio • Built by Ginger Dragon Fire Studios</div>', '<div className="landing-note">© 2026 Ginger Dragon Studios</div>'],
     ['<div className="landing-note">Independent studio • Built by Ginger Dragon Studios</div>', '<div className="landing-note">© 2026 Ginger Dragon Studios</div>'],
-    ['<div className="landing-note">Independent studio • Built by Ginger Dragon Studios • © 2026 Ginger Dragon Studios</div>', '<div className="landing-note">© 2026 Ginger Dragon Studios</div>']
+    ['<div className="landing-note">Independent studio • Built by Ginger Dragon Studios • © 2026 Ginger Dragon Studios</div>', '<div className="landing-note">© 2026 Ginger Dragon Studios</div>'],
+    ['<div className="landing-card">', '<div className="landing-card landing-card-v2">']
   ];
   let changed = false;
   for (const [from, to] of replacements) {
@@ -47,14 +52,14 @@ function cleanLandingSource(output) {
   }
   const hero = '<img className="studio-hero-art" src="/brand/ginger-dragon-studios-hero.webp" alt="Ginger Dragon Studios dragon artwork"/>';
   if (!source.includes('className="studio-hero-art"')) {
-    const marker = '<div className="landing-card">';
+    const marker = '<div className="landing-card landing-card-v2">';
     if (!source.includes(marker)) throw new Error('Landing card marker not found');
     source = source.replace(marker, marker + hero);
     changed = true;
   }
   if (changed) {
     fs.writeFileSync(file, source);
-    console.log('Cleaned canonical landing source');
+    console.log('Rebuilt Ginger Dragon Studios landing shell');
   }
 }
 
@@ -62,10 +67,15 @@ function injectLandingHeroStyles(output) {
   const file = path.join(root, output);
   let source = fs.readFileSync(file, "utf8");
   const marker = '/* ginger-dragon-studios-clean-hero */';
-  if (source.includes(marker)) return;
-  source += `\n${marker}\n.studio-hero-art{display:block;width:min(360px,72vw);height:auto;aspect-ratio:1/1;object-fit:contain;object-position:center;margin:0 auto 28px;border:0;border-radius:0;background:transparent;box-shadow:none}\n@media(max-width:760px){.studio-hero-art{width:min(300px,74vw);margin-bottom:22px}}\n`;
+  if (!source.includes(marker)) {
+    source += `\n${marker}\n.studio-hero-art{display:block;width:min(360px,72vw);height:auto;object-fit:contain;object-position:center;margin:0 auto 28px;border:0;border-radius:0;background:transparent;box-shadow:none}\n@media(max-width:760px){.studio-hero-art{width:min(300px,74vw);margin-bottom:22px}}\n`;
+  }
+  const v2 = '/* ginger-dragon-studios-landing-v2 */';
+  if (!source.includes(v2)) {
+    source += `\n${v2}\n.landing-card-v2{max-width:980px}\n.landing-card-v2 .studio-hero-art{display:block!important;width:min(512px,90vw)!important;max-width:100%!important;height:auto!important;aspect-ratio:auto!important;object-fit:contain!important;object-position:center!important;margin:0 auto 26px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 26px 60px rgba(0,0,0,.30)!important;image-rendering:auto!important}\n@media(max-width:760px){.landing-card-v2 .studio-hero-art{width:min(460px,90vw)!important;margin-bottom:20px!important}}\n`;
+  }
   fs.writeFileSync(file, source);
-  console.log('Integrated clean landing hero styles');
+  console.log('Integrated Ginger Dragon Studios landing v2 styles');
 }
 
 function injectCoreIntegration(output) {
