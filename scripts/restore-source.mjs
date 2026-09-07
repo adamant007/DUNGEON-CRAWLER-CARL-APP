@@ -17,6 +17,14 @@ function restore(prefix, output) {
   console.log(`Restored ${output}`);
 }
 
+function restoreBrandAsset() {
+  const encoded = fs.readFileSync(path.join(payload, "ginger-dragon-studios-hero.b64"), "utf8").trim();
+  const output = path.join(root, "public/brand/ginger-dragon-studios-hero.webp");
+  fs.mkdirSync(path.dirname(output), { recursive: true });
+  fs.writeFileSync(output, Buffer.from(encoded, "base64"));
+  console.log("Restored Ginger Dragon Studios hero asset");
+}
+
 function cleanLandingSource(output) {
   const file = path.join(root, output);
   let source = fs.readFileSync(file, "utf8");
@@ -37,10 +45,27 @@ function cleanLandingSource(output) {
       changed = true;
     }
   }
+  const hero = '<img className="studio-hero-art" src="/brand/ginger-dragon-studios-hero.webp" alt="Ginger Dragon Studios dragon artwork"/>';
+  if (!source.includes('className="studio-hero-art"')) {
+    const marker = '<div className="landing-card">';
+    if (!source.includes(marker)) throw new Error('Landing card marker not found');
+    source = source.replace(marker, marker + hero);
+    changed = true;
+  }
   if (changed) {
     fs.writeFileSync(file, source);
     console.log('Cleaned canonical landing source');
   }
+}
+
+function injectLandingHeroStyles(output) {
+  const file = path.join(root, output);
+  let source = fs.readFileSync(file, "utf8");
+  const marker = '/* ginger-dragon-studios-clean-hero */';
+  if (source.includes(marker)) return;
+  source += `\n${marker}\n.studio-hero-art{display:block;width:min(360px,72vw);height:auto;aspect-ratio:1/1;object-fit:contain;object-position:center;margin:0 auto 28px;border:0;border-radius:0;background:transparent;box-shadow:none}\n@media(max-width:760px){.studio-hero-art{width:min(300px,74vw);margin-bottom:22px}}\n`;
+  fs.writeFileSync(file, source);
+  console.log('Integrated clean landing hero styles');
 }
 
 function injectCoreIntegration(output) {
@@ -65,5 +90,7 @@ function injectCoreIntegration(output) {
 
 restore("main", "src/main.tsx");
 restore("styles", "src/styles.css");
+restoreBrandAsset();
 cleanLandingSource("src/main.tsx");
+injectLandingHeroStyles("src/styles.css");
 injectCoreIntegration("src/main.tsx");
