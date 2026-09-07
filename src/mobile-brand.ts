@@ -22,11 +22,24 @@ function removeLegacyLandingHero(){
   if(parent&&parent.children.length===0&&!leafText(parent))parent.remove();
  });
 }
+function removeObsoleteLandingIcon(){
+  if(!document.querySelector('.landing-card-v2,.studio-hero-art'))return;
+  document.querySelectorAll<HTMLImageElement>('img').forEach(img=>{
+    const src=(img.getAttribute('src')||'').toLowerCase();
+    const alt=(img.alt||'').toLowerCase();
+    const obsolete=src.includes('/brand/app-icon.svg')||src.includes('app-icon.svg')||alt.includes('app icon');
+    if(!obsolete)return;
+    const holder=img.closest<HTMLElement>('a,button,.project-card,.landing-project,.landing-tile,.card');
+    if(holder && !holder.querySelector('.studio-hero-art')) holder.remove();
+    else img.remove();
+  });
+}
 function fixBrand(){
- if(!document.getElementById(STYLE)){const s=document.createElement('style');s.id=STYLE;s.textContent=`#cc-mobile-brand-image{display:none!important}`;document.head.appendChild(s)}
+ if(!document.getElementById(STYLE)){const s=document.createElement('style');s.id=STYLE;s.textContent=`#cc-mobile-brand-image{display:none!important}.landing-card-v2 img[src*="app-icon.svg"]{display:none!important}`;document.head.appendChild(s)}
  document.querySelectorAll<HTMLElement>('h1,h2,h3,p,span,small,footer,header,div').forEach(el=>{if(el.children.length)return;const t=leafText(el);if(/Ginger Dragon Fire Studios/i.test(t))el.textContent=t.replace(/Ginger Dragon Fire Studios/gi,'Ginger Dragon Studios');else if(/Ginger Dragon Fire/i.test(t))el.textContent=t.replace(/Ginger Dragon Fire/gi,'Ginger Dragon')});
  document.querySelectorAll<HTMLImageElement>('img').forEach(img=>{if(/Ginger Dragon Fire Studios/i.test(img.alt))img.alt='Ginger Dragon Studios';else if(/Ginger Dragon Fire/i.test(img.alt))img.alt=img.alt.replace(/Ginger Dragon Fire/gi,'Ginger Dragon')});
  removeLegacyLandingHero();
+ removeObsoleteLandingIcon();
  removeDeadLandingButtons();
  removeInjectedFooter();
 }
