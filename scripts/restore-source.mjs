@@ -52,10 +52,19 @@ function cleanLandingSource(output) {
 
 function traceDashboard(output) {
   const source = fs.readFileSync(path.join(root, output), "utf8");
-  for (const needle of ['CURRENT CRAWLER','Current Crawler','Dice','Rulebook']) {
-    const i = source.indexOf(needle);
-    if (i !== -1) console.log(`DASHBOARD TRACE ${needle}:\n${source.slice(Math.max(0,i-900), i+1800)}\nEND DASHBOARD TRACE`);
+  const chunks = [];
+  for (const needle of ['CURRENT CRAWLER','Current Crawler','Dice','Rulebook','Character Wizard']) {
+    let from = 0;
+    while (true) {
+      const i = source.indexOf(needle, from);
+      if (i === -1) break;
+      chunks.push(`===== ${needle} @ ${i} =====\n${source.slice(Math.max(0,i-3000), i+6500)}\n`);
+      from = i + needle.length;
+    }
   }
+  const traceFile = path.join(root, 'public/dashboard-source-trace.txt');
+  fs.writeFileSync(traceFile, chunks.join('\n'));
+  console.log(`Wrote dashboard source trace (${chunks.length} matches)`);
 }
 
 function simplifyDashboard(output) {
