@@ -52,8 +52,10 @@ test('party and GM local flows survive rapid interaction', async ({ page }) => {
   await page.getByRole('button', { name: /Preview Box/i }).click();
   await expect(page.locator('#cc-loot-boxes [data-box-preview]')).toContainText('12.');
   await count.fill('');
+  await expect(count).toHaveValue('');
+  await count.fill('3');
   await count.blur();
-  await expect(count).not.toHaveValue('');
+  await expect(count).toHaveValue('3');
 });
 
 test('refresh keeps local character data available', async ({ page }) => {
