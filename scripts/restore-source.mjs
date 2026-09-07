@@ -76,20 +76,13 @@ function installCleanAppShell(output){
   const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");
   const importLine="import CleanAppShell from './clean-app-shell';";
   if(!source.includes(importLine))source=importLine+'\n'+source;
-  const appStart=source.indexOf('function App(');
-  if(appStart===-1)throw new Error('App component not found for standalone clean shell');
-  const appEnd=source.indexOf('\nfunction ',appStart+10);
-  if(appEnd===-1)throw new Error('Could not isolate App component for standalone clean shell');
-  const appSource=source.slice(appStart,appEnd);
-  const landingState=appSource.match(/const\s*\[([^,\]]+),\s*([^\]]+)\]\s*=\s*useState\((?:true|!1)\)/);
-  if(!landingState)throw new Error('Landing state not found for standalone clean shell');
-  const landingVar=landingState[1].trim();
-  const setter=landingState[2].trim();
-  const returnAt=appSource.indexOf('return ');
-  if(returnAt===-1)throw new Error('App return not found for standalone clean shell');
-  const replacement=`function App(){const [${landingVar},${setter}]=useState(true);return ${landingVar}?<Landing onLaunch={()=>${setter}(false)}/>:<CleanAppShell/>}`;
-  source=source.slice(0,appStart)+replacement+source.slice(appEnd);
-  fs.writeFileSync(file,source);console.log('Clean Crawler Companion shell now owns the launched app with no legacy wrapper');
+  const rootRender=/(createRoot\([^\n;]+\)\.render\()([^;]+)(\);?)/;
+  const match=source.match(rootRender);
+  if(!match)throw new Error('React root render not found for standalone clean shell');
+  const bridge=`function CleanRoot(){const [launched,setLaunched]=useState(false);return launched?<CleanAppShell/>:<Landing onLaunch={()=>setLaunched(true)}/>}\n`;
+  if(!source.includes('function CleanRoot('))source=source.slice(0,match.index)+bridge+source.slice(match.index);
+  source=source.replace(rootRender,'$1<CleanRoot/>$3');
+  fs.writeFileSync(file,source);console.log('Clean Crawler Companion shell mounted directly at React root with no legacy wrapper');
 }
 
 function injectLandingHeroStyles(output){const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");const marker='/* ginger-dragon-studios-clean-hero */';if(!source.includes(marker))source+=`\n${marker}\n.studio-hero-art{display:block;width:min(360px,72vw);height:auto;object-fit:contain;object-position:center;margin:0 auto 28px;border:0;border-radius:0;background:transparent;box-shadow:none}\n@media(max-width:760px){.studio-hero-art{width:min(300px,74vw);margin-bottom:22px}}\n`;const v2='/* ginger-dragon-studios-landing-v2 */';if(!source.includes(v2))source+=`\n${v2}\n.landing-card-v2{max-width:980px}\n.landing-card-v2 .studio-hero-art{display:block!important;width:min(512px,90vw)!important;max-width:100%!important;height:auto!important;aspect-ratio:auto!important;object-fit:contain!important;object-position:center!important;margin:0 auto 26px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 26px 60px rgba(0,0,0,.30)!important;image-rendering:auto!important}\n@media(max-width:760px){.landing-card-v2 .studio-hero-art{width:min(460px,90vw)!important;margin-bottom:20px!important}}\n`;const test='/* test-character-rebuild-shell */';if(!source.includes(test))source+=`\n${test}\n.test-char-workspace{max-width:1100px;margin:24px auto;padding:28px;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:rgba(10,12,18,.78)}.test-char-eyebrow{font-size:12px;font-weight:800;letter-spacing:.16em;opacity:.62}.test-char-workspace h2{margin:8px 0 6px;font-size:30px}.test-char-workspace p{margin:0;opacity:.76}.test-char-empty{margin-top:24px;min-height:220px;display:grid;place-items:center;border:1px dashed rgba(255,255,255,.2);border-radius:14px;opacity:.58}@media(max-width:760px){.test-char-workspace{margin:12px;padding:18px}.test-char-empty{min-height:160px}}\n`;fs.writeFileSync(file,source);console.log('Integrated landing and TEST CHAR shell styles');}
