@@ -22,6 +22,16 @@ function removeLegacyLandingHero(){
   if(parent&&parent.children.length===0&&!leafText(parent))parent.remove();
  });
 }
+function installCrawlerCompanionRook(){
+ if(!document.querySelector('.landing-card-v2,.studio-hero-art'))return;
+ const candidates=document.querySelectorAll<HTMLElement>('a,button,.project-card,.landing-project,.landing-tile,.card,div');
+ for(const card of candidates){
+  const text=leafText(card).toLowerCase();
+  if(!text.includes('crawler companion')||!text.includes('digital tabletop campaign companion'))continue;
+  const img=card.querySelector<HTMLImageElement>('img:not(.studio-hero-art)');
+  if(img){img.src='/brand/crawler-companion-rook.webp';img.alt='Crawler Companion rook';img.classList.add('cc-crawler-rook');return;}
+ }
+}
 function removeObsoleteLandingIcon(){
   if(!document.querySelector('.landing-card-v2,.studio-hero-art'))return;
   document.querySelectorAll<HTMLImageElement>('img').forEach(img=>{
@@ -35,10 +45,11 @@ function removeObsoleteLandingIcon(){
   });
 }
 function fixBrand(){
- if(!document.getElementById(STYLE)){const s=document.createElement('style');s.id=STYLE;s.textContent=`#cc-mobile-brand-image{display:none!important}.landing-card-v2 img[src*="app-icon.svg"]{display:none!important}`;document.head.appendChild(s)}
+ if(!document.getElementById(STYLE)){const s=document.createElement('style');s.id=STYLE;s.textContent=`#cc-mobile-brand-image{display:none!important}.landing-card-v2 img[src*="app-icon.svg"]{display:none!important}.cc-crawler-rook{display:block!important;object-fit:cover!important;object-position:center!important}`;document.head.appendChild(s)}
  document.querySelectorAll<HTMLElement>('h1,h2,h3,p,span,small,footer,header,div').forEach(el=>{if(el.children.length)return;const t=leafText(el);if(/Ginger Dragon Fire Studios/i.test(t))el.textContent=t.replace(/Ginger Dragon Fire Studios/gi,'Ginger Dragon Studios');else if(/Ginger Dragon Fire/i.test(t))el.textContent=t.replace(/Ginger Dragon Fire/gi,'Ginger Dragon')});
  document.querySelectorAll<HTMLImageElement>('img').forEach(img=>{if(/Ginger Dragon Fire Studios/i.test(img.alt))img.alt='Ginger Dragon Studios';else if(/Ginger Dragon Fire/i.test(img.alt))img.alt=img.alt.replace(/Ginger Dragon Fire/gi,'Ginger Dragon')});
  removeLegacyLandingHero();
+ installCrawlerCompanionRook();
  removeObsoleteLandingIcon();
  removeDeadLandingButtons();
  removeInjectedFooter();
