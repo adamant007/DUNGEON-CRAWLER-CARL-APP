@@ -24,15 +24,20 @@ function ensureGmButton(nav:HTMLElement){
  if(!gm){gm=document.createElement('button');gm.type='button';gm.textContent='GM Tools';const template=nav.querySelector<HTMLButtonElement>('button');if(template)gm.className=template.className.replace(/\bactive\b/g,'').trim();const library=[...nav.querySelectorAll<HTMLButtonElement>('button')].find(b=>/^Library$/i.test(clean(b.textContent||'')));nav.insertBefore(gm,library||null)}
  gm.setAttribute('aria-label','GM Tools');gm.dataset.ccRoleGuard='gm';return gm;
 }
+function revealGmPanels(){
+ document.body.dataset.ccPrimaryTab='gm-tools';
+ gmPanels().forEach(el=>{el.hidden=false;el.style.removeProperty('display')});
+}
 function openGm(){
  if(currentRole()==='player')return;
  const nav=primaryNav();if(!nav)return;
  const gm=ensureGmButton(nav);
  nav.querySelectorAll<HTMLButtonElement>('button').forEach(b=>{b.classList.remove('active');b.removeAttribute('aria-current')});
  gm.classList.add('active');gm.setAttribute('aria-current','page');
- document.body.dataset.ccPrimaryTab='gm-tools';
- gmPanels().forEach(el=>{el.hidden=false;el.style.removeProperty('display')});
+ revealGmPanels();
  window.dispatchEvent(new CustomEvent('cc:primary-tab-changed',{detail:{tab:'GM Tools'}}));
+ requestAnimationFrame(revealGmPanels);
+ setTimeout(revealGmPanels,120);
 }
 function applyVisibility(){
  ensureStyle();const nav=primaryNav();if(!nav)return;const gm=ensureGmButton(nav);const hide=currentRole()==='player';gm.hidden=hide;gm.style.setProperty('display',hide?'none':'inline-flex','important');gm.setAttribute('aria-hidden',String(hide));
@@ -51,7 +56,7 @@ document.addEventListener('click',e=>{
  const b=(e.target as Element|null)?.closest('button') as HTMLButtonElement|null;if(!b)return;
  const label=clean(b.textContent||'');
  if(/^GM Tools$/i.test(label)&&currentRole()!=='player'){
-  e.preventDefault();e.stopImmediatePropagation();openGm();return;
+  e.preventDefault();openGm();return;
  }
  if(b.closest('[aria-label="Primary navigation"]')&&document.body.dataset.ccPrimaryTab==='gm-tools'){
   document.body.dataset.ccPrimaryTab=label.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
