@@ -50,45 +50,16 @@ function cleanLandingSource(output) {
   if (changed) { fs.writeFileSync(file, source); console.log('Rebuilt Ginger Dragon Studios landing shell'); }
 }
 
-function traceDashboard(output) {
-  const source = fs.readFileSync(path.join(root, output), "utf8");
-  const chunks = [];
-  for (const needle of ['CURRENT CRAWLER','Current Crawler','Dice','Rulebook','Character Wizard']) {
-    let from = 0;
-    while (true) {
-      const i = source.indexOf(needle, from);
-      if (i === -1) break;
-      chunks.push(`===== ${needle} @ ${i} =====\n${source.slice(Math.max(0,i-3000), i+6500)}\n`);
-      from = i + needle.length;
-    }
-  }
-  const traceFile = path.join(root, 'public/dashboard-source-trace.txt');
-  fs.writeFileSync(traceFile, chunks.join('\n'));
-  console.log(`Wrote dashboard source trace (${chunks.length} matches)`);
-}
-
 function simplifyDashboard(output) {
   const file = path.join(root, output);
   let source = fs.readFileSync(file, "utf8");
-  const start = source.indexOf('<section className="quick-grid">');
-  if (start !== -1) {
-    const end = source.indexOf('</section>', start);
-    if (end !== -1) {
-      source = source.slice(0, start) + source.slice(end + 10);
-      console.log('Removed redundant dashboard shortcut grid');
-    }
-  }
-  const current = source.indexOf('<section className="card"><h2>Current Crawler</h2>');
-  if (current !== -1) {
-    const end = source.indexOf('</section>', current);
-    if (end !== -1) {
-      const old = source.slice(current, end + 10);
-      const replacement = `<section className="card dashboard-sheet-card"><h2>Current Crawler</h2><div className="dashboard-sheet-intro">Your active character sheet is your dashboard. Open Character to edit it.</div><button className="dashboard-sheet-open" onClick={()=>setTab('Character')}>Open Character Sheet</button></section>`;
-      source = source.replace(old, replacement);
-      console.log('Simplified Current Crawler dashboard card');
-    }
-  }
+  const start = source.indexOf('function Dashboard(');
+  const end = source.indexOf('\nfunction Combat(', start);
+  if (start === -1 || end === -1) throw new Error('Dashboard function boundary not found');
+  const replacement = 'function Dashboard({c,update}:{c:Character;update:(f:any)=>void;setTab:(t:Tab)=>void}){return <CharacterSheet c={c} update={update}/>}';
+  source = source.slice(0, start) + replacement + source.slice(end);
   fs.writeFileSync(file, source);
+  console.log('Dashboard now renders the active character sheet');
 }
 
 function injectLandingHeroStyles(output) {
@@ -97,8 +68,6 @@ function injectLandingHeroStyles(output) {
   if (!source.includes(marker)) source += `\n${marker}\n.studio-hero-art{display:block;width:min(360px,72vw);height:auto;object-fit:contain;object-position:center;margin:0 auto 28px;border:0;border-radius:0;background:transparent;box-shadow:none}\n@media(max-width:760px){.studio-hero-art{width:min(300px,74vw);margin-bottom:22px}}\n`;
   const v2 = '/* ginger-dragon-studios-landing-v2 */';
   if (!source.includes(v2)) source += `\n${v2}\n.landing-card-v2{max-width:980px}\n.landing-card-v2 .studio-hero-art{display:block!important;width:min(512px,90vw)!important;max-width:100%!important;height:auto!important;aspect-ratio:auto!important;object-fit:contain!important;object-position:center!important;margin:0 auto 26px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 26px 60px rgba(0,0,0,.30)!important;image-rendering:auto!important}\n@media(max-width:760px){.landing-card-v2 .studio-hero-art{width:min(460px,90vw)!important;margin-bottom:20px!important}}\n`;
-  const dash = '/* dashboard-character-sheet-first */';
-  if (!source.includes(dash)) source += `\n${dash}\n.dashboard-sheet-card{text-align:center}.dashboard-sheet-intro{color:#b9b5c7;margin:8px auto 14px;max-width:560px}.dashboard-sheet-open{min-height:48px;padding:0 22px;border-radius:10px;border:1px solid rgba(212,167,65,.55);background:linear-gradient(180deg,#322710,#171207);color:#f2d47d;font-weight:800;cursor:pointer}\n`;
   fs.writeFileSync(file, source); console.log('Integrated Ginger Dragon Studios landing v2 styles');
 }
 
@@ -114,7 +83,6 @@ restore("main", "src/main.tsx");
 restore("styles", "src/styles.css");
 restoreBrandAsset();
 cleanLandingSource("src/main.tsx");
-traceDashboard("src/main.tsx");
 simplifyDashboard("src/main.tsx");
 injectLandingHeroStyles("src/styles.css");
 injectCoreIntegration("src/main.tsx");
