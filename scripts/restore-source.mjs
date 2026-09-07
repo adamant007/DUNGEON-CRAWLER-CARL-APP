@@ -50,6 +50,14 @@ function cleanLandingSource(output) {
   if (changed) { fs.writeFileSync(file, source); console.log('Rebuilt Ginger Dragon Studios landing shell'); }
 }
 
+function traceDashboard(output) {
+  const source = fs.readFileSync(path.join(root, output), "utf8");
+  for (const needle of ['CURRENT CRAWLER','Current Crawler','Dice','Rulebook']) {
+    const i = source.indexOf(needle);
+    if (i !== -1) console.log(`DASHBOARD TRACE ${needle}:\n${source.slice(Math.max(0,i-900), i+1800)}\nEND DASHBOARD TRACE`);
+  }
+}
+
 function simplifyDashboard(output) {
   const file = path.join(root, output);
   let source = fs.readFileSync(file, "utf8");
@@ -97,6 +105,7 @@ restore("main", "src/main.tsx");
 restore("styles", "src/styles.css");
 restoreBrandAsset();
 cleanLandingSource("src/main.tsx");
+traceDashboard("src/main.tsx");
 simplifyDashboard("src/main.tsx");
 injectLandingHeroStyles("src/styles.css");
 injectCoreIntegration("src/main.tsx");
