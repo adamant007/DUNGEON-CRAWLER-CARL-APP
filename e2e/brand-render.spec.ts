@@ -12,8 +12,8 @@ test('landing renders final Ginger Dragon hero and Crawler Companion rook', asyn
     complete: img.complete,
   }));
   expect(heroSize.complete).toBeTruthy();
-  expect(heroSize.width).toBeGreaterThan(400);
-  expect(heroSize.height).toBeGreaterThan(400);
+  expect(heroSize.width).toBeGreaterThanOrEqual(512);
+  expect(heroSize.height).toBeGreaterThanOrEqual(341);
 
   const card = page.getByRole('link', { name: /Crawler Companion/i });
   await expect(card).toBeVisible();
