@@ -15,6 +15,16 @@ function restore(prefix, output) {
   console.log(`Restored ${output}`);
 }
 
+function restoreDoorAsset() {
+  const input = path.join(payload, "secret-door.b64");
+  if (!fs.existsSync(input)) return;
+  const encoded = fs.readFileSync(input, "utf8").replace(/\s+/g, "");
+  const output = path.join(root, "public/brand/ginger-dragon-secret-door.webp");
+  fs.mkdirSync(path.dirname(output), { recursive: true });
+  fs.writeFileSync(output, Buffer.from(encoded, "base64"));
+  console.log("Restored Ginger Dragon hidden doorway artwork");
+}
+
 function cleanLandingSource(output) {
   const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
   const replacements = [
@@ -23,52 +33,86 @@ function cleanLandingSource(output) {
     ['<h1 className="sr-only">Ginger Dragon Fire</h1>', '<h1 className="sr-only">Ginger Dragon Studios</h1>'],
     ['<span>New Ginger Dragon Fire projects will appear here.</span>', '<span>New Ginger Dragon projects will appear here.</span>'],
     ['<div className="landing-features"><span>⚔️ Games</span><span>🛠️ Software</span><span>🔥 Adventures</span><span>🐉 Original Worlds</span></div>', ''],
-    ['<div className="landing-note">Independent studio • Built by Ginger Dragon Fire Studios</div>', '<div className="landing-note">© 2026 Ginger Dragon Studios</div>'],
-    ['<div className="landing-note">Independent studio • Built by Ginger Dragon Studios</div>', '<div className="landing-note">© 2026 Ginger Dragon Studios</div>'],
-    ['<div className="landing-note">Independent studio • Built by Ginger Dragon Studios • © 2026 Ginger Dragon Studios</div>', '<div className="landing-note">© 2026 Ginger Dragon Studios</div>'],
     ['<div className="landing-card">', '<div className="landing-card landing-card-v2">']
   ];
-  for(const [from,to] of replacements) if(source.includes(from)) source=source.replace(from,to);
+  for (const [from,to] of replacements) if (source.includes(from)) source = source.replace(from,to);
 
-  const landingStart=source.indexOf('function Landing(');
-  if(landingStart!==-1){
-    const landingEnd=source.indexOf('\nfunction ',landingStart+10);
-    const end=landingEnd===-1?source.length:landingEnd;
-    let landing=source.slice(landingStart,end);
-    landing=landing.replace(/<img(?![^>]*className=["']studio-hero-art["'])[^>]*src=["'][^"']*(?:app-icon\.svg|icon-96\.webp|ginger-dragon-fire[^"']*|\/brand\/hero\.webp)[^"']*["'][^>]*\/?>(?:<\/img>)?/gi,'');
-    source=source.slice(0,landingStart)+landing+source.slice(end);
+  const landingStart = source.indexOf('function Landing(');
+  if (landingStart !== -1) {
+    const landingEnd = source.indexOf('\nfunction ', landingStart + 10);
+    const end = landingEnd === -1 ? source.length : landingEnd;
+    let landing = source.slice(landingStart, end);
+    landing = landing.replace(/<img(?![^>]*className=["']studio-hero-art["'])[^>]*src=["'][^"']*(?:app-icon\.svg|icon-96\.webp|ginger-dragon-fire[^"']*|\/brand\/hero\.webp)[^"']*["'][^>]*\/?>(?:<\/img>)?/gi, '');
+    source = source.slice(0, landingStart) + landing + source.slice(end);
   }
 
-  const hero='<img className="studio-hero-art" src="/brand/ginger-dragon-studios-tapestry.png" alt="Ginger Dragon Studios tapestry"/>';
-  if(source.includes('className="studio-hero-art"')){
-    source=source.replace(/<img className="studio-hero-art"[^>]*\/>/,hero);
+  const hero = '<img className="studio-hero-art" src="/brand/ginger-dragon-studios-tapestry.png" alt="Ginger Dragon Studios tapestry"/>';
+  if (source.includes('className="studio-hero-art"')) {
+    source = source.replace(/<img className="studio-hero-art"[^>]*\/>/, hero);
   } else {
-    const marker='<div className="landing-card landing-card-v2">';
-    if(!source.includes(marker)) throw new Error('Landing card marker not found');
-    source=source.replace(marker,marker+hero);
+    const marker = '<div className="landing-card landing-card-v2">';
+    if (!source.includes(marker)) throw new Error('Landing card marker not found');
+    source = source.replace(marker, marker + hero);
   }
-  fs.writeFileSync(file,source);console.log('Landing now uses the locked Ginger Dragon tapestry asset directly');
+
+  const interaction = "import './landing-production';";
+  if (!source.includes(interaction)) source += `\n\n// Clean Ginger Dragon entrance interaction.\n${interaction}\n`;
+  fs.writeFileSync(file, source);
+  console.log('Prepared clean Ginger Dragon entrance');
 }
 
-function makeCharacterPrimary(output){
-  const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");
-  const start=source.indexOf('function Dashboard('), end=source.indexOf('\nfunction Combat(',start);
-  if(start!==-1&&end!==-1){source=source.slice(0,start)+'function Dashboard({c,update}:{c:Character;update:(f:any)=>void;setTab:(t:Tab)=>void}){return <CharacterSheet c={c} update={update}/>}'+source.slice(end);}
-  source=source.replace(/useState<Tab>\(['"]Dashboard['"]\)/g,"useState<Tab>('Character')");
-  source=source.replace(/useState\(['"]Dashboard['"]\)/g,"useState('Character')");
-  source=source.replace(/['"]Dashboard['"]\s*,\s*/g,'');
-  source=source.replace(/,\s*['"]Dashboard['"]/g,'');
-  source=source.replace(/(['"]Account['"]\s*,\s*)(['"]Tutorial['"])/g,'$2');
-  fs.writeFileSync(file,source);console.log('Character is now the primary workspace; redundant Dashboard/Account navigation removed');
+function makeCharacterPrimary(output) {
+  const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
+  const start = source.indexOf('function Dashboard('), end = source.indexOf('\nfunction Combat(', start);
+  if (start !== -1 && end !== -1) source = source.slice(0,start) + 'function Dashboard({c,update}:{c:Character;update:(f:any)=>void;setTab:(t:Tab)=>void}){return <CharacterSheet c={c} update={update}/>}' + source.slice(end);
+  source = source.replace(/useState<Tab>\(['"]Dashboard['"]\)/g, "useState<Tab>('Character')");
+  source = source.replace(/useState\(['"]Dashboard['"]\)/g, "useState('Character')");
+  source = source.replace(/['"]Dashboard['"]\s*,\s*/g, '');
+  source = source.replace(/,\s*['"]Dashboard['"]/g, '');
+  source = source.replace(/(['"]Account['"]\s*,\s*)(['"]Tutorial['"])/g, '$2');
+  fs.writeFileSync(file, source);
 }
 
-function injectLandingHeroStyles(output){
- const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");
- const marker='/* ginger-dragon-studios-clean-hero */';if(!source.includes(marker))source+=`\n${marker}\n.studio-hero-art{display:block;width:min(360px,72vw);height:auto;object-fit:contain;object-position:center;margin:0 auto 28px;border:0;border-radius:0;background:transparent;box-shadow:none}\n@media(max-width:760px){.studio-hero-art{width:min(300px,74vw);margin-bottom:22px}}\n`;
- const v2='/* ginger-dragon-studios-landing-v2 */';if(!source.includes(v2))source+=`\n${v2}\n.landing-card-v2{max-width:980px}\n.landing-card-v2 .studio-hero-art{display:block!important;width:min(512px,90vw)!important;max-width:100%!important;height:auto!important;aspect-ratio:auto!important;object-fit:contain!important;object-position:center!important;margin:0 auto 26px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 26px 60px rgba(0,0,0,.30)!important;image-rendering:auto!important}\n@media(max-width:760px){.landing-card-v2 .studio-hero-art{width:min(460px,90vw)!important;margin-bottom:20px!important}}\n`;
- fs.writeFileSync(file,source);console.log('Integrated Ginger Dragon Studios landing v2 styles');
+function injectLandingStyles(output) {
+  const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
+  source += `
+/* ginger-dragon-clean-entrance-v1 */
+html.studio-landing-active,body.studio-landing-active{overflow:hidden!important;overscroll-behavior:none!important}
+.landing-card-v2.studio-poster-shell{
+  position:fixed!important;inset:0!important;z-index:1000!important;width:100vw!important;max-width:none!important;
+  height:100vh!important;height:100dvh!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
+  display:grid!important;place-items:center!important;overflow:hidden!important;background:#160f20!important;box-shadow:none!important;
+}
+.studio-poster-shell>:not(.studio-poster-stage){display:none!important}
+.studio-poster-stage{position:relative!important;display:block!important;overflow:hidden!important;line-height:0!important;isolation:isolate!important;flex:none!important}
+.studio-secret-world{position:absolute!important;inset:0!important;z-index:1!important;background:#0c0a0e url('/brand/ginger-dragon-secret-door.webp') center center/cover no-repeat!important;transform:scale(1.012)}
+.studio-poster-stage>img.studio-hero-art{position:absolute!important;inset:0!important;z-index:2!important;display:block!important;width:100%!important;height:100%!important;max-width:none!important;margin:0!important;object-fit:contain!important;object-position:center!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 20px 60px rgba(0,0,0,.44)!important;transform:translate3d(0,0,0);will-change:transform}
+.studio-poster-cta{position:absolute!important;left:31%!important;top:77.2%!important;width:38%!important;height:7.8%!important;z-index:4!important;border:0!important;border-radius:12px!important;background:transparent!important;cursor:pointer!important;padding:0!important;margin:0!important;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.studio-poster-cta:hover,.studio-poster-cta:focus-visible{outline:2px solid rgba(255,214,123,.9)!important;outline-offset:-3px!important;box-shadow:0 0 22px rgba(255,165,61,.38)!important;background:rgba(255,187,83,.05)!important}
+.studio-poster-cta:active{background:rgba(255,205,116,.10)!important}
+.studio-poster-stage.is-entering>img.studio-hero-art{transform:translate3d(0,-108%,0)!important;transition:transform 1.25s cubic-bezier(.22,.72,.18,1)!important}
+.studio-poster-stage.is-entering .studio-poster-cta{opacity:0!important;pointer-events:none!important}
+@media(prefers-reduced-motion:reduce){.studio-poster-stage.is-entering>img.studio-hero-art{transition:none!important}}
+`;
+  fs.writeFileSync(file, source);
+  console.log('Injected clean responsive full-viewport entrance styles');
 }
 
-function injectCoreIntegration(output){const file=path.join(root,output);let source=fs.readFileSync(file,"utf8");const integrations=[["import './core-hp-integration';",'// Build-time core integration: all HP damage controls route through Damage Resist.'],["import './campaign-role-visibility';",'// Build-time campaign role guard: keep GM navigation available to local/GM users and hidden from confirmed players.']];let changed=false;for(const [marker,comment] of integrations)if(!source.includes(marker)){source+=`\n\n${comment}\n${marker}\n`;changed=true;}if(changed){fs.writeFileSync(file,source);console.log(`Integrated runtime guards into ${output}`);}}
+function injectCoreIntegration(output) {
+  const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
+  const integrations = [
+    ["import './core-hp-integration';", '// Build-time core integration: all HP damage controls route through Damage Resist.'],
+    ["import './campaign-role-visibility';", '// Build-time campaign role guard: keep GM navigation available to local/GM users and hidden from confirmed players.']
+  ];
+  let changed = false;
+  for (const [marker,comment] of integrations) if (!source.includes(marker)) { source += `\n\n${comment}\n${marker}\n`; changed = true; }
+  if (changed) fs.writeFileSync(file, source);
+}
 
-restore("main","src/main.tsx");restore("styles","src/styles.css");cleanLandingSource("src/main.tsx");makeCharacterPrimary("src/main.tsx");injectLandingHeroStyles("src/styles.css");injectCoreIntegration("src/main.tsx");
+restore("main","src/main.tsx");
+restore("styles","src/styles.css");
+restoreDoorAsset();
+cleanLandingSource("src/main.tsx");
+makeCharacterPrimary("src/main.tsx");
+injectLandingStyles("src/styles.css");
+injectCoreIntegration("src/main.tsx");
