@@ -5,15 +5,13 @@ const root = process.cwd();
 const payloadDir = path.join(root, 'payload');
 
 function restoreLiveHero() {
-  const parts = fs.readdirSync(payloadDir)
-    .filter((name) => name.startsWith('ginger-dragon-live.') && name.endsWith('.b64part'))
-    .sort();
-  if (!parts.length) throw new Error('Missing live Ginger Dragon poster payload');
-  const encoded = parts.map((name) => fs.readFileSync(path.join(payloadDir, name), 'utf8').trim()).join('');
+  const final = path.join(payloadDir, 'final-tapestry.b64');
+  if (!fs.existsSync(final)) throw new Error('Missing final Ginger Dragon tapestry payload');
+  const encoded = fs.readFileSync(final, 'utf8').trim();
   const output = path.join(root, 'public/brand/ginger-dragon-studios-hero.webp');
   fs.mkdirSync(path.dirname(output), { recursive: true });
   fs.writeFileSync(output, Buffer.from(encoded, 'base64'));
-  console.log(`Restored production Ginger Dragon poster from ${parts.length} parts`);
+  console.log('Restored production Ginger Dragon poster from final tapestry payload');
 }
 
 function patchMain() {
