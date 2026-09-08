@@ -2,17 +2,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const payloadDir = path.join(root, 'payload');
-
-function restoreLiveHero() {
-  const final = path.join(payloadDir, 'final-tapestry.b64');
-  if (!fs.existsSync(final)) throw new Error('Missing final Ginger Dragon tapestry payload');
-  const encoded = fs.readFileSync(final, 'utf8').trim();
-  const output = path.join(root, 'public/brand/ginger-dragon-studios-hero.webp');
-  fs.mkdirSync(path.dirname(output), { recursive: true });
-  fs.writeFileSync(output, Buffer.from(encoded, 'base64'));
-  console.log('Restored production Ginger Dragon poster from final tapestry payload');
-}
 
 function patchMain() {
   const file = path.join(root, 'src/main.tsx');
@@ -66,6 +55,6 @@ ${marker}
   console.log('Integrated responsive painted-poster layout and CTA styling');
 }
 
-restoreLiveHero();
+// restore-source.mjs owns the hero asset. Do not overwrite it here.
 patchMain();
 patchStyles();
