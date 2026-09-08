@@ -1,13 +1,19 @@
-/* Ginger Dragon Studios — tapestry-only landing. No entrance cinematic. */
-function lock(a:boolean){document.documentElement.classList.toggle('studio-landing-active',a);document.body.classList.toggle('studio-landing-active',a)}
-function styles(){if(document.getElementById('gd-stable-handoff'))return;const s=document.createElement('style');s.id='gd-stable-handoff';s.textContent=`
-html,body{max-width:100%;overflow-x:hidden}
-img.studio-hero-art{display:block!important;width:auto!important;height:auto!important;max-width:min(100%,100vw)!important;object-fit:contain!important;object-position:center top!important;margin:0 auto!important;transform:none!important}
-.studio-stable-overlay{position:fixed;inset:0;z-index:2147483000;pointer-events:none;background:#050403;opacity:0}
-@media(max-width:760px){img.studio-hero-art{width:auto!important;height:auto!important;max-width:100vw!important;object-position:center top!important;margin:0 auto!important}}
+/* Ginger Dragon Studios — one-image landing. Old website landing is hidden completely. */
+const ROOT='gd-fresh-landing';
+const STYLE='gd-fresh-landing-style';
+const ART='/brand/ginger-dragon-studios-tapestry.png';
+function styles(){if(document.getElementById(STYLE))return;const s=document.createElement('style');s.id=STYLE;s.textContent=`
+html.gd-fresh-open,html.gd-fresh-open body{margin:0!important;padding:0!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#10051c!important}
+html.gd-fresh-open body>*:not(#${ROOT}){visibility:hidden!important}
+#${ROOT}{position:fixed;inset:0;z-index:2147483640;display:grid;place-items:center;background:#10051c;overflow:hidden}
+#${ROOT} .gd-art-wrap{position:relative;display:block;width:max-content;height:max-content;max-width:100vw;max-height:100svh}
+#${ROOT} img{display:block;width:auto;height:auto;max-width:100vw;max-height:100svh;object-fit:contain;user-select:none;-webkit-user-drag:none}
+#${ROOT} .gd-enter{position:absolute;left:48%;top:77.4%;width:38%;height:5.4%;border:0;background:transparent;cursor:pointer;padding:0;margin:0;outline:none}
+#${ROOT} .gd-enter:focus-visible{outline:3px solid #ffd36d;outline-offset:2px;border-radius:8px}
+@media(max-width:760px){#${ROOT}{place-items:start center}#${ROOT} .gd-art-wrap{margin:0 auto}#${ROOT} img{max-width:100vw;max-height:100svh}}
 `;document.head.appendChild(s)}
-function fitPhone(src:HTMLImageElement){if(innerWidth>760){src.style.removeProperty('max-height');return}const vh=Math.floor(visualViewport?.height||innerHeight);src.style.setProperty('max-height',Math.max(240,vh)+'px','important')}
-function hideLandingExtras(src:HTMLImageElement){let hero:HTMLElement|null=src;for(let i=0;i<6&&hero?.parentElement;i++){const p=hero.parentElement;const text=(p.textContent||'').toLowerCase();if(text.includes('games')&&text.includes('software')&&text.includes('adventures')){hero=p;break}hero=p}const scope=hero?.parentElement||document.body;const phrases=['Games • Software • Adventures','A home for the tools, games, and adventures we forge. Choose an app below.','Crawlers are entering the dungeon','Crawler Companion','More adventures coming','Independent studio • Built by Ginger Dragon Studios'];scope.querySelectorAll<HTMLElement>('h1,h2,h3,p,div,section,article,footer,a,button').forEach(el=>{if(el.contains(src))return;const t=(el.textContent||'').trim();if(phrases.some(x=>t===x||t.startsWith(x))){el.style.setProperty('display','none','important')}})}
-function install(){const src=document.querySelector<HTMLImageElement>('img.studio-hero-art');if(!src)return;styles();fitPhone(src);hideLandingExtras(src);src.dataset.posterEnhanced='stable';lock(false);const candidates=Array.from(document.querySelectorAll<HTMLElement>('button,a,[role="button"]'));const enter=candidates.find(el=>/enter|crawler companion/i.test((el.textContent||'')+' '+(el.getAttribute('aria-label')||'')));if(!enter||enter.dataset.gdStable==='1')return;enter.dataset.gdStable='1';let busy=false;enter.addEventListener('click',()=>{if(busy)return;busy=true;const o=document.createElement('div');o.className='studio-stable-overlay';document.body.appendChild(o);o.style.opacity='1';setTimeout(()=>{o.style.opacity='0';setTimeout(()=>o.remove(),50)},120)},true)}
-function refit(){const src=document.querySelector<HTMLImageElement>('img.studio-hero-art');if(src){fitPhone(src);hideLandingExtras(src)}}
-function boot(){styles();install();new MutationObserver(()=>install()).observe(document.documentElement,{childList:true,subtree:true});addEventListener('resize',refit,{passive:true});visualViewport?.addEventListener('resize',refit,{passive:true})}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+function nativeLaunch(){const els=[...document.querySelectorAll<HTMLElement>('button,a,[role="button"]')];return els.find(el=>!el.closest('#'+ROOT)&&/^(launch|enter crawler companion)|crawler companion.*launch/i.test(((el.textContent||'')+' '+(el.getAttribute('aria-label')||'')).trim()))||els.find(el=>!el.closest('#'+ROOT)&&/launch|enter crawler companion/i.test((el.textContent||'')+' '+(el.getAttribute('aria-label')||'')))}
+function closeLanding(){document.documentElement.classList.remove('gd-fresh-open');document.getElementById(ROOT)?.remove()}
+function enter(){const target=nativeLaunch();if(target){target.click();setTimeout(closeLanding,40);return}closeLanding();setTimeout(()=>nativeLaunch()?.click(),50)}
+function install(){if(document.getElementById(ROOT))return;styles();document.documentElement.classList.add('gd-fresh-open');const root=document.createElement('main');root.id=ROOT;root.setAttribute('aria-label','Ginger Dragon Studios');root.innerHTML=`<div class="gd-art-wrap"><img src="${ART}" alt="Ginger Dragon Studios tapestry"><button class="gd-enter" type="button" aria-label="Enter Crawler Companion"></button></div>`;document.body.appendChild(root);(root.querySelector('.gd-enter') as HTMLButtonElement).addEventListener('click',enter)}
+function boot(){install()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
