@@ -1,14 +1,18 @@
 /* Clean Ginger Dragon Studios entrance behavior. */
 
-const CTA_TEXT = /enter\s+crawler\s+companion/i;
+const CTA_TEXT = /(?:enter|open|launch|start)\s+(?:the\s+)?crawler\s+companion/i;
 const ART_W = 1085;
 const ART_H = 1450;
 const ART_RATIO = ART_W / ART_H;
-const DOOR_SRC = '/brand/ginger-dragon-secret-door.webp';
+
+function getCandidates(root: ParentNode): HTMLElement[] {
+  return Array.from(root.querySelectorAll<HTMLElement>('button,a,[role="button"]'))
+    .filter((el) => !el.classList.contains('studio-poster-cta'));
+}
 
 function findNativeCta(root: ParentNode): HTMLElement | null {
-  const candidates = Array.from(root.querySelectorAll<HTMLElement>('button,a,[role="button"]'));
-  return candidates.find((el) => CTA_TEXT.test((el.textContent || '').trim()) && !el.classList.contains('studio-poster-cta')) || null;
+  const candidates = getCandidates(root);
+  return candidates.find((el) => CTA_TEXT.test((el.textContent || '').trim())) || candidates[0] || null;
 }
 
 function setLandingLock(active: boolean) {
@@ -29,30 +33,22 @@ function sizeStage(stage: HTMLElement) {
   stage.style.height = `${Math.floor(height)}px`;
 }
 
-function loadDoor(): Promise<boolean> {
-  return new Promise((resolve) => {
-    const probe = new Image();
-    let settled = false;
-    const finish = (ok: boolean) => {
-      if (settled) return;
-      settled = true;
-      resolve(ok && probe.naturalWidth > 0 && probe.naturalHeight > 0);
-    };
-    probe.onload = () => finish(true);
-    probe.onerror = () => finish(false);
-    probe.src = DOOR_SRC;
-    window.setTimeout(() => finish(false), 2500);
-  });
-}
+function activateNativeCta(nativeCta: HTMLElement | null, card: HTMLElement, overlay: HTMLElement) {
+  const target = nativeCta && nativeCta !== overlay && document.contains(nativeCta)
+    ? nativeCta
+    : findNativeCta(card) || findNativeCta(document);
 
-function activateNativeCta(nativeCta: HTMLElement | null, overlay: HTMLElement) {
   setLandingLock(false);
-  if (nativeCta && nativeCta !== overlay && document.contains(nativeCta)) {
-    nativeCta.click();
+
+  if (target && target !== overlay) {
+    target.click();
     return;
   }
-  const fallback = findNativeCta(document);
-  if (fallback && fallback !== overlay) fallback.click();
+
+  // Safety fallback: never leave the user on a black reveal layer.
+  card.classList.remove('studio-poster-shell');
+  const stage = overlay.closest<HTMLElement>('.studio-poster-stage');
+  stage?.classList.remove('is-entering');
 }
 
 function installEntrance() {
@@ -72,7 +68,9 @@ function installEntrance() {
   const card = image.closest<HTMLElement>('.landing-card-v2') || image.parentElement;
   if (!card) return;
 
+  // Capture the real landing control before we hide the original card contents.
   const nativeCta = findNativeCta(card) || findNativeCta(document);
+
   image.dataset.posterEnhanced = 'true';
   image.loading = 'eager';
   image.decoding = 'async';
@@ -83,11 +81,6 @@ function installEntrance() {
   const stage = document.createElement('div');
   stage.className = 'studio-poster-stage';
   image.parentNode?.insertBefore(stage, image);
-
-  const world = document.createElement('div');
-  world.className = 'studio-secret-world';
-  world.setAttribute('aria-hidden', 'true');
-  stage.appendChild(world);
   stage.appendChild(image);
 
   const cta = document.createElement('button');
@@ -98,22 +91,19 @@ function installEntrance() {
   cta.innerHTML = '<span class="sr-only">Enter Crawler Companion</span>';
 
   let entering = false;
-  cta.addEventListener('click', async () => {
+  cta.addEventListener('click', () => {
     if (entering) return;
     entering = true;
     cta.disabled = true;
 
-    // Never remove the tapestry unless the reveal artwork has actually decoded.
-    const doorReady = await loadDoor();
-    if (!doorReady) {
-      activateNativeCta(nativeCta, cta);
-      return;
-    }
+    // Reveal animation is intentionally disabled until the doorway asset is proven stable.
+    // The painted button must first hand off reliably to the actual application.
+    activateNativeCta(nativeCta, card, cta);
 
-    stage.classList.add('is-entering');
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 1450));
-    activateNativeCta(nativeCta, cta);
+    window.setTimeout(() => {
+      entering = false;
+      cta.disabled = false;
+    }, 800);
   });
 
   stage.appendChild(cta);
