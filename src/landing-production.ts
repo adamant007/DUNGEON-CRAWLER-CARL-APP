@@ -4,6 +4,7 @@ const CTA_TEXT = /enter\s+crawler\s+companion/i;
 const ART_W = 1085;
 const ART_H = 1450;
 const ART_RATIO = ART_W / ART_H;
+const DOOR_SRC = '/brand/ginger-dragon-secret-door.webp';
 
 function findNativeCta(root: ParentNode): HTMLElement | null {
   const candidates = Array.from(root.querySelectorAll<HTMLElement>('button,a,[role="button"]'));
@@ -26,6 +27,32 @@ function sizeStage(stage: HTMLElement) {
   const height = width / ART_RATIO;
   stage.style.width = `${Math.floor(width)}px`;
   stage.style.height = `${Math.floor(height)}px`;
+}
+
+function loadDoor(): Promise<boolean> {
+  return new Promise((resolve) => {
+    const probe = new Image();
+    let settled = false;
+    const finish = (ok: boolean) => {
+      if (settled) return;
+      settled = true;
+      resolve(ok && probe.naturalWidth > 0 && probe.naturalHeight > 0);
+    };
+    probe.onload = () => finish(true);
+    probe.onerror = () => finish(false);
+    probe.src = DOOR_SRC;
+    window.setTimeout(() => finish(false), 2500);
+  });
+}
+
+function activateNativeCta(nativeCta: HTMLElement | null, overlay: HTMLElement) {
+  setLandingLock(false);
+  if (nativeCta && nativeCta !== overlay && document.contains(nativeCta)) {
+    nativeCta.click();
+    return;
+  }
+  const fallback = findNativeCta(document);
+  if (fallback && fallback !== overlay) fallback.click();
 }
 
 function installEntrance() {
@@ -75,18 +102,18 @@ function installEntrance() {
     if (entering) return;
     entering = true;
     cta.disabled = true;
-    stage.classList.add('is-entering');
 
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 1450));
-
-    setLandingLock(false);
-    if (nativeCta && nativeCta !== cta && document.contains(nativeCta)) {
-      nativeCta.click();
+    // Never remove the tapestry unless the reveal artwork has actually decoded.
+    const doorReady = await loadDoor();
+    if (!doorReady) {
+      activateNativeCta(nativeCta, cta);
       return;
     }
-    const fallback = findNativeCta(document);
-    if (fallback && fallback !== cta) fallback.click();
+
+    stage.classList.add('is-entering');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 1450));
+    activateNativeCta(nativeCta, cta);
   });
 
   stage.appendChild(cta);
