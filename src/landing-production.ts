@@ -24,9 +24,9 @@ function sizeStage(stage: HTMLElement) {
   const vv = window.visualViewport;
   const viewportWidth = vv?.width || window.innerWidth;
   const viewportHeight = vv?.height || window.innerHeight;
-  const inset = viewportWidth < 520 ? 10 : 18;
-  const availableWidth = Math.max(240, viewportWidth - inset * 2);
-  const availableHeight = Math.max(320, viewportHeight - inset * 2);
+  const inset = viewportWidth < 520 ? 8 : 16;
+  const availableWidth = Math.max(220, viewportWidth - inset * 2);
+  const availableHeight = Math.max(280, viewportHeight - inset * 2);
   const width = Math.min(ART_W, availableWidth, availableHeight * ART_RATIO);
   const height = width / ART_RATIO;
   stage.style.width = `${Math.floor(width)}px`;
@@ -38,15 +38,9 @@ function activateNativeCta(nativeCta: HTMLElement | null, card: HTMLElement, ove
     ? nativeCta
     : findNativeCta(card) || findNativeCta(document);
 
-  // Tear down the full-screen landing layer BEFORE activating the app.
-  // Previously the fixed shell remained above the app, which is why users saw black.
   setLandingLock(false);
-  card.classList.remove('studio-poster-shell');
-  const stage = overlay.closest<HTMLElement>('.studio-poster-stage');
-  if (stage) {
-    stage.classList.remove('is-entering');
-    stage.style.display = 'none';
-  }
+  const root = overlay.closest<HTMLElement>('.studio-entrance-root');
+  root?.remove();
 
   window.requestAnimationFrame(() => {
     if (target && target !== overlay) target.click();
@@ -60,29 +54,35 @@ function installEntrance() {
     return;
   }
 
-  setLandingLock(true);
-  if (image.dataset.posterEnhanced === 'true') {
-    const stage = image.closest<HTMLElement>('.studio-poster-stage');
-    if (stage) sizeStage(stage);
-    return;
-  }
+  if (document.querySelector('.studio-entrance-root')) return;
+  if (image.dataset.posterEnhanced === 'true') return;
 
   const card = image.closest<HTMLElement>('.landing-card-v2') || image.parentElement;
   if (!card) return;
 
   const nativeCta = findNativeCta(card) || findNativeCta(document);
-
   image.dataset.posterEnhanced = 'true';
   image.loading = 'eager';
   image.decoding = 'async';
   try { (image as any).fetchPriority = 'high'; } catch {}
 
-  card.classList.add('studio-poster-shell');
+  setLandingLock(true);
+
+  const root = document.createElement('div');
+  root.className = 'studio-entrance-root';
+  root.setAttribute('role', 'presentation');
 
   const stage = document.createElement('div');
   stage.className = 'studio-poster-stage';
-  image.parentNode?.insertBefore(stage, image);
-  stage.appendChild(image);
+  root.appendChild(stage);
+
+  const poster = image.cloneNode(true) as HTMLImageElement;
+  poster.removeAttribute('data-poster-enhanced');
+  poster.className = 'studio-hero-art';
+  poster.alt = 'Ginger Dragon Studios tapestry';
+  poster.loading = 'eager';
+  poster.decoding = 'async';
+  stage.appendChild(poster);
 
   const cta = document.createElement('button');
   cta.type = 'button';
@@ -90,14 +90,14 @@ function installEntrance() {
   cta.setAttribute('aria-label', 'Enter Crawler Companion');
   cta.setAttribute('title', 'Enter Crawler Companion');
   cta.innerHTML = '<span class="sr-only">Enter Crawler Companion</span>';
-
   cta.addEventListener('click', () => {
     if (cta.disabled) return;
     cta.disabled = true;
     activateNativeCta(nativeCta, card, cta);
   });
-
   stage.appendChild(cta);
+
+  document.body.appendChild(root);
   sizeStage(stage);
 
   const resize = () => sizeStage(stage);
