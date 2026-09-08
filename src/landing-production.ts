@@ -38,17 +38,19 @@ function activateNativeCta(nativeCta: HTMLElement | null, card: HTMLElement, ove
     ? nativeCta
     : findNativeCta(card) || findNativeCta(document);
 
+  // Tear down the full-screen landing layer BEFORE activating the app.
+  // Previously the fixed shell remained above the app, which is why users saw black.
   setLandingLock(false);
-
-  if (target && target !== overlay) {
-    target.click();
-    return;
-  }
-
-  // Safety fallback: never leave the user on a black reveal layer.
   card.classList.remove('studio-poster-shell');
   const stage = overlay.closest<HTMLElement>('.studio-poster-stage');
-  stage?.classList.remove('is-entering');
+  if (stage) {
+    stage.classList.remove('is-entering');
+    stage.style.display = 'none';
+  }
+
+  window.requestAnimationFrame(() => {
+    if (target && target !== overlay) target.click();
+  });
 }
 
 function installEntrance() {
@@ -68,7 +70,6 @@ function installEntrance() {
   const card = image.closest<HTMLElement>('.landing-card-v2') || image.parentElement;
   if (!card) return;
 
-  // Capture the real landing control before we hide the original card contents.
   const nativeCta = findNativeCta(card) || findNativeCta(document);
 
   image.dataset.posterEnhanced = 'true';
@@ -90,20 +91,10 @@ function installEntrance() {
   cta.setAttribute('title', 'Enter Crawler Companion');
   cta.innerHTML = '<span class="sr-only">Enter Crawler Companion</span>';
 
-  let entering = false;
   cta.addEventListener('click', () => {
-    if (entering) return;
-    entering = true;
+    if (cta.disabled) return;
     cta.disabled = true;
-
-    // Reveal animation is intentionally disabled until the doorway asset is proven stable.
-    // The painted button must first hand off reliably to the actual application.
     activateNativeCta(nativeCta, card, cta);
-
-    window.setTimeout(() => {
-      entering = false;
-      cta.disabled = false;
-    }, 800);
   });
 
   stage.appendChild(cta);
