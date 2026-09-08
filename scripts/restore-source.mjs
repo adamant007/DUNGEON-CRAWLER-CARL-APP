@@ -15,16 +15,6 @@ function restore(prefix, output) {
   console.log(`Restored ${output}`);
 }
 
-function restoreDoorAsset() {
-  const input = path.join(payload, "secret-door.b64");
-  if (!fs.existsSync(input)) return;
-  const encoded = fs.readFileSync(input, "utf8").replace(/\s+/g, "");
-  const output = path.join(root, "public/brand/ginger-dragon-secret-door.webp");
-  fs.mkdirSync(path.dirname(output), { recursive: true });
-  fs.writeFileSync(output, Buffer.from(encoded, "base64"));
-  console.log("Restored Ginger Dragon hidden doorway artwork");
-}
-
 function cleanLandingSource(output) {
   const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
   const replacements = [
@@ -76,26 +66,30 @@ function makeCharacterPrimary(output) {
 function injectLandingStyles(output) {
   const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
   source += `
-/* ginger-dragon-clean-entrance-v1 */
+/* ginger-dragon-clean-entrance-v2 */
 html.studio-landing-active,body.studio-landing-active{overflow:hidden!important;overscroll-behavior:none!important}
-.landing-card-v2.studio-poster-shell{
-  position:fixed!important;inset:0!important;z-index:1000!important;width:100vw!important;max-width:none!important;
-  height:100vh!important;height:100dvh!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
-  display:grid!important;place-items:center!important;overflow:hidden!important;background:#160f20!important;box-shadow:none!important;
+.studio-entrance-root{
+  position:fixed!important;inset:0!important;z-index:2147483000!important;
+  width:100vw!important;height:100vh!important;height:100dvh!important;
+  display:grid!important;place-items:center!important;overflow:hidden!important;
+  background:#160f20!important;padding:0!important;margin:0!important;
 }
-.studio-poster-shell>:not(.studio-poster-stage){display:none!important}
-.studio-poster-stage{position:relative!important;display:block!important;overflow:hidden!important;line-height:0!important;isolation:isolate!important;flex:none!important}
-.studio-secret-world{position:absolute!important;inset:0!important;z-index:1!important;background:#0c0a0e url('/brand/ginger-dragon-secret-door.webp') center center/cover no-repeat!important;transform:scale(1.012)}
-.studio-poster-stage>img.studio-hero-art{position:absolute!important;inset:0!important;z-index:2!important;display:block!important;width:100%!important;height:100%!important;max-width:none!important;margin:0!important;object-fit:contain!important;object-position:center!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 20px 60px rgba(0,0,0,.44)!important;transform:translate3d(0,0,0);will-change:transform}
-.studio-poster-cta{position:absolute!important;left:31%!important;top:77.2%!important;width:38%!important;height:7.8%!important;z-index:4!important;border:0!important;border-radius:12px!important;background:transparent!important;cursor:pointer!important;padding:0!important;margin:0!important;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.studio-poster-stage{position:relative!important;display:block!important;overflow:hidden!important;line-height:0!important;flex:none!important}
+.studio-poster-stage>img.studio-hero-art{
+  position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;
+  max-width:none!important;margin:0!important;object-fit:contain!important;object-position:center!important;
+  border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 20px 60px rgba(0,0,0,.44)!important;
+}
+.studio-poster-cta{
+  position:absolute!important;left:31%!important;top:77.2%!important;width:38%!important;height:7.8%!important;z-index:4!important;
+  border:0!important;border-radius:12px!important;background:transparent!important;cursor:pointer!important;padding:0!important;margin:0!important;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation
+}
 .studio-poster-cta:hover,.studio-poster-cta:focus-visible{outline:2px solid rgba(255,214,123,.9)!important;outline-offset:-3px!important;box-shadow:0 0 22px rgba(255,165,61,.38)!important;background:rgba(255,187,83,.05)!important}
 .studio-poster-cta:active{background:rgba(255,205,116,.10)!important}
-.studio-poster-stage.is-entering>img.studio-hero-art{transform:translate3d(0,-108%,0)!important;transition:transform 1.25s cubic-bezier(.22,.72,.18,1)!important}
-.studio-poster-stage.is-entering .studio-poster-cta{opacity:0!important;pointer-events:none!important}
-@media(prefers-reduced-motion:reduce){.studio-poster-stage.is-entering>img.studio-hero-art{transition:none!important}}
 `;
   fs.writeFileSync(file, source);
-  console.log('Injected clean responsive full-viewport entrance styles');
+  console.log('Injected isolated responsive full-viewport entrance styles');
 }
 
 function injectCoreIntegration(output) {
@@ -111,7 +105,6 @@ function injectCoreIntegration(output) {
 
 restore("main","src/main.tsx");
 restore("styles","src/styles.css");
-restoreDoorAsset();
 cleanLandingSource("src/main.tsx");
 makeCharacterPrimary("src/main.tsx");
 injectLandingStyles("src/styles.css");
