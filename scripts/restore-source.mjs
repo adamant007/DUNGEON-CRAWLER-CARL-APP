@@ -36,22 +36,18 @@ function cleanLandingSource(output) {
     source = source.slice(0, landingStart) + landing + source.slice(end);
   }
 
-  const hero = '<img className="studio-hero-art" src="/brand/ginger-dragon-studios-tapestry.png" alt="Ginger Dragon Studios tapestry"/>';
-  if (source.includes('className="studio-hero-art"')) {
-    source = source.replace(/<img className="studio-hero-art"[^>]*\/>/, hero);
-  } else {
-    const marker = '<div className="landing-card landing-card-v2">';
-    if (!source.includes(marker)) throw new Error('Landing card marker not found');
-    source = source.replace(marker, marker + hero);
+  // Preserve the studio homepage artwork that is already part of the restored
+  // Landing component. Do not replace it with the legacy tapestry.
+  if (!source.includes('className="studio-hero-art"')) {
+    throw new Error('Studio homepage artwork marker not found');
   }
 
-  // RPG Companion now opens directly to the app. Do not inject the legacy
-  // full-screen tapestry/library overlay; it can hide the character sheet.
+  // Never inject the legacy tapestry/library overlay.
   source = source.replace(/\n\n\/\/ Clean Ginger Dragon entrance interaction\.\nimport '\.\/landing-production';\n?/g, '\n');
   source = source.replace(/import '\.\/landing-production';\n?/g, '');
 
   fs.writeFileSync(file, source);
-  console.log('Prepared direct RPG Companion entry');
+  console.log('Prepared Ginger Dragon Studios homepage -> RPG Companion flow');
 }
 
 function makeCharacterPrimary(output) {
@@ -69,22 +65,22 @@ function makeCharacterPrimary(output) {
 function injectLandingStyles(output) {
   const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
   source += `
-/* ginger-dragon-clean-entrance-v3 */
-html.studio-landing-active,body.studio-landing-active{overflow:hidden!important;overscroll-behavior:none!important}
+/* ginger-dragon-studio-homepage */
+html.studio-landing-active,body.studio-landing-active{overflow:auto!important;overscroll-behavior:auto!important}
 .studio-entrance-root{
-  position:fixed!important;inset:0!important;z-index:2147483000!important;
-  width:100vw!important;height:100vh!important;height:100dvh!important;
-  display:grid!important;place-items:center!important;overflow:hidden!important;
+  position:relative!important;z-index:1!important;
+  width:100%!important;min-height:100vh!important;
+  display:flex!important;justify-content:center!important;align-items:flex-start!important;overflow:visible!important;
   background:#160f20!important;padding:0!important;margin:0!important;
 }
 .studio-poster-stage{
-  position:relative!important;display:block!important;overflow:hidden!important;line-height:0!important;flex:none!important;
-  width:100vw!important;height:100vh!important;height:100dvh!important;max-width:100vw!important;max-height:100dvh!important;
+  position:relative!important;display:block!important;overflow:visible!important;line-height:0!important;flex:none!important;
+  width:min(100%,1100px)!important;height:auto!important;max-width:1100px!important;
   margin:0 auto!important;left:auto!important;right:auto!important;transform:none!important;
 }
 .studio-poster-stage>img.studio-hero-art{
-  position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;
-  max-width:none!important;margin:0!important;object-fit:contain!important;object-position:center center!important;
+  position:relative!important;display:block!important;width:100%!important;height:auto!important;
+  max-width:1100px!important;margin:0 auto!important;object-fit:contain!important;object-position:center top!important;
   border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 20px 60px rgba(0,0,0,.44)!important;
 }
 .studio-poster-cta{
@@ -96,7 +92,7 @@ html.studio-landing-active,body.studio-landing-active{overflow:hidden!important;
 .studio-poster-cta:active{background:rgba(255,205,116,.10)!important}
 `;
   fs.writeFileSync(file, source);
-  console.log('Injected centered full-viewport entrance styles');
+  console.log('Injected responsive studio homepage styles');
 }
 
 function injectCoreIntegration(output) {
