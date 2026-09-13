@@ -45,10 +45,13 @@ function cleanLandingSource(output) {
     source = source.replace(marker, marker + hero);
   }
 
-  const interaction = "import './landing-production';";
-  if (!source.includes(interaction)) source += `\n\n// Clean Ginger Dragon entrance interaction.\n${interaction}\n`;
+  // RPG Companion now opens directly to the app. Do not inject the legacy
+  // full-screen tapestry/library overlay; it can hide the character sheet.
+  source = source.replace(/\n\n\/\/ Clean Ginger Dragon entrance interaction\.\nimport '\.\/landing-production';\n?/g, '\n');
+  source = source.replace(/import '\.\/landing-production';\n?/g, '');
+
   fs.writeFileSync(file, source);
-  console.log('Prepared clean Ginger Dragon entrance');
+  console.log('Prepared direct RPG Companion entry');
 }
 
 function makeCharacterPrimary(output) {
