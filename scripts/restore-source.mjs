@@ -69,7 +69,7 @@ function makeCharacterPrimary(output) {
 function injectLandingStyles(output) {
   const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
   source += `
-/* ginger-dragon-clean-entrance-v2 */
+/* ginger-dragon-clean-entrance-v3 */
 html.studio-landing-active,body.studio-landing-active{overflow:hidden!important;overscroll-behavior:none!important}
 .studio-entrance-root{
   position:fixed!important;inset:0!important;z-index:2147483000!important;
@@ -77,10 +77,14 @@ html.studio-landing-active,body.studio-landing-active{overflow:hidden!important;
   display:grid!important;place-items:center!important;overflow:hidden!important;
   background:#160f20!important;padding:0!important;margin:0!important;
 }
-.studio-poster-stage{position:relative!important;display:block!important;overflow:hidden!important;line-height:0!important;flex:none!important}
+.studio-poster-stage{
+  position:relative!important;display:block!important;overflow:hidden!important;line-height:0!important;flex:none!important;
+  width:100vw!important;height:100vh!important;height:100dvh!important;max-width:100vw!important;max-height:100dvh!important;
+  margin:0 auto!important;left:auto!important;right:auto!important;transform:none!important;
+}
 .studio-poster-stage>img.studio-hero-art{
   position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;
-  max-width:none!important;margin:0!important;object-fit:contain!important;object-position:center!important;
+  max-width:none!important;margin:0!important;object-fit:contain!important;object-position:center center!important;
   border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 20px 60px rgba(0,0,0,.44)!important;
 }
 .studio-poster-cta{
@@ -92,7 +96,7 @@ html.studio-landing-active,body.studio-landing-active{overflow:hidden!important;
 .studio-poster-cta:active{background:rgba(255,205,116,.10)!important}
 `;
   fs.writeFileSync(file, source);
-  console.log('Injected isolated responsive full-viewport entrance styles');
+  console.log('Injected centered full-viewport entrance styles');
 }
 
 function injectCoreIntegration(output) {
