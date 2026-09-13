@@ -45,11 +45,18 @@ function cleanLandingSource(output) {
     source = source.replace(marker, marker + homepage);
   }
 
-  source = source.replace(/\n\n\/\/ Clean Ginger Dragon entrance interaction\.\nimport '\.\/landing-production';\n?/g, '\n');
-  source = source.replace(/import '\.\/landing-production';\n?/g, '');
+  // Keep the real homepage visible. Older emergency code auto-clicked the CTA
+  // and skipped the homepage entirely, which made production open on the app.
+  source = source.replace(/import ['"]\.\/direct-rpg-entry['"];?\n?/g, '');
+  source = source.replace(/import ['"]\.\/landing-production['"];?\n?/g, '');
+
+  // Attach the responsive, accessible hotspot to the painted Enter button.
+  if (!source.includes("import './studio-landing-final';")) {
+    source += "\n\n// Production homepage interaction.\nimport './studio-landing-final';\n";
+  }
 
   fs.writeFileSync(file, source);
-  console.log('Prepared studio homepage -> RPG Companion character sheet flow');
+  console.log('Prepared correct studio homepage -> RPG Companion character sheet flow');
 }
 
 function makeCharacterPrimary(output) {
