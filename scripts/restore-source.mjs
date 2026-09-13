@@ -36,8 +36,6 @@ function cleanLandingSource(output) {
     source = source.slice(0, landingStart) + landing + source.slice(end);
   }
 
-  // The public domain opens on the final Ginger Dragon Studios homepage.
-  // The old tapestry is never injected into the startup path.
   const homepage = '<img className="studio-hero-art" src="/brand/studio-homepage.webp" alt="Ginger Dragon Studios — RPG Companion homepage"/>';
   if (source.includes('className="studio-hero-art"')) {
     source = source.replace(/<img className="studio-hero-art"[^>]*\/>/, homepage);
@@ -104,7 +102,10 @@ function injectCoreIntegration(output) {
   const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
   const integrations = [
     ["import './core-hp-integration';", '// Build-time core integration: all HP damage controls route through Damage Resist.'],
-    ["import './campaign-role-visibility';", '// Build-time campaign role guard: keep GM navigation available to local/GM users and hidden from confirmed players.']
+    ["import './campaign-role-visibility';", '// Build-time campaign role guard: keep GM navigation available to local/GM users and hidden from confirmed players.'],
+    ["import './character-dashboard-v2';", '// Ensure the Ginger Dragon character dashboard is mounted on every production build.'],
+    ["import './character-dashboard-polish';", '// Restore the segmented HP/Mana treatment and character dashboard polish.'],
+    ["import './character-hotbar-loadout';", '// Restore the 1-0 character hotbar below the main character header.']
   ];
   let changed = false;
   for (const [marker,comment] of integrations) if (!source.includes(marker)) { source += `\n\n${comment}\n${marker}\n`; changed = true; }
