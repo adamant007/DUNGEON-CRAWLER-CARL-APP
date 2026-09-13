@@ -1,4 +1,5 @@
 const STYLE_ID='gds-final-landing-style';
+const CRAWLER_URL='https://crawl-companion-quest.base44.app';
 
 function installFinalLanding(){
   if(document.getElementById(STYLE_ID)) return;
@@ -21,20 +22,19 @@ function installFinalLanding(){
     const card=document.querySelector('.landing-card-v2');
     const art=card?.querySelector('.studio-hero-art');
     if(!(card instanceof HTMLElement)||!(art instanceof HTMLImageElement)) return false;
-    if(card.querySelector('.gds-enter-hotspot')) return true;
-    const enter=Array.from(card.querySelectorAll('button,a')).find((el)=>/enter (?:crawler|rpg) companion/i.test((el.textContent||'')+' '+(el.getAttribute('aria-label')||'')));
-    const target=enter instanceof HTMLAnchorElement?enter.getAttribute('href'):null;
-    const hotspot=document.createElement('a');
-    hotspot.className='gds-enter-hotspot';
-    hotspot.href=target||'#rpg-companion';
-    hotspot.setAttribute('aria-label','Enter RPG Companion');
-    hotspot.textContent='Enter RPG Companion';
-    hotspot.addEventListener('click',(event)=>{
-      if(enter instanceof HTMLElement){event.preventDefault();enter.click();}
-      else if(!target){event.preventDefault();window.dispatchEvent(new CustomEvent('gds-enter-crawler-companion'));}
-    });
-    card.appendChild(hotspot);
-    if(enter instanceof HTMLElement){enter.style.position='absolute';enter.style.width='1px';enter.style.height='1px';enter.style.overflow='hidden';enter.style.clip='rect(0 0 0 0)';enter.style.whiteSpace='nowrap';}
+    let hotspot=card.querySelector('.gds-enter-hotspot') as HTMLAnchorElement|null;
+    if(!hotspot){
+      hotspot=document.createElement('a');
+      hotspot.className='gds-enter-hotspot';
+      hotspot.setAttribute('aria-label','Enter Crawler Companion');
+      hotspot.textContent='Enter Crawler Companion';
+      card.appendChild(hotspot);
+    }
+    hotspot.href=CRAWLER_URL;
+    hotspot.target='_self';
+    hotspot.rel='noopener';
+    const oldEnter=Array.from(card.querySelectorAll('button,a')).find((el)=>el!==hotspot&&/enter (?:crawler|rpg) companion/i.test((el.textContent||'')+' '+(el.getAttribute('aria-label')||'')));
+    if(oldEnter instanceof HTMLElement){oldEnter.style.position='absolute';oldEnter.style.width='1px';oldEnter.style.height='1px';oldEnter.style.overflow='hidden';oldEnter.style.clip='rect(0 0 0 0)';oldEnter.style.whiteSpace='nowrap';}
     return true;
   };
   if(!attach()){
