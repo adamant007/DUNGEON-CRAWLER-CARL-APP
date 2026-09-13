@@ -36,18 +36,22 @@ function cleanLandingSource(output) {
     source = source.slice(0, landingStart) + landing + source.slice(end);
   }
 
-  // Preserve the studio homepage artwork that is already part of the restored
-  // Landing component. Do not replace it with the legacy tapestry.
-  if (!source.includes('className="studio-hero-art"')) {
-    throw new Error('Studio homepage artwork marker not found');
+  // The public domain opens on the final Ginger Dragon Studios homepage.
+  // The old tapestry is never injected into the startup path.
+  const homepage = '<img className="studio-hero-art" src="/brand/studio-homepage.webp" alt="Ginger Dragon Studios — RPG Companion homepage"/>';
+  if (source.includes('className="studio-hero-art"')) {
+    source = source.replace(/<img className="studio-hero-art"[^>]*\/>/, homepage);
+  } else {
+    const marker = '<div className="landing-card landing-card-v2">';
+    if (!source.includes(marker)) throw new Error('Landing card marker not found');
+    source = source.replace(marker, marker + homepage);
   }
 
-  // Never inject the legacy tapestry/library overlay.
   source = source.replace(/\n\n\/\/ Clean Ginger Dragon entrance interaction\.\nimport '\.\/landing-production';\n?/g, '\n');
   source = source.replace(/import '\.\/landing-production';\n?/g, '');
 
   fs.writeFileSync(file, source);
-  console.log('Prepared Ginger Dragon Studios homepage -> RPG Companion flow');
+  console.log('Prepared studio homepage -> RPG Companion character sheet flow');
 }
 
 function makeCharacterPrimary(output) {
@@ -66,29 +70,30 @@ function injectLandingStyles(output) {
   const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
   source += `
 /* ginger-dragon-studio-homepage */
-html.studio-landing-active,body.studio-landing-active{overflow:auto!important;overscroll-behavior:auto!important}
+html.studio-landing-active,body.studio-landing-active{overflow:auto!important;overscroll-behavior:auto!important;background:#090b10!important}
 .studio-entrance-root{
   position:relative!important;z-index:1!important;
   width:100%!important;min-height:100vh!important;
   display:flex!important;justify-content:center!important;align-items:flex-start!important;overflow:visible!important;
-  background:#160f20!important;padding:0!important;margin:0!important;
+  background:#090b10!important;padding:0!important;margin:0!important;
 }
 .studio-poster-stage{
   position:relative!important;display:block!important;overflow:visible!important;line-height:0!important;flex:none!important;
-  width:min(100%,1100px)!important;height:auto!important;max-width:1100px!important;
+  width:min(100%,1024px)!important;height:auto!important;max-width:1024px!important;
   margin:0 auto!important;left:auto!important;right:auto!important;transform:none!important;
 }
-.studio-poster-stage>img.studio-hero-art{
+.studio-poster-stage>img.studio-hero-art,
+.landing-card-v2 .studio-hero-art{
   position:relative!important;display:block!important;width:100%!important;height:auto!important;
-  max-width:1100px!important;margin:0 auto!important;object-fit:contain!important;object-position:center top!important;
-  border:0!important;border-radius:0!important;background:transparent!important;box-shadow:0 20px 60px rgba(0,0,0,.44)!important;
+  max-width:1024px!important;margin:0 auto!important;object-fit:contain!important;object-position:center top!important;
+  border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;
 }
 .studio-poster-cta{
-  position:absolute!important;left:31%!important;top:77.2%!important;width:38%!important;height:7.8%!important;z-index:4!important;
-  border:0!important;border-radius:12px!important;background:transparent!important;cursor:pointer!important;padding:0!important;margin:0!important;
+  position:absolute!important;left:40.2%!important;top:74.7%!important;width:37.8%!important;height:3.0%!important;z-index:40!important;
+  border:0!important;border-radius:8px!important;background:transparent!important;cursor:pointer!important;padding:0!important;margin:0!important;
   -webkit-tap-highlight-color:transparent;touch-action:manipulation
 }
-.studio-poster-cta:hover,.studio-poster-cta:focus-visible{outline:2px solid rgba(255,214,123,.9)!important;outline-offset:-3px!important;box-shadow:0 0 22px rgba(255,165,61,.38)!important;background:rgba(255,187,83,.05)!important}
+.studio-poster-cta:hover,.studio-poster-cta:focus-visible{outline:2px solid rgba(255,214,123,.9)!important;outline-offset:-2px!important;box-shadow:0 0 22px rgba(255,165,61,.38)!important;background:rgba(255,187,83,.05)!important}
 .studio-poster-cta:active{background:rgba(255,205,116,.10)!important}
 `;
   fs.writeFileSync(file, source);
