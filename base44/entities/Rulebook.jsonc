@@ -1,0 +1,113 @@
+{
+  "name": "Rulebook",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "default": ""
+    },
+    "system_name": {
+      "type": "string",
+      "default": ""
+    },
+    "edition": {
+      "type": "string",
+      "default": ""
+    },
+    "publisher": {
+      "type": "string",
+      "default": ""
+    },
+    "document_type": {
+      "type": "string",
+      "enum": [
+        "core_rulebook",
+        "player_guide",
+        "gm_guide",
+        "expansion",
+        "bestiary",
+        "supplement",
+        "homebrew",
+        "other"
+      ],
+      "default": "core_rulebook"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "uploaded",
+        "builtin",
+        "licensed",
+        "custom"
+      ],
+      "default": "uploaded"
+    },
+    "file_url": {
+      "type": "string",
+      "default": ""
+    },
+    "original_filename": {
+      "type": "string",
+      "default": ""
+    },
+    "mime_type": {
+      "type": "string",
+      "default": ""
+    },
+    "file_size": {
+      "type": "number",
+      "default": null
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "added",
+        "uploaded",
+        "awaiting_processing",
+        "processing",
+        "extraction_complete",
+        "review_required",
+        "ready",
+        "failed"
+      ],
+      "default": "added"
+    },
+    "rules_profile_id": {
+      "type": "string",
+      "default": ""
+    },
+    "processing_version": {
+      "type": "number",
+      "default": null
+    },
+    "schema_version": {
+      "type": "number",
+      "default": 1
+    },
+    "is_private": {
+      "type": "boolean",
+      "default": true
+    },
+    "notes": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

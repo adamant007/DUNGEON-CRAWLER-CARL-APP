@@ -1,0 +1,55 @@
+{
+  "name": "RulebookExtraction",
+  "type": "object",
+  "properties": {
+    "rulebook_id": {
+      "type": "string",
+      "default": ""
+    },
+    "processing_job_id": {
+      "type": "string",
+      "default": ""
+    },
+    "page_number": {
+      "type": "number",
+      "default": null
+    },
+    "section_index": {
+      "type": "number",
+      "default": 0
+    },
+    "text": {
+      "type": "string",
+      "default": ""
+    },
+    "character_count": {
+      "type": "number",
+      "default": 0
+    },
+    "processing_version": {
+      "type": "number",
+      "default": 1
+    },
+    "schema_version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  },
+  "required": [
+    "rulebook_id"
+  ]
+}

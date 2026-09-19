@@ -1,0 +1,158 @@
+{
+  "name": "Character",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "default": ""
+    },
+    "ruleset": {
+      "type": "string",
+      "default": "crawler"
+    },
+    "system_key": {
+      "type": "string",
+      "default": ""
+    },
+    "rules_profile_id": {
+      "type": "string",
+      "default": ""
+    },
+    "profile_version": {
+      "type": "number",
+      "default": 1
+    },
+    "schema_version": {
+      "type": "number",
+      "default": 1
+    },
+    "legacy_profile": {
+      "type": "boolean",
+      "default": false
+    },
+    "character_source": {
+      "type": "string",
+      "default": ""
+    },
+    "source_template_id": {
+      "type": "string",
+      "default": ""
+    },
+    "ruleset_data": {
+      "type": "object"
+    },
+    "quote": {
+      "type": "string",
+      "default": "Still Standing."
+    },
+    "draft": {
+      "type": "boolean",
+      "default": false
+    },
+    "creation_step": {
+      "type": "string",
+      "default": ""
+    },
+    "portrait_url": {
+      "type": "string",
+      "default": ""
+    },
+    "portrait_settings": {
+      "type": "object",
+      "properties": {
+        "offsetX": {
+          "type": "number",
+          "default": 0
+        },
+        "offsetY": {
+          "type": "number",
+          "default": 0
+        },
+        "scale": {
+          "type": "number",
+          "default": 1
+        }
+      }
+    },
+    "customization": {
+      "type": "object"
+    },
+    "details": {
+      "type": "object"
+    },
+    "attributes": {
+      "type": "object"
+    },
+    "skills": {
+      "type": "object"
+    },
+    "health": {
+      "type": "number",
+      "default": 10
+    },
+    "max_health": {
+      "type": "number",
+      "default": 10
+    },
+    "mana": {
+      "type": "number",
+      "default": 8
+    },
+    "max_mana": {
+      "type": "number",
+      "default": 8
+    },
+    "defense": {
+      "type": "object"
+    },
+    "equipment": {
+      "type": "object"
+    },
+    "currency": {
+      "type": "object"
+    },
+    "attacks": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "spells": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "hotbar": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "inventory": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "notes": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  },
+  "required": []
+}
