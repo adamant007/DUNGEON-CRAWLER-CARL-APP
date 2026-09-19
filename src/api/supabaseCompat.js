@@ -466,6 +466,15 @@ const functions = {
         },
       };
     }
+
+    if (name === "processRulebook") {
+      const data = await apiFetch("/functions/v1/process-rulebook", {
+        method: "POST",
+        body: JSON.stringify(payload || {}),
+      });
+      return { data };
+    }
+
     throw makeError(
       `${name} has not been migrated from Base44 yet.`,
       501,
