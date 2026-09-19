@@ -1,0 +1,510 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --font-heading: ui-sans-serif, system-ui, sans-serif;
+    --font-body: ui-sans-serif, system-ui, sans-serif;
+    --font-display: ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body;
+  }
+}
+
+/* ===== Crawler Companion — Parchment Sheet System ===== */
+:root {
+  --parch-1: #dcc59f;
+  --parch-2: #d2b48c;
+  --parch-3: #c5a377;
+  --parch-edge: #a8946c;
+  --ink: #2f2620;
+  --ink-soft: #5c4d3d;
+  --ink-faint: #8a775c;
+  --rule: #a8957c;
+  --rule-soft: #c4b18d;
+  --hp: #8b0000;
+  --hp-glow: #a63a30;
+  --mana: #2a5a8c;
+  --mana-glow: #4d7fae;
+  --gold: #b08a3e;
+  --gold-bright: #d4a055;
+}
+
+.font-display { font-family: 'Cinzel', serif; }
+.font-fell { font-family: 'IM Fell English', serif; }
+.font-fell-sc { font-family: 'IM Fell English SC', serif; }
+.font-garamond { font-family: 'EB Garamond', serif; }
+
+.parchment {
+  /* Real aged parchment texture — mottling, foxing, stains, and worn edges baked in */
+  background-color: #d2b48c;
+  background-image: url("https://media.base44.com/images/public/6aa08093485633062c57e946/ced1a92a7_generated_image.png");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+/* Ornate reference frame — dragon-emblem corners, chain-link top/bottom bands */
+.sheet-frame {
+  border: 28px solid transparent;
+  border-image: url("https://media.base44.com/images/public/6aa08093485633062c57e946/304758f10_generated_image.png") 15% / 28px repeat;
+}
+
+.ink-border {
+  border: 2px solid var(--ink-soft);
+  box-shadow: 0 0 0 1px var(--rule-soft), inset 0 0 0 1px var(--rule-soft);
+}
+.ink-border-thin {
+  border: 1.5px solid var(--rule);
+}
+.ink-rule { border-color: var(--rule); }
+
+.ink-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink);
+  font-family: 'EB Garamond', serif;
+  outline: none;
+  width: 100%;
+}
+.ink-input:focus {
+  border-bottom-color: var(--ink);
+}
+.ink-box {
+  background: rgba(255, 248, 220, 0.25);
+  border: 1.5px solid var(--ink-soft);
+  color: var(--ink);
+  font-family: 'Cinzel', serif;
+  text-align: center;
+  outline: none;
+}
+.ink-box:focus {
+  background: rgba(255, 248, 220, 0.45);
+}
+
+.section-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--ink);
+  text-transform: uppercase;
+}
+.field-label {
+  font-family: 'IM Fell English SC', serif;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.ruled-lines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 27px,
+    var(--rule-soft) 27px,
+    var(--rule-soft) 28px
+  );
+}
+
+.hp-seg {
+  flex: 1;
+  height: 100%;
+  border: 1px solid var(--ink-soft);
+  background: rgba(255,255,255,0.15);
+  transition: background 0.15s ease;
+}
+.hp-seg.active {
+  background: linear-gradient(180deg, var(--hp-glow), var(--hp));
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.3);
+}
+
+.scrollbar-thin::-webkit-scrollbar { width: 6px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
+
+/* Subtle "tap me" pulse over the open book */
+@keyframes book-glow {
+  0%, 100% { opacity: 0.3; transform: scale(0.94) rotate(-1.2deg); }
+  50% { opacity: 0.75; transform: scale(1.06) rotate(1.2deg); }
+}
+.book-hint {
+  position: absolute;
+  inset: -8%;
+  border-radius: 9999px;
+  background: radial-gradient(ellipse at center, rgba(244, 208, 63, 0.55) 0%, rgba(244, 208, 63, 0.2) 45%, transparent 70%);
+  box-shadow: 0 0 45px 12px rgba(244, 208, 63, 0.35);
+  filter: blur(2px);
+  animation: book-glow 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ===== Physical illustrated sheet ===== */
+.sheet-edge {
+  box-shadow:
+    inset 0 0 0 2px var(--ink-soft),
+    inset 0 0 0 3px var(--rule-soft),
+    inset 0 0 0 9px rgba(255, 248, 220, 0.22),
+    inset 0 0 130px rgba(115, 82, 42, 0.55),
+    inset 0 0 26px rgba(60, 42, 20, 0.35),
+    0 25px 60px rgba(0, 0, 0, 0.6);
+}
+
+/* Hand-inked irregular section frames */
+.hand-frame {
+  position: relative;
+  border: 1.5px solid var(--ink-soft);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  background: rgba(255, 248, 220, 0.10);
+}
+.hand-frame::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid var(--rule);
+  border-radius: 225px 12px 245px 18px / 18px 245px 12px 225px;
+  pointer-events: none;
+}
+.hand-frame-b {
+  border-radius: 15px 225px 15px 255px / 255px 15px 225px 15px;
+}
+.hand-frame-b::after {
+  border-radius: 18px 245px 12px 225px / 225px 12px 245px 18px;
+}
+
+.sheet-banner {
+  border-top: 3px double var(--ink-soft);
+  border-bottom: 3px double var(--ink-soft);
+  background: linear-gradient(180deg, rgba(35, 25, 18, 0.16), rgba(35, 25, 18, 0.05));
+}
+
+/* Vitals pips — 10 segments of 10% each */
+.pip {
+  height: 100%;
+  border: 1.5px solid var(--ink-soft);
+  border-radius: 2px 2px 3px 3px;
+  background: rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.12s ease;
+}
+.pip:active { transform: scale(0.94); }
+.pip.on-hp {
+  background: linear-gradient(180deg, var(--hp-glow), var(--hp));
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
+}
+.pip.on-mana {
+  background: linear-gradient(180deg, var(--mana-glow), var(--mana));
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== Reference-sheet furniture ===== */
+.ribbon {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  background: linear-gradient(180deg, #a11616, var(--hp) 55%, #6e0000);
+  color: #f0e2c8;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 7px;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  padding: 14px 5px;
+  clip-path: polygon(0 0, 50% 9px, 100% 0, 100% calc(100% - 9px), 50% 100%, 0 calc(100% - 9px));
+}
+
+.nameplate {
+  background: linear-gradient(180deg, #a11616, var(--hp) 60%, #6e0000);
+  color: #f0e2c8;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 9px) 100%, 9px 100%);
+  box-shadow: inset 0 0 0 1px rgba(240, 226, 200, 0.22), inset 0 0 16px rgba(0, 0, 0, 0.35);
+}
+
+.crest {
+  width: 84px;
+  height: 84px;
+  border: 2px solid rgba(47, 38, 32, 0.22);
+  border-radius: 9999px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.crest::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(47, 38, 32, 0.16);
+  border-radius: 9999px;
+}
+
+.skill-box {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--ink);
+  border-radius: 1px;
+  background: rgba(255, 248, 220, 0.15);
+  flex-shrink: 0;
+  transition: background 0.12s ease;
+}
+.skill-box.on {
+  background: var(--ink);
+  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.4);
+}
+
+.score-blank {
+  border-bottom: 1.5px solid var(--ink-soft);
+  display: inline-block;
+}
+
+
+/* Global nav — transparent hit areas over the approved navbar artwork */
+.nav-hit {
+  transition: box-shadow 0.15s ease;
+}
+/* Current-page state is retained by aria-current; artwork stays unobscured. */
+
+/* Portrait Workshop — compact drawer anchored to the portrait box — v2.
+   Restores the solid aged-parchment texture (hand-frame's background
+   shorthand would otherwise wipe it out) and casts a shadow from behind
+   the portrait on the drawer's leading (left) edge. */
+@keyframes drawer-slide-right {
+  /* Starts exactly one workshop-width left of its final spot — fully
+     hidden behind the portrait — and translates only its own width. */
+  from { opacity: 0; transform: translateX(-100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.portrait-drawer {
+  /* Solid aged parchment — near-opaque so the sheet beneath never bleeds
+     through the drawer text. !important beats the tome theme rules that
+     otherwise strip the background. */
+  background-color: #d4b98e !important;
+  background-image:
+    linear-gradient(rgba(214, 186, 143, 0.96), rgba(206, 176, 132, 0.96)),
+    url("https://media.base44.com/images/public/6aa08093485633062c57e946/ced1a92a7_generated_image.png") !important;
+  background-size: cover, cover !important;
+  background-position: center, center !important;
+  /* Placement is owned by the workshop WRAPPER (inline top/left/height,
+     absolutely anchored to the portrait container, flush with its right
+     edge). This panel is position:relative (via .parchment), so any
+     top/left/height here would offset it a SECOND time and push the
+     drawer to mid-sheet. Never add offsets to this panel. */
+  border: 1.5px solid rgba(74, 55, 39, 0.72) !important;
+  border-radius: 3px !important;
+  box-shadow: -10px 0 22px -6px rgba(38, 24, 10, 0.55), 0 6px 20px rgba(30, 20, 10, 0.35) !important;
+  animation: drawer-slide-right 0.22s ease-out forwards;
+}
+
+/* Character-management dialogs — the same aged-parchment artwork as the
+   sheet, softened by a near-opaque cream overlay so full-opacity ink text
+   reads clearly. Original artwork files are untouched. */
+.dialog-parchment {
+  background-color: #f2e6c9 !important;
+  background-image:
+    linear-gradient(rgba(248, 239, 216, 0.9), rgba(243, 232, 206, 0.9)),
+    url("https://media.base44.com/images/public/6aa08093485633062c57e946/ced1a92a7_generated_image.png") !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+/* Ribbons read horizontally on phone-width screens */
+@media (max-width: 767px) {
+  .ribbon {
+    writing-mode: horizontal-tb;
+    text-orientation: initial;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    padding: 6px 18px;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0 50%);
+  }
+}
+
+/* Portrait Workshop main drawer — below 1024px there is no horizontal
+   room beside the sheet columns, so the workshop stacks below the
+   portrait instead of sliding right, scrolls internally, and stays
+   fully inside the viewport. !important beats the wrapper's inline
+   positioning (top/left/height are set inline in PortraitWorkshop). */
+@media (max-width: 1023px) {
+  .portrait-workshop-wrap {
+    top: 100% !important;
+    left: 0 !important;
+    height: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 4px 0 0 !important;
+  }
+  .portrait-workshop-wrap .portrait-drawer {
+    height: auto !important;
+    max-height: 64vh;
+    overflow-y: auto !important;
+    /* slides down into place, not sideways, when stacked */
+    animation: none !important;
+  }
+}
+
+/* Second-stage drawers (Choose Character / Customize) — attached to the
+   Portrait Workshop's RIGHT edge: top aligned, left edge flush with the
+   Workshop's right edge, same height, horizontal slide only. position is
+   pinned in the stylesheet (not a utility class) because Tailwind
+   utilities have proven unreliable for this element. */
+.portrait-sub-drawer {
+  position: absolute !important;
+  top: 0 !important;
+  left: 100% !important;
+  height: 100% !important;
+}
+
+/* Below 1024px — no horizontal room beside the sheet columns, so the
+   second drawer stacks below the Workshop instead of sliding right. */
+@media (max-width: 1023px) {
+  .portrait-sub-drawer {
+    top: 100% !important;
+    left: 0 !important;
+    height: auto !important;
+    max-height: 260px !important;
+    margin-top: 4px !important;
+    margin-left: 0 !important;
+  }
+}
+
+/* Customize drawer outer wrapper — same attachment geometry as the other
+   second-stage drawers, but without overflow clipping so the OptionPicker
+   can hang beside (or, on phones, below) it. */
+.customize-wrap {
+  position: absolute !important;
+  top: 0 !important;
+  left: 100% !important;
+  height: 100% !important;
+}
+.customize-panel {
+  height: 100%;
+}
+@media (max-width: 1023px) {
+  .customize-wrap {
+    top: 100% !important;
+    left: 0 !important;
+    height: auto !important;
+    margin-top: 4px !important;
+    margin-left: 0 !important;
+  }
+  .customize-panel {
+    max-height: 260px;
+  }
+}
+
+/* One-option-at-a-time picker — third stage, attached to the Customize
+   drawer's right edge; on phones it stacks below and uses the full
+   available width so the large preview and touch controls stay usable. */
+.option-picker {
+  position: absolute !important;
+  top: 0 !important;
+  left: 100% !important;
+  height: 100% !important;
+  width: 88%;
+  max-width: 300px;
+  margin-left: 4px !important;
+}
+
+/* EDIT CHARACTER OFF — the browser's native number spinners render even
+   on read-only inputs (and some browsers still honor clicks on them), so
+   while the sheet is in normal play the arrows are removed entirely.
+   readOnly still blocks typing; EDIT CHARACTER ON keeps the arrows. */
+.play-locked input[type="number"]::-webkit-outer-spin-button,
+.play-locked input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.play-locked input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+@media (max-width: 1023px) {
+  .option-picker {
+    top: 100% !important;
+    left: 0 !important;
+    height: auto !important;
+    max-height: 74vh !important;
+    width: 100%;
+    max-width: none;
+    margin-top: 4px !important;
+    margin-left: 0 !important;
+  }
+}
