@@ -1,127 +1,21 @@
 import fs from "node:fs";
 import path from "node:path";
-import zlib from "node:zlib";
 
 const root = process.cwd();
 const payload = path.join(root, "payload");
+const output = path.join(root, "public", "brand", "homepage-exact.webp");
 
-function restore(prefix, output) {
-  const parts = fs.readdirSync(payload).filter((name) => name.startsWith(prefix + ".") && name.endsWith(".part")).sort();
-  if (!parts.length) throw new Error(`Missing payload for ${prefix}`);
-  const base64 = parts.map((name) => fs.readFileSync(path.join(payload, name), "utf8").trim()).join("");
-  const source = zlib.gunzipSync(Buffer.from(base64, "base64"));
-  fs.mkdirSync(path.dirname(path.join(root, output)), { recursive: true });
-  fs.writeFileSync(path.join(root, output), source);
-  console.log(`Restored ${output}`);
-}
+const parts = fs.readdirSync(payload)
+  .filter((name) => name.startsWith("homepage-exact.") && name.endsWith(".b64part"))
+  .sort();
 
-function cleanLandingSource(output) {
-  const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
-  const replacements = [
-    ['<img className="studio-hero-logo" src="/brand/hero.webp" alt="Ginger Dragon Fire Studios dragon logo"/>', ''],
-    ['<div className="landing-kicker">GINGER DRAGON FIRE STUDIOS</div>', '<div className="landing-kicker">GINGER DRAGON STUDIOS</div>'],
-    ['<h1 className="sr-only">Ginger Dragon Fire</h1>', '<h1 className="sr-only">Ginger Dragon Studios</h1>'],
-    ['<span>New Ginger Dragon Fire projects will appear here.</span>', '<span>New Ginger Dragon projects will appear here.</span>'],
-    ['<div className="landing-features"><span>⚔️ Games</span><span>🛠️ Software</span><span>🔥 Adventures</span><span>🐉 Original Worlds</span></div>', ''],
-    ['<div className="landing-card">', '<div className="landing-card landing-card-v2">']
-  ];
-  for (const [from,to] of replacements) if (source.includes(from)) source = source.replace(from,to);
+if (!parts.length) throw new Error("Missing homepage-exact image payload");
 
-  const landingStart = source.indexOf('function Landing(');
-  if (landingStart !== -1) {
-    const landingEnd = source.indexOf('\nfunction ', landingStart + 10);
-    const end = landingEnd === -1 ? source.length : landingEnd;
-    let landing = source.slice(landingStart, end);
-    landing = landing.replace(/<img(?![^>]*className=["']studio-hero-art["'])[^>]*src=["'][^"']*(?:app-icon\.svg|icon-96\.webp|ginger-dragon-fire[^"']*|\/brand\/hero\.webp)[^"']*["'][^>]*\/?>(?:<\/img>)?/gi, '');
-    source = source.slice(0, landingStart) + landing + source.slice(end);
-  }
+const base64 = parts
+  .map((name) => fs.readFileSync(path.join(payload, name), "utf8").trim())
+  .join("");
 
-  const homepage = '<img className="studio-hero-art" src="/brand/studio-homepage.webp" alt="Ginger Dragon Studios — RPG Companion homepage"/>';
-  if (source.includes('className="studio-hero-art"')) {
-    source = source.replace(/<img className="studio-hero-art"[^>]*\/>/, homepage);
-  } else {
-    const marker = '<div className="landing-card landing-card-v2">';
-    if (!source.includes(marker)) throw new Error('Landing card marker not found');
-    source = source.replace(marker, marker + homepage);
-  }
-
-  // Keep the real homepage visible. Older emergency code auto-clicked the CTA
-  // and skipped the homepage entirely, which made production open on the app.
-  source = source.replace(/import ['"]\.\/direct-rpg-entry['"];?\n?/g, '');
-  source = source.replace(/import ['"]\.\/landing-production['"];?\n?/g, '');
-
-  // Attach the responsive, accessible hotspot to the painted Enter button.
-  if (!source.includes("import './studio-landing-final';")) {
-    source += "\n\n// Production homepage interaction.\nimport './studio-landing-final';\n";
-  }
-
-  fs.writeFileSync(file, source);
-  console.log('Prepared correct studio homepage -> RPG Companion character sheet flow');
-}
-
-function makeCharacterPrimary(output) {
-  const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
-  const start = source.indexOf('function Dashboard('), end = source.indexOf('\nfunction Combat(', start);
-  if (start !== -1 && end !== -1) source = source.slice(0,start) + 'function Dashboard({c,update}:{c:Character;update:(f:any)=>void;setTab:(t:Tab)=>void}){return <CharacterSheet c={c} update={update}/>}' + source.slice(end);
-  source = source.replace(/useState<Tab>\(['"]Dashboard['"]\)/g, "useState<Tab>('Character')");
-  source = source.replace(/useState\(['"]Dashboard['"]\)/g, "useState('Character')");
-  source = source.replace(/['"]Dashboard['"]\s*,\s*/g, '');
-  source = source.replace(/,\s*['"]Dashboard['"]/g, '');
-  source = source.replace(/(['"]Account['"]\s*,\s*)(['"]Tutorial['"])/g, '$2');
-  fs.writeFileSync(file, source);
-}
-
-function injectLandingStyles(output) {
-  const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
-  source += `
-/* ginger-dragon-studio-homepage */
-html.studio-landing-active,body.studio-landing-active{overflow:auto!important;overscroll-behavior:auto!important;background:#090b10!important}
-.studio-entrance-root{
-  position:relative!important;z-index:1!important;
-  width:100%!important;min-height:100vh!important;
-  display:flex!important;justify-content:center!important;align-items:flex-start!important;overflow:visible!important;
-  background:#090b10!important;padding:0!important;margin:0!important;
-}
-.studio-poster-stage{
-  position:relative!important;display:block!important;overflow:visible!important;line-height:0!important;flex:none!important;
-  width:min(100%,1024px)!important;height:auto!important;max-width:1024px!important;
-  margin:0 auto!important;left:auto!important;right:auto!important;transform:none!important;
-}
-.studio-poster-stage>img.studio-hero-art,
-.landing-card-v2 .studio-hero-art{
-  position:relative!important;display:block!important;width:100%!important;height:auto!important;
-  max-width:1024px!important;margin:0 auto!important;object-fit:contain!important;object-position:center top!important;
-  border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;
-}
-.studio-poster-cta{
-  position:absolute!important;left:40.2%!important;top:74.7%!important;width:37.8%!important;height:3.0%!important;z-index:40!important;
-  border:0!important;border-radius:8px!important;background:transparent!important;cursor:pointer!important;padding:0!important;margin:0!important;
-  -webkit-tap-highlight-color:transparent;touch-action:manipulation
-}
-.studio-poster-cta:hover,.studio-poster-cta:focus-visible{outline:2px solid rgba(255,214,123,.9)!important;outline-offset:-2px!important;box-shadow:0 0 22px rgba(255,165,61,.38)!important;background:rgba(255,187,83,.05)!important}
-.studio-poster-cta:active{background:rgba(255,205,116,.10)!important}
-`;
-  fs.writeFileSync(file, source);
-  console.log('Injected responsive studio homepage styles');
-}
-
-function injectCoreIntegration(output) {
-  const file = path.join(root, output); let source = fs.readFileSync(file, "utf8");
-  const integrations = [
-    ["import './core-hp-integration';", '// Build-time core integration: all HP damage controls route through Damage Resist.'],
-    ["import './campaign-role-visibility';", '// Build-time campaign role guard: keep GM navigation available to local/GM users and hidden from confirmed players.'],
-    ["import './character-dashboard-v2';", '// Ensure the Ginger Dragon character dashboard is mounted on every production build.'],
-    ["import './character-dashboard-polish';", '// Restore the segmented HP/Mana treatment and character dashboard polish.'],
-    ["import './character-hotbar-loadout';", '// Restore the 1-0 character hotbar below the main character header.']
-  ];
-  let changed = false;
-  for (const [marker,comment] of integrations) if (!source.includes(marker)) { source += `\n\n${comment}\n${marker}\n`; changed = true; }
-  if (changed) fs.writeFileSync(file, source);
-}
-
-restore("main","src/main.tsx");
-restore("styles","src/styles.css");
-cleanLandingSource("src/main.tsx");
-makeCharacterPrimary("src/main.tsx");
-injectLandingStyles("src/styles.css");
-injectCoreIntegration("src/main.tsx");
+const bytes = Buffer.from(base64, "base64");
+fs.mkdirSync(path.dirname(output), { recursive: true });
+fs.writeFileSync(output, bytes);
+console.log(`Restored public/brand/homepage-exact.webp (${bytes.length} bytes)`);
