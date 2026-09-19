@@ -5,7 +5,7 @@
    numbers live in The Vault. Currency types come from the active Rules
    Profile; nothing here is hard-coded to any specific metal or system. */
 
-const IMG = "https://media.base44.com/images/public/6aa08093485633062c57e946";
+const IMG = "https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets";
 
 /* The Vault chest — the battered old open lockbox, its hoard a chaotic
    jumble of mismatched coins and pocket debris. Decorative atmosphere
