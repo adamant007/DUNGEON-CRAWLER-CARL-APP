@@ -1,6 +1,6 @@
 import React from "react";
 
-const HEADER_ART = "https://media.base44.com/images/public/6aa08093485633062c57e946/7934da15c_Crawler_Companion_Approved_Top_Header.png";
+const HEADER_ART = "https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/7934da15c_Crawler_Companion_Approved_Top_Header.png";
 
 export default function SheetHeader() {
   return (

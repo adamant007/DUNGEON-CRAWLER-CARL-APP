@@ -18,7 +18,7 @@ import gearOther from "@/assets/gear/1acc7c228_GD_GEAR_OTHER_FRAME.png";
 
    ★ APPROVED VISUAL REFERENCE (authoritative — the final 33-icon
    contact sheet; every canonical icon below is the user's own artwork):
-   https://media.base44.com/images/public/6aa08093485633062c57e946/49bbf1f51_Ginger_Dragon_Contact_Sheet.png
+   https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/49bbf1f51_Ginger_Dragon_Contact_Sheet.png
 
    Style: high-fantasy, slightly illustrated/engraved, solid filled
    silhouettes with consistent weight, readable at ~11–28px on the dark
@@ -114,22 +114,22 @@ const TRAIL_PATH = (
 /* ═══════════════ CORE STATS ═══════════════ */
 
 /* Core stat icons — all approved artwork assets. */
-export const GD_STAT_STR = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/e47073b4b_GD_STAT_STR.png");
-export const GD_STAT_DEX = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/31e82c23c_GD_STAT_DEX.png");
-export const GD_STAT_CON = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/011cc93fb_GD_STAT_CON.png");
-export const GD_STAT_INT = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/e2a9e7621_GD_STAT_INT.png");
-export const GD_STAT_CHA = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/28571feef_GD_STAT_CHA.png");
+export const GD_STAT_STR = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/e47073b4b_GD_STAT_STR.png");
+export const GD_STAT_DEX = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/31e82c23c_GD_STAT_DEX.png");
+export const GD_STAT_CON = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/011cc93fb_GD_STAT_CON.png");
+export const GD_STAT_INT = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/e2a9e7621_GD_STAT_INT.png");
+export const GD_STAT_CHA = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/28571feef_GD_STAT_CHA.png");
 
 /* ═══════════════ MAJOR SECTIONS (antique gold/bronze) ═══════════════ */
 
 /* Attacks — crossed fantasy weapons. Approved artwork asset. */
-export const GD_ATTACKS = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/02e82007b_GD_ATTACKS.png");
+export const GD_ATTACKS = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/02e82007b_GD_ATTACKS.png");
 /* Skills — ornate gold star compass / compass rose. Approved artwork asset. */
-export const GD_SKILLS = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/b6a337a91_GD_SKILLS.png");
+export const GD_SKILLS = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/b6a337a91_GD_SKILLS.png");
 /* Equipment — fantasy great helm. Approved artwork asset. */
-export const GD_GEAR = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/3a9616657_GD_GEAR.png");
+export const GD_GEAR = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/3a9616657_GD_GEAR.png");
 /* Defense — fantasy heater shield. Approved artwork asset. */
-export const GD_DEFENSE = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/4dc65d8f2_GD_DEFENSE.png");
+export const GD_DEFENSE = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/4dc65d8f2_GD_DEFENSE.png");
 /* Movement — winged fantasy boot (section-level symbol). Antique gold. */
 export const GD_MOVEMENT = gdSvg(
   <g>
@@ -141,52 +141,52 @@ export const GD_MOVEMENT = gdSvg(
 );
 
 /* Spells — open glowing spellbook with an arcane spark. Approved artwork asset. */
-export const GD_SPELLS = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/adc0cced2_GD_SPELLS.png");
+export const GD_SPELLS = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/adc0cced2_GD_SPELLS.png");
 
 /* ═══════════════ RESOURCES ═══════════════ */
 
 /* HP — faceted vitality heart. Approved artwork asset. */
-export const GD_HP = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/0fd3d4f66_GD_HP.png");
+export const GD_HP = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/0fd3d4f66_GD_HP.png");
 /* Mana — faceted arcane crystal. Approved artwork asset. */
-export const GD_MANA = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/3c226e55e_GD_MANA.png");
+export const GD_MANA = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/3c226e55e_GD_MANA.png");
 /* Hotbar — magical flame over a ruby. Approved artwork asset. */
-export const GD_HOTBAR = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/5e2052a2a_GD_HOTBAR.png");
+export const GD_HOTBAR = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/5e2052a2a_GD_HOTBAR.png");
 
 /* ═══════════════ DEFENSE / MOVEMENT MICRO ICONS ═══════════════ */
 
 /* Damage Resist — reinforced gold shield. Approved artwork asset. */
-export const GD_DAMAGE_RESIST = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/45dc859e1_GD_DAMAGE_RESIST.png");
+export const GD_DAMAGE_RESIST = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/45dc859e1_GD_DAMAGE_RESIST.png");
 /* Evade — blue wind / deflection swirl. Approved artwork asset. */
-export const GD_EVADE = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/8d29b61c8_GD_EVADE.png");
+export const GD_EVADE = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/8d29b61c8_GD_EVADE.png");
 /* Move — winged boot. Approved artwork asset. */
-export const GD_MOVE = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/6d3c5ab5c_GD_MOVE.png");
+export const GD_MOVE = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/6d3c5ab5c_GD_MOVE.png");
 /* Step — two gold footprints. Approved artwork asset. */
-export const GD_STEP = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/f41684f45_GD_STEP.png");
+export const GD_STEP = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/f41684f45_GD_STEP.png");
 
 /* ═══════════════ CHARACTER / INVENTORY ═══════════════ */
 
 /* Character Details — rolled scroll with a quill. Approved artwork asset. */
-export const GD_CHARACTER_DETAILS = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/348df435f_GD_CHARACTER_DETAILS.png");
+export const GD_CHARACTER_DETAILS = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/348df435f_GD_CHARACTER_DETAILS.png");
 /* Inventory — leather backpack / satchel. Approved artwork asset. */
-export const GD_INVENTORY = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/cf23d37e8_GD_INVENTORY.png");
+export const GD_INVENTORY = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/cf23d37e8_GD_INVENTORY.png");
 
 /* ═══════════════ ACTION ICONS ═══════════════ */
 
 /* Heal — green cross with light rays. Approved artwork asset. */
-export const GD_HEAL = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/adddee7e0_GD_ACTION_HEAL.png");
+export const GD_HEAL = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/adddee7e0_GD_ACTION_HEAL.png");
 /* Magic Attack — blue magical energy bolt. Approved artwork asset. */
-export const GD_MAGIC_ATTACK = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/958434804_GD_ACTION_MAGIC_ATTACK.png");
+export const GD_MAGIC_ATTACK = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/958434804_GD_ACTION_MAGIC_ATTACK.png");
 /* Physical Attack — silver sword. Approved artwork asset. */
-export const GD_PHYSICAL_ATTACK = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/f293beb62_GD_ACTION_PHYSICAL_ATTACK.png");
+export const GD_PHYSICAL_ATTACK = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/f293beb62_GD_ACTION_PHYSICAL_ATTACK.png");
 /* Passive — purple swirling vortex spiral. Approved artwork asset. */
-export const GD_PASSIVE = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/bc36ec004_GD_ACTION_PASSIVE.png");
+export const GD_PASSIVE = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/bc36ec004_GD_ACTION_PASSIVE.png");
 
 /* ═══════════════ CONSUMABLE ICONS ═══════════════ */
 
 /* Healing Potion — round potion bottle, crimson liquid. Approved artwork asset. */
-export const GD_HEALING_POTION = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/853b4cf25_GD_HEALING_POTION.png");
+export const GD_HEALING_POTION = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/853b4cf25_GD_HEALING_POTION.png");
 /* Mana Potion — round potion bottle, arcane-blue liquid. Approved artwork asset. */
-export const GD_MANA_POTION = gdAsset("https://media.base44.com/images/public/6aa08093485633062c57e946/0814084b1_GD_MANA_POTION.png");
+export const GD_MANA_POTION = gdAsset("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/0814084b1_GD_MANA_POTION.png");
 
 /* ═══════════════ GEAR SLOT ICONS ═══════════════ */
 

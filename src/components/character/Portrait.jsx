@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import PortraitWorkshop from "@/components/character/PortraitWorkshop";
 import { DEFAULT_CUSTOMIZATION } from "@/components/character/customizeOptions";
 
-const PORTRAIT_ART = "https://media.base44.com/images/public/6aa08093485633062c57e946/31ca293c5_Crawler_Companion_Approved_Portrait_Frame_ONLY.png";
+const PORTRAIT_ART = "https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/31ca293c5_Crawler_Companion_Approved_Portrait_Frame_ONLY.png";
 
 const DEFAULT_SETTINGS = { offsetX: 0, offsetY: 0, scale: 1 };
 

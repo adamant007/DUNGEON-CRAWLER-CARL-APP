@@ -39,7 +39,7 @@ export const DEFAULT_CUSTOMIZATION = {
    so the artwork is shown pixel-accurate, unaltered. Reference only —
    never pasted onto the user's portrait. */
 const REFERENCE_SHEET =
-  "https://media.base44.com/images/public/6aa08093485633062c57e946/98e9126a5_Ginger_Dragon_Hair_Style_and_Facial_Hair_FINAL.png";
+  "https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/98e9126a5_Ginger_Dragon_Hair_Style_and_Facial_Hair_FINAL.png";
 
 const HAIR_COLORS = [
   { key: "original", label: "Original", hex: null },
