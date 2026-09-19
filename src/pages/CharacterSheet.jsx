@@ -216,7 +216,14 @@ export default function CharacterSheet() {
         me = await base44.auth.me();
         authed = true;
       } catch {
-        /* offline / not signed in — keep the blank draft */
+        /* A plain /character visit is a saved-character destination, not a
+           silent blank guest sheet. Keep guest mode only when the visitor
+           explicitly chose New Character or already has a local guest draft. */
+        const entryAction = new URLSearchParams(window.location.search).get("action");
+        if (!guest && entryAction !== "new") {
+          base44.auth.redirectToLogin(window.location.pathname + window.location.search);
+          return;
+        }
       }
       if (authed && guest) {
         try {
