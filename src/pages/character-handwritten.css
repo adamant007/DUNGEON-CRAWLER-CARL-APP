@@ -1,0 +1,79 @@
+.parchment .section-title {
+  font-family: 'IM Fell English SC', serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.055em !important;
+  text-transform: none !important;
+  color: #3f3126 !important;
+  text-shadow: 0.35px 0.2px 0 rgba(78, 52, 35, 0.28);
+}
+
+.parchment .field-label {
+  font-family: 'IM Fell English', serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.025em !important;
+  text-transform: none !important;
+  color: #5a4634 !important;
+}
+
+.parchment .ink-input,
+.parchment textarea,
+.parchment input:not(.pip) {
+  font-family: 'EB Garamond', 'IM Fell English', serif;
+  font-weight: 500;
+  letter-spacing: 0.015em;
+}
+
+.parchment .ink-input,
+.parchment textarea {
+  font-style: italic;
+}
+
+.parchment .ink-box {
+  font-family: 'IM Fell English', serif !important;
+  font-weight: 400 !important;
+  border-color: rgba(73, 54, 39, 0.64) !important;
+  background: rgba(239, 220, 184, 0.08) !important;
+  box-shadow: inset 0 0 0 0.5px rgba(117, 83, 55, 0.22);
+}
+
+.parchment .hand-frame,
+.parchment .hand-frame-b {
+  border-color: rgba(74, 55, 39, 0.72) !important;
+  background: rgba(255, 248, 220, 0.045) !important;
+  box-shadow: 0.5px 0.7px 0 rgba(67, 45, 30, 0.18);
+}
+
+.parchment .hand-frame::after,
+.parchment .hand-frame-b::after {
+  border-color: rgba(119, 88, 60, 0.48) !important;
+}
+
+.parchment .score-blank {
+  font-family: 'IM Fell English', serif !important;
+  border-bottom-color: rgba(76, 55, 40, 0.62) !important;
+}
+
+.parchment .nameplate input {
+  font-family: 'IM Fell English', serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.035em;
+}
+
+.parchment .nameplate p,
+.parchment footer p,
+.parchment .font-fell {
+  text-shadow: 0.25px 0.2px 0 rgba(76, 51, 33, 0.25);
+}
+
+.parchment .pip {
+  border-radius: 1px 3px 2px 2px;
+  border-color: rgba(62, 47, 35, 0.72);
+  box-shadow: 0.5px 0.5px 0 rgba(48, 34, 24, 0.2), inset 0 0 5px rgba(255,255,255,0.05);
+}
+
+.parchment h1 {
+  font-family: 'IM Fell English SC', serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.075em !important;
+  text-shadow: 0.8px 0.6px 0 rgba(88, 58, 37, 0.28);
+}

@@ -1,0 +1,208 @@
+.crawler-tome {
+  isolation: isolate;
+  background-color: #efe0b8 !important;
+  background-image:
+    linear-gradient(rgba(255,249,226,.58), rgba(255,244,211,.48)),
+    url("https://media.base44.com/images/public/6aa08093485633062c57e946/ced1a92a7_generated_image.png") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  border-width: 34px !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(83,57,34,.62),
+    inset 0 0 0 7px rgba(235,207,154,.46),
+    inset 0 0 34px rgba(88,54,25,.18),
+    inset 0 0 120px rgba(147,101,48,.16),
+    0 4px 0 #5b3b25,
+    0 10px 0 #34251d,
+    0 18px 28px rgba(0,0,0,.46),
+    0 36px 70px rgba(0,0,0,.52) !important;
+}
+
+.crawler-tome::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  height: 16px;
+  z-index: 4;
+  pointer-events: none;
+  border: 1px solid rgba(207,157,72,.75);
+  background:
+    radial-gradient(circle at 18px 50%, #c79b4c 0 3px, transparent 4px),
+    repeating-linear-gradient(90deg, rgba(50,38,31,.96) 0 18px, rgba(119,78,42,.96) 18px 21px, rgba(42,32,27,.98) 21px 40px);
+  box-shadow: inset 0 1px 0 rgba(255,221,147,.36), 0 2px 4px rgba(0,0,0,.4);
+}
+
+.crawler-tome::after { bottom: -27px; }
+
+.crawler-tome .hand-frame,
+.crawler-tome .hand-frame-b {
+  background: rgba(255,250,229,.20) !important;
+  border-color: rgba(70,47,31,.72) !important;
+  box-shadow:
+    inset 0 0 18px rgba(145,103,56,.08),
+    1px 1px 0 rgba(74,48,30,.18),
+    -1px 0 0 rgba(255,247,219,.35) !important;
+}
+
+.crawler-tome .hand-frame::after,
+.crawler-tome .hand-frame-b::after {
+  border-color: rgba(132,90,53,.42) !important;
+}
+
+.crawler-tome .ink-input,
+.crawler-tome textarea {
+  color: #33261d !important;
+  border-bottom-color: rgba(86,60,42,.34) !important;
+}
+
+.crawler-tome .section-title {
+  font-family: 'IM Fell English', serif !important;
+  font-style: italic;
+  font-size: 1.02em;
+  letter-spacing: .02em !important;
+  color: #2f2119 !important;
+}
+
+.crawler-tome .field-label,
+.crawler-tome input,
+.crawler-tome textarea,
+.crawler-tome .score-blank {
+  font-family: 'IM Fell English', 'EB Garamond', serif !important;
+}
+
+.crawler-tome input:not([type='number']),
+.crawler-tome textarea {
+  font-style: italic;
+}
+
+.crawler-tome .nameplate {
+  background: linear-gradient(180deg,#a8241b 0%,#801713 58%,#5b100e 100%) !important;
+  border: 1px solid rgba(224,177,91,.64);
+  box-shadow:
+    inset 0 0 0 2px rgba(64,31,19,.35),
+    inset 0 0 18px rgba(0,0,0,.42),
+    0 3px 4px rgba(52,31,20,.28) !important;
+}
+
+.crawler-tome .pip {
+  border: 2px solid rgba(62,43,32,.74) !important;
+  box-shadow: inset 0 0 5px rgba(255,255,255,.1), 0 1px 1px rgba(55,38,27,.28) !important;
+}
+
+.crawler-tome footer > div {
+  background: linear-gradient(180deg,#3d3029,#171513 62%,#2b211c);
+  color: #e9cf91;
+  border: 2px solid #9c7338 !important;
+  padding: 7px 28px !important;
+  clip-path: polygon(4% 0,96% 0,100% 50%,96% 100%,4% 100%,0 50%);
+  box-shadow: inset 0 0 0 2px rgba(222,173,79,.16), 0 3px 5px rgba(0,0,0,.38);
+}
+
+.tome-header {
+  display: grid;
+  grid-template-columns: 90px 72px minmax(360px,1fr) 72px 90px;
+  align-items: stretch;
+  gap: 6px;
+  margin: -12px -8px 18px;
+  min-height: 112px;
+}
+
+.tome-side,
+.tome-sigil,
+.tome-title-plaque {
+  border: 2px solid #6c4a2d;
+  box-shadow: inset 0 0 0 2px rgba(207,158,74,.28), inset 0 0 18px rgba(0,0,0,.4), 0 3px 4px rgba(0,0,0,.28);
+}
+
+.tome-side {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px;
+  text-align:center;
+  color:#e3c891;
+  background:linear-gradient(180deg,#332820,#171514 58%,#30231d);
+  font-family:'IM Fell English SC',serif;
+  font-size:11px;
+  line-height:1.22;
+  letter-spacing:.06em;
+}
+
+.tome-sigil {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#e4b34e;
+  background:linear-gradient(180deg,#a7271d,#711613 62%,#4d100f);
+  font-family:'IM Fell English SC',serif;
+  font-size:35px;
+  text-shadow:0 2px 2px rgba(0,0,0,.55);
+}
+
+.tome-title-plaque {
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:10px 24px;
+  color:#ead09b;
+  background:linear-gradient(180deg,#3c3029,#171514 62%,#2c221e);
+  clip-path:polygon(6% 0,94% 0,100% 50%,94% 100%,6% 100%,0 50%);
+}
+
+.tome-title-plaque::before,
+.tome-title-plaque::after {
+  content:"◆";
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  color:#b9883e;
+  font-size:13px;
+}
+.tome-title-plaque::before { left:24px; }
+.tome-title-plaque::after { right:24px; }
+
+.tome-title-plaque h1 {
+  margin:0;
+  font-family:'Cinzel',serif !important;
+  font-style:normal;
+  font-weight:700 !important;
+  letter-spacing:.06em !important;
+  color:#ead09b !important;
+  text-shadow:0 2px 1px #000, 0 0 10px rgba(215,163,77,.15) !important;
+}
+
+.tome-title-plaque p {
+  color:#ead09b;
+  margin-top:7px;
+  letter-spacing:.36em;
+}
+
+@media (max-width: 900px) {
+  .tome-header { grid-template-columns:76px 58px minmax(330px,1fr) 58px 76px; }
+  .tome-side { font-size:9px; }
+  .tome-sigil { font-size:28px; }
+}
+
+/* Phone compaction — panels use the same 8px padding as desktop;
+   text sizes, input heights, and touch targets are untouched. */
+@media (max-width: 639px) {
+  /* Ginger Dragon flavor panel — phone only: hugs its single quote line */
+  .crawler-tome .flavor-panel {
+    padding: 6px 8px !important;
+  }
+}
+
+/* Visual dice — fast tumble while the roll settles (~0.65s total).
+   Presentation only; the settled value is always the engine's result. */
+@keyframes die-tumble {
+  0% { transform: rotate(-16deg) scale(1.06); }
+  25% { transform: rotate(12deg) scale(0.95); }
+  50% { transform: rotate(-9deg) scale(1.05); }
+  75% { transform: rotate(7deg) scale(0.96); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+.die-tumble { animation: die-tumble 0.18s linear infinite; }
+.die-settled { animation: none; }

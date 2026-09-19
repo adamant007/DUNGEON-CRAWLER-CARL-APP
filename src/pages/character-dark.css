@@ -1,0 +1,926 @@
+/* ===== Pass 2 — Ginger Dragon dark-fantasy sheet treatment =====
+   Scoped to the character sheet (.crawler-tome) and imported LAST so
+   these rules win over the earlier parchment/tome styles at equal
+   specificity. PRESENTATION ONLY — no component logic, data, or
+   behavior is changed by anything in this file.
+
+   Design language: near-black charcoal sheet face, dark charcoal panel
+   interiors with bronze outer edges and a faint gold inner line,
+   restrained warm-gold headings, ivory body text, crimson accents for
+   HP/important controls, cool blue for Mana. The approved ornate frame
+   artwork and the locked Ginger Dragon banner are untouched. */
+
+/* — The sheet face: the project's approved aged-parchment asset
+   (the same artwork the dialogs and drawers use), scaled responsively.
+   Presentation only — the dark panels, borders, spacing, fonts, buttons,
+   resources, navigation, and layout are untouched below. — */
+.crawler-tome {
+  background-color: #d2b48c !important;
+  background-image: url("https://media.base44.com/images/public/6aa08093485633062c57e946/ced1a92a7_generated_image.png") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+
+  /* Pigments of Poor Decisions — the panel interior gradient stops. The
+     defaults are the approved brown ("Dried Scab"); the sheet element
+     carries inline custom properties whenever a character has a chosen
+     pigment. */
+  --pig-1: #5a4733;
+  --pig-2: #4b3c2c;
+  --pig-3: #3c2f21;
+  --pig-4: #2c2216;
+
+  /* Dark-sheet token remap — the shared ink/gold tokens every panel
+     reads flip to the light-on-dark palette. The components themselves
+     are not modified. */
+  --ink: #f3e8d1;
+  --ink-soft: #d8b986;
+  --ink-faint: #b39a72;
+  --rule: #4a3a24;
+  --rule-soft: #3a2d1b;
+  --hp: #de6550;
+  --hp-glow: #b8402f;
+  --mana: #7aa5d8;
+  --mana-glow: #4d7fae;
+  --gold: #d4a055;
+  --gold-bright: #ecc277;
+
+  box-shadow:
+    inset 0 0 0 2px rgba(176, 138, 74, 0.5),
+    inset 0 0 0 7px rgba(12, 9, 6, 0.92),
+    inset 0 0 46px rgba(0, 0, 0, 0.55),
+    inset 0 0 130px rgba(0, 0, 0, 0.4),
+    0 4px 0 #231a11,
+    0 10px 0 #110d09,
+    0 18px 28px rgba(0, 0, 0, 0.5),
+    0 36px 70px rgba(0, 0, 0, 0.55) !important;
+}
+
+/* — Panels: dark charcoal plaques. Dark rim, bronze outer edge, faint
+     gold inner line, soft forged depth. — */
+.crawler-tome .hand-frame,
+.crawler-tome .hand-frame-b {
+  /* Carved dark-wood / forged-metal feel: warm brown-toned charcoal
+     interior, subtle top light, aged bronze outer edge, thin gold
+     inner line, soft dark shadow. */
+  /* Original approved dark-brown panel surface — Pigments of Poor
+     Decisions are ACCENT colors only and never touch the panel
+     backgrounds. The pigment re-inks just the small secondary accents
+     (thin inner panel lines, header underlines, heading diamonds,
+     accent text, value-box edges) through the --pig-accent* variables,
+     which fall back to the original gold/bronze values when unset, so
+     Default Brown is the completely original sheet. */
+  background-image: linear-gradient(180deg, var(--pig-1) 0%, var(--pig-2) 38%, var(--pig-3) 75%, var(--pig-4) 100%) !important;
+  border-color: rgba(178, 136, 66, 0.8) !important;
+  box-shadow:
+    /* fine gold highlight on the light-facing edge */
+    inset 0 1px 0 rgba(245, 210, 132, 0.28),
+    inset 1px 0 0 rgba(245, 210, 132, 0.1),
+    /* darker inner edge beneath the gold rim */
+    inset 0 2px 0 rgba(0, 0, 0, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.65),
+    inset -1px 0 0 rgba(0, 0, 0, 0.45),
+    /* just enough inset depth to seat the panel — the smooth airbrushed
+       edge vignette is gone; crisp edges and the pigment's own granular
+       texture carry the depth now */
+    inset 0 0 10px rgba(0, 0, 0, 0.35),
+    inset 0 0 12px rgba(176, 138, 74, 0.06),
+    /* subtle outer shadow separating the panel from the page */
+    0 0 0 1px rgba(8, 6, 4, 0.65),
+    0 1px 0 rgba(0, 0, 0, 0.6),
+    0 6px 14px rgba(0, 0, 0, 0.5) !important;
+}
+.crawler-tome .hand-frame::after,
+.crawler-tome .hand-frame-b::after {
+  border-color: rgb(var(--pig-accent-rgb, 228 182 106) / 0.38) !important;
+}
+
+/* — Headings & labels: restrained gold, small bronze ornament. — */
+.crawler-tome .section-title {
+  color: var(--pig-accent-text, #e6c88e) !important;
+}
+.crawler-tome .hand-frame .section-title::before,
+.crawler-tome .hand-frame-b .section-title::before {
+  content: "◆";
+  font-size: 0.5em;
+  vertical-align: 0.28em;
+  margin-right: 0.5em;
+  color: var(--pig-accent, #b08a3e);
+}
+.crawler-tome .field-label {
+  color: var(--pig-accent-text, #d6b077) !important;
+}
+
+/* — Restrained per-stat accents: a soft hue on each stat row's small
+   label and a fine tinted edge on its Enhanced value box. Kept subtle
+   so the illustrated stat artwork keeps full prominence. — */
+.crawler-tome [data-stat="str"] > .field-label { color: #d1826f !important; }
+.crawler-tome [data-stat="dex"] > .field-label { color: #a3bd82 !important; }
+.crawler-tome [data-stat="con"] > .field-label { color: #d8a85f !important; }
+.crawler-tome [data-stat="int"] > .field-label { color: #8fb2de !important; }
+.crawler-tome [data-stat="cha"] > .field-label { color: #c2a3dc !important; }
+.crawler-tome [data-stat="str"] > input.ink-box { border-color: rgba(209, 130, 111, 0.45) !important; }
+.crawler-tome [data-stat="dex"] > input.ink-box { border-color: rgba(163, 189, 130, 0.4) !important; }
+.crawler-tome [data-stat="con"] > input.ink-box { border-color: rgba(216, 168, 95, 0.45) !important; }
+.crawler-tome [data-stat="int"] > input.ink-box { border-color: rgba(143, 178, 222, 0.4) !important; }
+.crawler-tome [data-stat="cha"] > input.ink-box { border-color: rgba(194, 163, 220, 0.4) !important; }
+
+/* — Inputs: ivory text, bronze rules. — */
+.crawler-tome .ink-input,
+.crawler-tome textarea {
+  color: #eee2c6 !important;
+  border-bottom-color: rgba(133, 101, 50, 0.55) !important;
+}
+.crawler-tome .ink-input:focus {
+  border-bottom-color: #d4a055 !important;
+}
+
+/* — ink-box control surfaces: dark bronze-edged chips and buttons. — */
+.crawler-tome .ink-box {
+  /* inset value sockets — dark interiors, subtle inner shadows, fine
+     gold edges; values read in warm ivory */
+  background: linear-gradient(180deg, rgba(46, 36, 26, 0.96), rgba(31, 24, 17, 0.98)) !important;
+  border-color: rgb(var(--pig-accent-rgb, 176 138 74) / 0.55) !important;
+  color: #f1e5cb !important;
+  box-shadow:
+    inset 0 1px 0 rgba(0, 0, 0, 0.5),
+    inset 0 2px 5px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(176, 138, 74, 0.12),
+    inset 0 -1px 0 rgba(245, 210, 132, 0.08),
+    0 1px 0 rgba(0, 0, 0, 0.35) !important;
+}
+/* Crimson tap-to-roll / modifier chips keep their accent over the
+   ivory value color (labels must stay readable as controls). */
+.crawler-tome .ink-box.text-\[var\(--hp\)\] {
+  color: var(--hp) !important;
+}
+
+/* — Icon depth: engraved weight. A tiny shadow plus a whisper of warm
+     edge light lifts every sheet pictogram off the charcoal, matching the
+     subtly dimensional icons in the approved mockup. Scoped to the sheet
+     panels — dialogs and drawers keep their parchment islands. — */
+.crawler-tome .hand-frame svg,
+.crawler-tome .hand-frame-b svg,
+.crawler-tome .gd-cluster svg {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 1px rgba(236, 194, 119, 0.14));
+}
+/* Clickable controls read as raised coordinated bronze and press in;
+   value chips and text fields stay recessed and still. */
+.crawler-tome button.ink-box,
+.crawler-tome .gd-toolbar button {
+  background: linear-gradient(180deg, rgba(96, 69, 36, 0.96), rgba(48, 35, 22, 0.97)) !important;
+  border-color: rgba(198, 154, 86, 0.6) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(245, 210, 132, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    inset 0 2px 5px rgba(0, 0, 0, 0.35),
+    0 1px 0 rgba(0, 0, 0, 0.55),
+    0 2px 4px rgba(0, 0, 0, 0.45) !important;
+}
+.crawler-tome button.ink-box:focus-visible,
+.crawler-tome .gd-toolbar button:focus-visible {
+  outline: 1px solid rgba(236, 194, 119, 0.55);
+  outline-offset: 1px;
+}
+.crawler-tome button.ink-box:active,
+.crawler-tome .gd-toolbar button:active {
+  background: linear-gradient(180deg, rgba(25, 19, 13, 0.98), rgba(66, 48, 28, 0.97)) !important;
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.65),
+    inset 0 -1px 0 rgba(245, 210, 132, 0.06) !important;
+}
+.crawler-tome .ink-box:focus {
+  background: linear-gradient(180deg, rgba(74, 57, 34, 0.95), rgba(46, 35, 22, 0.95)) !important;
+}
+/* Only CLICKABLE chips pick up the bronze glint on hover; read-only
+   value chips stay still. Replaces the pale cream hover treatment. */
+.crawler-tome button.ink-box:hover,
+.crawler-tome button:hover > .ink-box {
+  background: linear-gradient(180deg, rgba(124, 92, 50, 0.96), rgba(60, 44, 26, 0.97)) !important;
+  border-color: rgba(228, 184, 108, 0.72) !important;
+}
+
+/* — Vitals: bronze-edged pips; the existing crimson/cool-blue segments
+     stay illuminated against the dark interior. — */
+/* Empty vitals segments: dark charcoal with a bronze slot frame. */
+.crawler-tome .pip {
+  background: rgba(22, 17, 12, 0.8) !important;
+  border-color: rgba(176, 138, 74, 0.45) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.55) !important;
+}
+/* Filled HP — HEALTHY (100–61%): deep garnet / blood-crimson. Stable,
+   controlled, rich but NOT alarming — visibly darker and less saturated
+   than the critical scarlet. */
+.crawler-tome .pip.on-hp {
+  background: linear-gradient(180deg, #b32a3a 0%, #8b1e2d 55%, #6e1624 100%) !important;
+  box-shadow:
+    /* subtle warm highlight on the light-facing edge */
+    inset 0 1px 0 rgba(226, 132, 138, 0.35),
+    inset 0 3px 3px -2px rgba(255, 190, 190, 0.12),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.5),
+    /* restrained deep-crimson illumination */
+    0 0 4px rgba(139, 30, 45, 0.32) !important;
+}
+/* Filled HP — WOUNDED (60–31%): strong warning amber/gold — clearly
+   different from BOTH red states, brighter warm center, moderate glow. */
+.crawler-tome .pip.hp-wounded {
+  background: linear-gradient(180deg, #f0b429 0%, #d69a1d 45%, #a8760f 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 226, 150, 0.55),
+    inset 0 3px 3px -2px rgba(255, 236, 180, 0.28),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.45),
+    0 0 5px rgba(214, 154, 29, 0.45) !important;
+}
+/* Filled HP — CRITICAL (30–1%): bright emergency scarlet — much hotter,
+   more saturated, and brighter than the healthy garnet so the danger
+   state is identifiable instantly without reading the number. */
+.crawler-tome .pip.hp-critical {
+  background: linear-gradient(180deg, #ff4a3d 0%, #ff2a2a 40%, #c11010 75%, #8f0b0b 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 205, 195, 0.7),
+    inset 0 3px 3px -2px rgba(255, 230, 220, 0.35),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.4),
+    /* stronger but still tasteful scarlet glow */
+    0 0 7px rgba(255, 42, 42, 0.55) !important;
+}
+/* Filled Mana: rich arcane blue with the same treatment. */
+.crawler-tome .pip.on-mana {
+  background: linear-gradient(180deg, #7dabd8 0%, #4a7cb0 32%, #2f5682 62%, #1d3a58 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(180, 215, 255, 0.45),
+    inset 0 3px 3px -2px rgba(205, 230, 255, 0.2),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.45),
+    0 0 5px rgba(111, 159, 214, 0.38) !important;
+}
+.crawler-tome .gd-damage {
+  background: rgba(138, 45, 40, 0.22) !important;
+  border-color: rgba(217, 95, 76, 0.55) !important;
+  color: #ec9484 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.crawler-tome .gd-damage:hover {
+  background: rgba(138, 45, 40, 0.4) !important;
+}
+.crawler-tome .gd-damage:active {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+.crawler-tome .gd-heal {
+  background: rgba(49, 93, 124, 0.22) !important;
+  border-color: rgba(111, 159, 214, 0.55) !important;
+  color: #9cc0e6 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.crawler-tome .gd-heal:hover {
+  background: rgba(49, 93, 124, 0.4) !important;
+}
+.crawler-tome .gd-heal:active {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* — Hotbar slots: occupied slots stay bronze-edged and active; empty
+     slots recede into the dark so the two read apart instantly. — */
+.crawler-tome .gd-slot-empty {
+  /* empty slots recede into the dark — a carved socket */
+  background: linear-gradient(180deg, rgba(11, 9, 7, 0.85), rgba(19, 14, 11, 0.8)) !important;
+  border-color: rgba(133, 101, 50, 0.35) !important;
+  color: #6b5636 !important;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    inset 0 -1px 0 rgba(176, 138, 74, 0.1) !important;
+}
+/* Filled slots read as gently raised metal with a soft center highlight;
+   a restrained warm inner glow marks the interactive hover state. */
+.crawler-tome .gd-slot-filled {
+  background: linear-gradient(180deg, rgba(92, 67, 36, 0.96), rgba(40, 30, 19, 0.98)) !important;
+  border-color: rgba(200, 156, 88, 0.62) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(236, 194, 119, 0.16),
+    inset 0 3px 6px rgba(0, 0, 0, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    0 1px 0 rgba(0, 0, 0, 0.55),
+    0 2px 4px rgba(0, 0, 0, 0.45) !important;
+}
+.crawler-tome button.gd-slot-filled:hover {
+  background: linear-gradient(180deg, rgba(120, 88, 48, 0.96), rgba(52, 38, 25, 0.98)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(236, 194, 119, 0.18),
+    inset 0 3px 6px rgba(0, 0, 0, 0.35),
+    inset 0 0 8px rgba(236, 194, 119, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    0 1px 0 rgba(0, 0, 0, 0.55),
+    0 2px 4px rgba(0, 0, 0, 0.45) !important;
+}
+.crawler-tome button.gd-slot-filled:active {
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.55),
+    inset 0 -1px 0 rgba(236, 194, 119, 0.05) !important;
+}
+
+/* ===== Pass 2C — panel ornament & resource cluster (presentation only) ===== */
+
+/* hand-frame-b panels stand alone (no .hand-frame base), so give them
+   the same positioning and edge treatment inside the dark sheet. */
+.crawler-tome .hand-frame-b {
+  position: relative;
+  border: 1.5px solid rgba(160, 122, 60, 0.75);
+}
+.crawler-tome .hand-frame-b::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgb(var(--pig-accent-rgb, 220 172 96) / 0.32);
+  pointer-events: none;
+}
+
+/* Handcrafted furniture: tiny bronze corner rivets on every panel. */
+.crawler-tome .hand-frame::before,
+.crawler-tome .hand-frame-b::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* forged rivets — bright cap, bronze ring, dark cut around each */
+  background:
+    radial-gradient(circle at 5px 5px, rgba(240, 200, 122, 0.85) 0.7px, rgba(176, 138, 74, 0.5) 1.3px, rgba(0, 0, 0, 0.45) 1.8px, transparent 2.3px),
+    radial-gradient(circle at calc(100% - 5px) 5px, rgba(240, 200, 122, 0.85) 0.7px, rgba(176, 138, 74, 0.5) 1.3px, rgba(0, 0, 0, 0.45) 1.8px, transparent 2.3px),
+    radial-gradient(circle at 5px calc(100% - 5px), rgba(240, 200, 122, 0.85) 0.7px, rgba(176, 138, 74, 0.5) 1.3px, rgba(0, 0, 0, 0.45) 1.8px, transparent 2.3px),
+    radial-gradient(circle at calc(100% - 5px) calc(100% - 5px), rgba(240, 200, 122, 0.85) 0.7px, rgba(176, 138, 74, 0.5) 1.3px, rgba(0, 0, 0, 0.45) 1.8px, transparent 2.3px);
+}
+
+/* Heading strips — a visibly distinct, restrained bronze band under
+   each panel heading: warm bronze at the top fading out, a gold seam
+   with a dark cut beneath it. */
+.crawler-tome section[class*="hand-frame"] > header {
+  border-bottom: 1px solid rgb(var(--pig-accent-rgb, 228 182 106) / 0.42);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+  padding-bottom: 3px;
+  margin-bottom: 6px;
+  background: linear-gradient(180deg, rgba(198, 150, 78, 0.2) 0%, rgba(150, 112, 58, 0.07) 55%, transparent 100%);
+}
+
+/* Upper-right resource cluster — a pure spacing wrapper so Vitals and
+   the Hotbar sit flush with every other panel edge in the column, with
+   the same 12px panel gap used everywhere else on the sheet. */
+.crawler-tome .gd-cluster {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* — Toolbar: dark bronze color integration ONLY. Dimensions, layout,
+   and behavior are unchanged (locked toolbar). — */
+.crawler-tome .gd-toolbar .font-fell-sc {
+  color: #e6c987 !important;
+}
+.crawler-tome .gd-toolbar button {
+  background: linear-gradient(180deg, rgba(96, 69, 36, 0.95), rgba(48, 35, 22, 0.96)) !important;
+  border-color: rgba(198, 154, 86, 0.6) !important;
+}
+.crawler-tome .gd-toolbar button:hover {
+  background: linear-gradient(180deg, rgba(124, 92, 50, 0.96), rgba(60, 44, 26, 0.97)) !important;
+}
+
+/* ===== Parchment islands =====
+   Dialogs, action cards, the Hotbar picker, and the Portrait Workshop
+   drawers keep their approved near-opaque parchment palette. The dark
+   token remap and dark panel/chip treatments are reverted inside them
+   so their ink text and parchment surfaces stay exactly as before. */
+.crawler-tome .dialog-parchment,
+.crawler-tome .portrait-drawer,
+.crawler-tome .portrait-sub-drawer,
+.crawler-tome .customize-panel,
+.crawler-tome .option-picker {
+  --ink: #2f2620;
+  --ink-soft: #5c4d3d;
+  --ink-faint: #8a775c;
+  --rule: #a8957c;
+  --rule-soft: #c4b18d;
+  --hp: #8b0000;
+  --hp-glow: #a63a30;
+  --mana: #2a5a8c;
+  --mana-glow: #4d7fae;
+}
+.crawler-tome .dialog-parchment .ink-box,
+.crawler-tome .portrait-drawer .ink-box,
+.crawler-tome .portrait-sub-drawer .ink-box,
+.crawler-tome .customize-panel .ink-box,
+.crawler-tome .option-picker .ink-box {
+  background: rgba(239, 220, 184, 0.08) !important;
+  border-color: rgba(73, 54, 39, 0.64) !important;
+  color: #33261d !important;
+  box-shadow: inset 0 0 0 0.5px rgba(117, 83, 55, 0.22);
+}
+.crawler-tome .dialog-parchment .ink-input,
+.crawler-tome .portrait-drawer .ink-input,
+.crawler-tome .portrait-sub-drawer .ink-input,
+.crawler-tome .customize-panel .ink-input,
+.crawler-tome .option-picker .ink-input {
+  color: #33261d !important;
+  border-bottom-color: rgba(86, 60, 42, 0.34) !important;
+}
+.crawler-tome .dialog-parchment .hand-frame,
+.crawler-tome .dialog-parchment .hand-frame-b,
+.crawler-tome .portrait-drawer .hand-frame,
+.crawler-tome .portrait-drawer .hand-frame-b,
+.crawler-tome .portrait-sub-drawer .hand-frame,
+.crawler-tome .portrait-sub-drawer .hand-frame-b,
+.crawler-tome .customize-panel .hand-frame,
+.crawler-tome .customize-panel .hand-frame-b,
+.crawler-tome .option-picker .hand-frame,
+.crawler-tome .option-picker .hand-frame-b {
+  background: rgba(255, 248, 220, 0.045) !important;
+  border-color: rgba(74, 55, 39, 0.72) !important;
+  box-shadow: 0.5px 0.7px 0 rgba(67, 45, 30, 0.18) !important;
+}
+.crawler-tome .dialog-parchment .section-title,
+.crawler-tome .portrait-drawer .section-title,
+.crawler-tome .portrait-sub-drawer .section-title,
+.crawler-tome .customize-panel .section-title,
+.crawler-tome .option-picker .section-title {
+  color: #2f2119 !important;
+}
+.crawler-tome .dialog-parchment .field-label,
+.crawler-tome .portrait-drawer .field-label,
+.crawler-tome .portrait-sub-drawer .field-label,
+.crawler-tome .customize-panel .field-label,
+.crawler-tome .option-picker .field-label {
+  color: #5a4634 !important;
+}
+
+/* ===== Square panel geometry =====
+   Sheet panels become straight-edged plaques with one small consistent
+   corner radius (3px outer, 2px inner line) — the bowed hand-inked
+   outlines are retired on the dark sheet only. The parchment islands
+   (dialogs, workshop drawers, option picker) keep their approved
+   hand-drawn outlines untouched. */
+.crawler-tome .hand-frame,
+.crawler-tome .hand-frame-b {
+  border-radius: 3px !important;
+}
+.crawler-tome .hand-frame::after,
+.crawler-tome .hand-frame-b::after {
+  border-radius: 2px !important;
+}
+.crawler-tome .dialog-parchment .hand-frame,
+.crawler-tome .portrait-drawer .hand-frame,
+.crawler-tome .portrait-sub-drawer .hand-frame,
+.crawler-tome .customize-panel .hand-frame,
+.crawler-tome .option-picker .hand-frame {
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
+}
+.crawler-tome .dialog-parchment .hand-frame-b,
+.crawler-tome .portrait-drawer .hand-frame-b,
+.crawler-tome .portrait-sub-drawer .hand-frame-b,
+.crawler-tome .customize-panel .hand-frame-b,
+.crawler-tome .option-picker .hand-frame-b {
+  border-radius: 15px 225px 15px 255px / 255px 15px 225px 15px !important;
+}
+.crawler-tome .dialog-parchment .hand-frame::after,
+.crawler-tome .portrait-drawer .hand-frame::after,
+.crawler-tome .portrait-sub-drawer .hand-frame::after,
+.crawler-tome .customize-panel .hand-frame::after,
+.crawler-tome .option-picker .hand-frame::after {
+  border-radius: 225px 12px 245px 18px / 18px 245px 12px 225px !important;
+}
+.crawler-tome .dialog-parchment .hand-frame-b::after,
+.crawler-tome .portrait-drawer .hand-frame-b::after,
+.crawler-tome .portrait-sub-drawer .hand-frame-b::after,
+.crawler-tome .customize-panel .hand-frame-b::after,
+.crawler-tome .option-picker .hand-frame-b::after {
+  border-radius: 18px 245px 12px 225px / 225px 12px 245px 18px !important;
+}
+
+/* Pigments of Poor Decisions are accent-only now: the panels always
+   keep the original dark brown, so the light-pigment text flip is
+   retired — the accent text variant (pigmentAccentText) handles the
+   readability of light and dark pigments itself. */
+
+/* ===== Appearance: TOME (Light) =====
+   The second sheet appearance — aged-ivory / light-parchment panel
+   surfaces with dark readable ink. It stays old, worn, medieval Ginger
+   Dragon: same artwork, same gold ornamentation, same red Health / blue
+   Mana; only the panel interiors and the text ink flip. The panel
+   surface gradient is driven by the same --pig-1..4 stops as the Dark
+   appearance, so redefining them here re-tints every panel at once.
+   The pigment accent variables are computed PER-APPEARANCE in
+   pigments.js so every pigment stays clearly visible on Light too.
+   Rules in this block sit BEFORE the .pigment-on pass, so an active
+   pigment still wins on the properties it owns (borders, underlines,
+   value-box edges). */
+.crawler-tome.tome-light {
+  --pig-1: #ecdcbb;
+  --pig-2: #e2cfa9;
+  --pig-3: #d5bd92;
+  --pig-4: #c7a97b;
+  --ink: #2f2620;
+  --ink-soft: #5c4d3d;
+  --ink-faint: #8a775c;
+  --rule: #a8957c;
+  --rule-soft: #c4b18d;
+  --hp: #a11616;
+  --hp-glow: #8b1e2d;
+  --mana: #2a5a8c;
+  --mana-glow: #4d7fae;
+  --gold: #8a6a2e;
+  --gold-bright: #a5813c;
+}
+
+/* Worn aged-ivory plaques: candle-lit top, softly darkened worn bottom,
+   dark bronze rims, gentle aged shading. */
+.crawler-tome.tome-light .hand-frame,
+.crawler-tome.tome-light .hand-frame-b {
+  border-color: rgba(122, 88, 44, 0.75) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 252, 238, 0.55),
+    inset 0 0 0 1px rgba(122, 88, 44, 0.14),
+    inset 0 0 16px rgba(133, 96, 47, 0.16),
+    inset 0 -2px 6px rgba(133, 96, 47, 0.14),
+    0 0 0 1px rgba(74, 52, 24, 0.3),
+    0 1px 0 rgba(74, 52, 24, 0.22),
+    0 5px 12px rgba(60, 40, 16, 0.3) !important;
+}
+.crawler-tome.tome-light .hand-frame::after,
+.crawler-tome.tome-light .hand-frame-b::after {
+  border-color: rgba(122, 88, 44, 0.38) !important;
+}
+
+/* Dark ink text on the light surfaces. */
+.crawler-tome.tome-light .section-title {
+  color: var(--pig-accent-text, #6b4f2c) !important;
+}
+.crawler-tome.tome-light .field-label {
+  color: var(--pig-accent-text, #5a4634) !important;
+}
+.crawler-tome.tome-light .ink-input,
+.crawler-tome.tome-light textarea {
+  color: #33261d !important;
+  border-bottom-color: rgba(122, 88, 44, 0.45) !important;
+}
+.crawler-tome.tome-light .ink-input:focus {
+  border-bottom-color: #6b4f2c !important;
+}
+
+/* Per-stat accents — deeper inked tints readable on ivory. */
+.crawler-tome.tome-light [data-stat="str"] > .field-label { color: #9c3b2a !important; }
+.crawler-tome.tome-light [data-stat="dex"] > .field-label { color: #4f6b33 !important; }
+.crawler-tome.tome-light [data-stat="con"] > .field-label { color: #8f6414 !important; }
+.crawler-tome.tome-light [data-stat="int"] > .field-label { color: #33557f !important; }
+.crawler-tome.tome-light [data-stat="cha"] > .field-label { color: #5d3f80 !important; }
+.crawler-tome.tome-light [data-stat="str"] > input.ink-box { border-color: rgba(156, 59, 42, 0.55) !important; }
+.crawler-tome.tome-light [data-stat="dex"] > input.ink-box { border-color: rgba(79, 107, 51, 0.5) !important; }
+.crawler-tome.tome-light [data-stat="con"] > input.ink-box { border-color: rgba(143, 100, 20, 0.55) !important; }
+.crawler-tome.tome-light [data-stat="int"] > input.ink-box { border-color: rgba(51, 85, 127, 0.5) !important; }
+.crawler-tome.tome-light [data-stat="cha"] > input.ink-box { border-color: rgba(93, 63, 128, 0.5) !important; }
+
+/* Value sockets — light recessed ivory chips with dark ink. */
+.crawler-tome.tome-light .ink-box {
+  background: linear-gradient(180deg, rgba(255, 250, 228, 0.55), rgba(236, 220, 186, 0.6)) !important;
+  color: #33261d !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 0 3px rgba(122, 88, 44, 0.18),
+    0 1px 0 rgba(74, 52, 24, 0.22) !important;
+}
+.crawler-tome.tome-light .ink-box:focus {
+  background: linear-gradient(180deg, rgba(255, 252, 236, 0.85), rgba(243, 228, 196, 0.9)) !important;
+}
+
+/* Clickable chips — raised warm bronze on the light surfaces. */
+.crawler-tome.tome-light button.ink-box,
+.crawler-tome.tome-light .gd-toolbar button {
+  background: linear-gradient(180deg, #c9a25e, #a87f42) !important;
+  border-color: rgba(102, 74, 36, 0.7) !important;
+  color: #2f2119 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 235, 190, 0.45),
+    inset 0 -1px 0 rgba(74, 52, 24, 0.35),
+    0 1px 0 rgba(74, 52, 24, 0.3) !important;
+}
+.crawler-tome.tome-light button.ink-box:hover,
+.crawler-tome.tome-light button:hover > .ink-box,
+.crawler-tome.tome-light .gd-toolbar button:hover {
+  background: linear-gradient(180deg, #d4ae68, #b58a48) !important;
+  border-color: rgba(90, 64, 30, 0.8) !important;
+}
+.crawler-tome.tome-light button.ink-box:active,
+.crawler-tome.tome-light .gd-toolbar button:active {
+  box-shadow: inset 0 2px 5px rgba(74, 52, 24, 0.4) !important;
+}
+.crawler-tome.tome-light .gd-toolbar .font-fell-sc {
+  color: #6b4f2c !important;
+}
+
+/* Vitals — light empty slots; the red/blue FILLS are untouched. */
+.crawler-tome.tome-light .pip {
+  background: rgba(255, 250, 228, 0.4) !important;
+  border-color: rgba(122, 88, 44, 0.6) !important;
+  box-shadow: inset 0 1px 2px rgba(122, 88, 44, 0.22) !important;
+}
+.crawler-tome.tome-light .gd-damage {
+  color: #8f2b22 !important;
+  border-color: rgba(165, 55, 40, 0.55) !important;
+}
+.crawler-tome.tome-light .gd-heal {
+  color: #2f5682 !important;
+  border-color: rgba(47, 86, 130, 0.5) !important;
+}
+
+/* Hotbar — empty slots are recessed light sockets; filled slots keep
+   their raised bronze. */
+.crawler-tome.tome-light .gd-slot-empty {
+  background: rgba(112, 92, 62, 0.14) !important;
+  border-color: rgba(122, 88, 44, 0.5) !important;
+  color: #7a5c38 !important;
+  box-shadow: inset 0 2px 4px rgba(122, 88, 44, 0.22) !important;
+}
+
+/* Header strips — warm aged band with a dark seam. */
+.crawler-tome.tome-light section[class*="hand-frame"] > header {
+  border-bottom-color: rgb(var(--pig-accent-rgb, 122 88 44) / 0.5) !important;
+  box-shadow: 0 1px 0 rgba(74, 52, 24, 0.22) !important;
+  background: linear-gradient(180deg, rgba(198, 150, 78, 0.14) 0%, rgba(150, 112, 58, 0.05) 55%, transparent 100%) !important;
+}
+
+/* ===== Pigment accent pass — bright hand-highlighter (.pigment-on) =====
+   The approved bright-pigment reference: with a pigment selected the
+   accent reads as a sharp kid-highlighted outline around each panel —
+   Default Brown keeps every original value and is untouched. The
+   pigment brightens the thin outer panel border, the corner rivets
+   become little hollow 4-pointed diamonds riding the border with twins
+   at the middle of the left and right edges, section titles gain a
+   trailing diamond, and the inner lines, header underlines, value-box
+   edges, vitals slot frames, the character name, and the hotbar helper
+   text pick the color up. Panels, parchment, gold trim artwork, HP/Mana
+   fills, icons, and body text are never recolored. */
+
+/* Outer panel border — ONE solid bigger pigment band: instead of the
+   thin outer line plus the separate thin inner line, a pigment gives
+   each panel a single thick filled border. */
+.crawler-tome.pigment-on .hand-frame,
+.crawler-tome.pigment-on .hand-frame-b {
+  border-color: rgb(var(--pig-border-rgb) / 1) !important;
+  border-width: 2px !important;
+}
+
+/* The thin inner ::after line is folded into the thick band — hidden
+   under a pigment (parchment islands keep their original gold line). */
+.crawler-tome.pigment-on .hand-frame::after,
+.crawler-tome.pigment-on .hand-frame-b::after {
+  border-color: transparent !important;
+}
+.crawler-tome.pigment-on section[class*="hand-frame"] > header {
+  border-bottom-color: rgb(var(--pig-accent-rgb) / 1);
+}
+
+/* Value-box edges and vitals slot frames — container highlights. The
+   HP/Mana FILLS keep their crimson/blue state colors. */
+.crawler-tome.pigment-on .ink-box {
+  border-color: rgb(var(--pig-accent-rgb) / 0.95) !important;
+}
+.crawler-tome.pigment-on .pip {
+  border-color: rgb(var(--pig-accent-rgb) / 0.95) !important;
+}
+/* Empty hotbar sockets keep their recessed brown-gray rims. */
+.crawler-tome.pigment-on .gd-slot-empty {
+  border-color: rgba(133, 101, 50, 0.35) !important;
+}
+
+/* Section-title trailing diamond — mirrors the leading one (◆ TITLE ◆). */
+.crawler-tome.pigment-on .hand-frame .section-title::after,
+.crawler-tome.pigment-on .hand-frame-b .section-title::after {
+  content: "◆";
+  font-size: 0.5em;
+  vertical-align: 0.28em;
+  margin-left: 0.5em;
+  color: var(--pig-accent);
+}
+
+/* Corner rivets become hollow 4-pointed diamonds riding the panel
+   border, with twins at the middle of the left and right edges. The
+   diamond geometry is a colorless SVG mask (the stroke is the visible
+   part); the pigment color comes from the element's background. */
+.crawler-tome.pigment-on .hand-frame::before,
+.crawler-tome.pigment-on .hand-frame-b::before {
+  background: rgb(var(--pig-border-rgb)) !important;
+  --gd-dia: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 .6 9.4 5 5 9.4 .6 5Z' fill='none' stroke='black' stroke-width='1.2'/%3E%3C/svg%3E");
+  mask-image: var(--gd-dia), var(--gd-dia), var(--gd-dia), var(--gd-dia), var(--gd-dia), var(--gd-dia);
+  mask-repeat: no-repeat;
+  mask-size: 7px 7px;
+  mask-position:
+    -3.5px -3.5px,
+    calc(100% + 3.5px) -3.5px,
+    -3.5px calc(100% + 3.5px),
+    calc(100% + 3.5px) calc(100% + 3.5px),
+    -3.5px 50%,
+    calc(100% + 3.5px) 50%;
+}
+
+/* Character name and the hotbar helper text pick up the pigment; the
+   accent-text variant keeps both readable on the dark brown. */
+.crawler-tome.pigment-on .gd-name {
+  color: var(--pig-accent-text) !important;
+}
+.crawler-tome.pigment-on .gd-hint {
+  color: rgb(var(--pig-accent-rgb) / 0.9) !important;
+}
+
+/* Parchment islands inside the sheet — action cards, the hotbar
+   picker, the Portrait Workshop drawers, the option picker — keep
+   their fully original parchment look: every accent rule above is
+   reverted within them. */
+.crawler-tome.pigment-on .dialog-parchment .hand-frame,
+.crawler-tome.pigment-on .portrait-drawer .hand-frame,
+.crawler-tome.pigment-on .portrait-sub-drawer .hand-frame,
+.crawler-tome.pigment-on .customize-panel .hand-frame,
+.crawler-tome.pigment-on .option-picker .hand-frame,
+.crawler-tome.pigment-on .dialog-parchment .hand-frame-b,
+.crawler-tome.pigment-on .portrait-drawer .hand-frame-b,
+.crawler-tome.pigment-on .portrait-sub-drawer .hand-frame-b,
+.crawler-tome.pigment-on .customize-panel .hand-frame-b,
+.crawler-tome.pigment-on .option-picker .hand-frame-b {
+  border-color: rgba(74, 55, 39, 0.72) !important;
+  border-width: 1.5px !important;
+}
+.crawler-tome.pigment-on .dialog-parchment .hand-frame::after,
+.crawler-tome.pigment-on .portrait-drawer .hand-frame::after,
+.crawler-tome.pigment-on .portrait-sub-drawer .hand-frame::after,
+.crawler-tome.pigment-on .customize-panel .hand-frame::after,
+.crawler-tome.pigment-on .option-picker .hand-frame::after,
+.crawler-tome.pigment-on .dialog-parchment .hand-frame-b::after,
+.crawler-tome.pigment-on .portrait-drawer .hand-frame-b::after,
+.crawler-tome.pigment-on .portrait-sub-drawer .hand-frame-b::after,
+.crawler-tome.pigment-on .customize-panel .hand-frame-b::after,
+.crawler-tome.pigment-on .option-picker .hand-frame-b::after {
+  border-color: rgba(228, 182, 106, 0.38) !important;
+}
+.crawler-tome.pigment-on .dialog-parchment .hand-frame::before,
+.crawler-tome.pigment-on .portrait-drawer .hand-frame::before,
+.crawler-tome.pigment-on .portrait-sub-drawer .hand-frame::before,
+.crawler-tome.pigment-on .customize-panel .hand-frame::before,
+.crawler-tome.pigment-on .option-picker .hand-frame::before,
+.crawler-tome.pigment-on .dialog-parchment .hand-frame-b::before,
+.crawler-tome.pigment-on .portrait-drawer .hand-frame-b::before,
+.crawler-tome.pigment-on .portrait-sub-drawer .hand-frame-b::before,
+.crawler-tome.pigment-on .customize-panel .hand-frame-b::before,
+.crawler-tome.pigment-on .option-picker .hand-frame-b::before {
+  background:
+    radial-gradient(circle at 5px 5px, rgba(240, 200, 122, 0.85) 0.7px, rgba(176, 138, 74, 0.5) 1.3px, rgba(0, 0, 0, 0.45) 1.8px, transparent 2.3px),
+    radial-gradient(circle at calc(100% - 5px) 5px, rgba(240, 200, 122, 0.85) 0.7px, rgba(176, 138, 74, 0.5) 1.3px, rgba(0, 0, 0, 0.45) 1.8px, transparent 2.3px),
+    radial-gradient(circle at 5px calc(100% - 5px), rgba(240, 200, 122, 0.85) 0.7px, rgba(176, 138, 74, 0.5) 1.3px, rgba(0, 0, 0, 0.45) 1.8px, transparent 2.3px),
+    radial-gradient(circle at calc(100% - 5px) calc(100% - 5px), rgba(240, 200, 122, 0.85) 0.7px, rgba(176, 138, 74, 0.5) 1.3px, rgba(0, 0, 0, 0.45) 1.8px, transparent 2.3px) !important;
+  mask: none !important;
+}
+.crawler-tome.pigment-on .dialog-parchment .hand-frame .section-title::after,
+.crawler-tome.pigment-on .portrait-drawer .hand-frame .section-title::after,
+.crawler-tome.pigment-on .portrait-sub-drawer .hand-frame .section-title::after,
+.crawler-tome.pigment-on .customize-panel .hand-frame .section-title::after,
+.crawler-tome.pigment-on .option-picker .hand-frame .section-title::after,
+.crawler-tome.pigment-on .dialog-parchment .hand-frame-b .section-title::after,
+.crawler-tome.pigment-on .portrait-drawer .hand-frame-b .section-title::after,
+.crawler-tome.pigment-on .portrait-sub-drawer .hand-frame-b .section-title::after,
+.crawler-tome.pigment-on .customize-panel .hand-frame-b .section-title::after,
+.crawler-tome.pigment-on .option-picker .hand-frame-b .section-title::after {
+  content: none;
+}
+.crawler-tome.pigment-on .dialog-parchment .ink-box,
+.crawler-tome.pigment-on .portrait-drawer .ink-box,
+.crawler-tome.pigment-on .portrait-sub-drawer .ink-box,
+.crawler-tome.pigment-on .customize-panel .ink-box,
+.crawler-tome.pigment-on .option-picker .ink-box {
+  border-color: rgba(73, 54, 39, 0.64) !important;
+}
+.crawler-tome.pigment-on .dialog-parchment section[class*="hand-frame"] > header,
+.crawler-tome.pigment-on .portrait-drawer section[class*="hand-frame"] > header,
+.crawler-tome.pigment-on .portrait-sub-drawer section[class*="hand-frame"] > header,
+.crawler-tome.pigment-on .customize-panel section[class*="hand-frame"] > header,
+.crawler-tome.pigment-on .option-picker section[class*="hand-frame"] > header {
+  border-bottom-color: rgba(228, 182, 106, 0.42);
+}
+
+/* ===== Low-health heartbeat — segmented HEALTH bar only =====
+   PRESENTATION ONLY. Driven by the character's LIVE HP percentage
+   (any ruleset, any maximum): above 20% no animation; at/below 20% the
+   final two segment slots breathe brighter red on a slow ~1.8s
+   heartbeat; at/below 10% the final slot pulses slightly more urgently
+   while the second-to-last keeps the gentle cycle; at 0 HP the pulse
+   stops and the existing defeated/unconscious presentation stands.
+   Mana is never animated. The pulse is brightness-only — a smooth
+   double-swell "lub-dub", no strobing, no rapid blinking, no glow
+   outside the bar, no movement or scaling. prefers-reduced-motion
+   replaces the animation with the static brighter-red danger tint
+   (the class background stays, the animation is dropped). */
+/* Fill pulse + sun-like radiating halo. The red fill still breathes
+   via brightness/saturation, and layered zero-offset drop-shadows paint
+   a soft light aura radiating OUTWARD on all four sides of the segment
+   (top/bottom/left/right) — radiating light, not a border. The halo
+   swell rides the same 1.5s heartbeat: dim red → bright red → hot
+   flare → bright red → dim red. Nothing moves, resizes, disappears, or
+   flashes transparent; the segment itself stays fully stationary and
+   Mana is never touched. Works the same on the Dungeon and Tome faces. */
+/* Danger halo — the LIBRARY BOOK's glow (see .book-hint in
+   index.css), recreated in red as a soft radial aura riding past all
+   four edges of the segment: the same blurred radial-gradient ellipse
+   plus a wide soft box-shadow, breathing opacity and size on the
+   1.5s heartbeat. No parent around the Health bar clips it (no
+   overflow/mask/clip-path on the bar, panel, or column); z-index on
+   the segment lifts the halo above the rows around it. The segment
+   itself never moves, resizes, or disappears; Mana is never touched.
+   Identical on Dungeon/Tome.
+   ≤20%: the final TWO segments glow softly, reaching ~7px out on all
+   four sides. ≤10%: the FINAL segment glows as a small red sun —
+   hot scarlet core, red middle, softer red outer reaching ~11px —
+   normal → small aura → bright sun → small aura → normal, with the
+   red fill brightening in step. */
+/* The fill breathes brightness/saturation in step with the halo. */
+@keyframes hp-heartbeat {
+  0%, 100% { filter: brightness(1.05) saturate(1.15); }
+  30%, 70% { filter: brightness(1.4) saturate(1.3); }
+  50% { filter: brightness(2) saturate(1.5); }
+}
+@keyframes hp-heartbeat-urgent {
+  0%, 100% { filter: brightness(1.1) saturate(1.2); }
+  30%, 70% { filter: brightness(1.6) saturate(1.4); }
+  50% { filter: brightness(2.6) saturate(1.7); }
+}
+/* The book-glow halo itself — opacity + scale breathing. */
+@keyframes hp-halo {
+  0%, 100% { opacity: 0.35; transform: scale(0.94); }
+  50% { opacity: 0.85; transform: scale(1.04); }
+}
+@keyframes hp-halo-sun {
+  0%, 100% { opacity: 0.45; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+.crawler-tome .pip.hp-pulse {
+  position: relative; /* seat for the halo + lift above nearby rows */
+  z-index: 2;
+  background: linear-gradient(180deg, #ff5a48, #c41e14) !important;
+  filter: brightness(1.35) saturate(1.25);
+  animation: hp-heartbeat 1.5s ease-in-out infinite;
+}
+/* Red book-glow: blurred radial ellipse + soft wide shadow, ~7px
+   past all four sides of the segment. */
+.crawler-tome .pip.hp-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 9999px;
+  background: radial-gradient(ellipse at center, rgba(255, 60, 45, 0.6) 0%, rgba(255, 60, 45, 0.25) 45%, transparent 70%);
+  box-shadow: 0 0 18px 6px rgba(255, 42, 42, 0.4);
+  filter: blur(2px);
+  animation: hp-halo 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+.crawler-tome .pip.hp-pulse-urgent {
+  position: relative;
+  z-index: 3;
+  background: linear-gradient(180deg, #ff6a54, #d91f0f) !important;
+  filter: brightness(1.6) saturate(1.45);
+  animation: hp-heartbeat-urgent 1.5s ease-in-out infinite;
+}
+/* Small red SUN: hot scarlet core, red middle, softer red outer —
+   ~11px past all four sides at the peak. */
+.crawler-tome .pip.hp-pulse-urgent::after {
+  content: "";
+  position: absolute;
+  inset: -11px;
+  border-radius: 9999px;
+  background: radial-gradient(ellipse at center, rgba(255, 90, 60, 0.85) 0%, rgba(255, 65, 40, 0.35) 45%, transparent 70%);
+  box-shadow:
+    0 0 22px 8px rgba(255, 50, 35, 0.5),
+    0 0 38px 14px rgba(255, 60, 45, 0.28);
+  filter: blur(2px);
+  animation: hp-halo-sun 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+/* Reduced motion — no animation; the halo is shown permanently at its
+   bright (peak) state. */
+@media (prefers-reduced-motion: reduce) {
+  .crawler-tome .pip.hp-pulse {
+    animation: none;
+    filter: brightness(2) saturate(1.5);
+  }
+  .crawler-tome .pip.hp-pulse::after {
+    animation: none;
+    opacity: 0.85;
+    transform: scale(1.04);
+  }
+  .crawler-tome .pip.hp-pulse-urgent {
+    animation: none;
+    filter: brightness(2.6) saturate(1.7);
+  }
+  .crawler-tome .pip.hp-pulse-urgent::after {
+    animation: none;
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
