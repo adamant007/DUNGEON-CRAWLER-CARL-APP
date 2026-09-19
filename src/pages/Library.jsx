@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const LIBRARY = "https://media.base44.com/images/public/user_68b2613af2012fdde419b413/5b383626d_ginger-library-1.png";
+const LIBRARY = "https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/5b383626d_ginger-library-1.png";
 
 export default function Library() {
   const navigate = useNavigate();

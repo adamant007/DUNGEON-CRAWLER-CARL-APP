@@ -9,7 +9,7 @@ import LibrarySection from "@/components/home/LibrarySection";
    dragon artwork filling 100% of the remaining viewport beneath it.
    The artwork carries the headline, tagline, and CTAs itself — no live
    duplicates, no cards, nothing else. */
-const HERO_URL = "https://media.base44.com/images/public/6aa08093485633062c57e946/c00000162_c5029073-5a19-47ff-b083-5e8d67d470bb.png";
+const HERO_URL = "https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/c00000162_c5029073-5a19-47ff-b083-5e8d67d470bb.png";
 
 export default function NewUserHome() {
   return (

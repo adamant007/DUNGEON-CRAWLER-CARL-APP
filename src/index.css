@@ -118,7 +118,7 @@
 .parchment {
   /* Real aged parchment texture — mottling, foxing, stains, and worn edges baked in */
   background-color: #d2b48c;
-  background-image: url("https://media.base44.com/images/public/6aa08093485633062c57e946/ced1a92a7_generated_image.png");
+  background-image: url("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/ced1a92a7_generated_image.png");
   background-size: cover;
   background-position: center;
   position: relative;
@@ -127,7 +127,7 @@
 /* Ornate reference frame — dragon-emblem corners, chain-link top/bottom bands */
 .sheet-frame {
   border: 28px solid transparent;
-  border-image: url("https://media.base44.com/images/public/6aa08093485633062c57e946/304758f10_generated_image.png") 15% / 28px repeat;
+  border-image: url("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/304758f10_generated_image.png") 15% / 28px repeat;
 }
 
 .ink-border {
@@ -359,7 +359,7 @@
   background-color: #d4b98e !important;
   background-image:
     linear-gradient(rgba(214, 186, 143, 0.96), rgba(206, 176, 132, 0.96)),
-    url("https://media.base44.com/images/public/6aa08093485633062c57e946/ced1a92a7_generated_image.png") !important;
+    url("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/ced1a92a7_generated_image.png") !important;
   background-size: cover, cover !important;
   background-position: center, center !important;
   /* Placement is owned by the workshop WRAPPER (inline top/left/height,
@@ -380,7 +380,7 @@
   background-color: #f2e6c9 !important;
   background-image:
     linear-gradient(rgba(248, 239, 216, 0.9), rgba(243, 232, 206, 0.9)),
-    url("https://media.base44.com/images/public/6aa08093485633062c57e946/ced1a92a7_generated_image.png") !important;
+    url("https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/ced1a92a7_generated_image.png") !important;
   background-size: cover !important;
   background-position: center !important;
 }

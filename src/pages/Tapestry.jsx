@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const TAPESTRY = "https://media.base44.com/images/public/user_68b2613af2012fdde419b413/fef9f9109_Ginger_Dragon_Tapestry.png";
+const TAPESTRY = "https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/fef9f9109_Ginger_Dragon_Tapestry.png";
 
 export default function Tapestry() {
   const navigate = useNavigate();
