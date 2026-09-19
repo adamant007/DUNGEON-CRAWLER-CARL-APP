@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
    appear beneath the artwork instead (same pattern as the toolbar). */
 
 const LIBRARY_URL =
-  "https://media.base44.com/images/public/6aa08093485633062c57e946/f1879fcd5_8dcf2921-7553-4d61-a1e0-e07ddf19f02e.png";
+  "https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/f1879fcd5_8dcf2921-7553-4d61-a1e0-e07ddf19f02e.png";
 
 /* Measured against the artwork itself (1000x1562 source): each zone runs
    from its circular gold icon through its CTA button, left edges in % of

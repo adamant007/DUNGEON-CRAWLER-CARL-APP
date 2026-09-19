@@ -6,7 +6,7 @@ import { format } from "date-fns";
 /* Dashboard hero — dragon-hoard backdrop with the welcome heading, the
    Continue Playing card, secondary action buttons, and the parchment
    flourish banner. Reproduced from the approved mockup. */
-const HERO_URL = "https://media.base44.com/images/public/6aa08093485633062c57e946/519d34ad1_generated_image.png";
+const HERO_URL = "https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/519d34ad1_generated_image.png";
 
 export default function DashboardHero({ me, activeCharacter, onContinue, onCreateNew }) {
   const firstName = (me?.full_name || "").trim().split(" ")[0] || "";

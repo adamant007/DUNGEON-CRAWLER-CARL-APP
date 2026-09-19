@@ -2,7 +2,7 @@ import React from "react";
 
 /* The GDS dragon emblem — round gold-ringed badge used in headers and the
    returning-user sidebar. */
-const EMBLEM = "https://media.base44.com/images/public/6aa08093485633062c57e946/ac9f997f4_generated_image.png";
+const EMBLEM = "https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/ac9f997f4_generated_image.png";
 
 export default function GdsEmblem({ size = 44, className = "" }) {
   return (

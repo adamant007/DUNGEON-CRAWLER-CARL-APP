@@ -5,8 +5,8 @@ import React from "react";
    keeps the candlelit scene visible while the translucent cards sit on
    top as dark glass. */
 const BACKGROUNDS = {
-  welcome: "https://media.base44.com/images/public/6aa08093485633062c57e946/989bf3e5b_generated_image.png",
-  returning: "https://media.base44.com/images/public/6aa08093485633062c57e946/18104a7af_generated_image.png",
+  welcome: "https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/989bf3e5b_generated_image.png",
+  returning: "https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/18104a7af_generated_image.png",
 };
 
 export default function HomeBackdrop({ variant = "welcome" }) {

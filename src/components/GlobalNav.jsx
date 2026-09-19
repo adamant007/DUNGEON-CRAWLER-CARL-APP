@@ -8,7 +8,7 @@ import { Image } from "@/components/ui/image";
    The GINGER DRAGON / RPG COMPANION / FERRO IGNIQUE center branding is baked
    directly into this image: decorative only, never a hit target. */
 const NAV_ART =
-  "https://media.base44.com/images/public/6aa08093485633062c57e946/2215acebc_Ginger_Dragon_FINAL_Toolbar.png";
+  "https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/2215acebc_Ginger_Dragon_FINAL_Toolbar.png";
 const ART_WIDTH = 2172;
 const ART_HEIGHT = 724;
 /* Measured visible content of the artwork (pixel scan of the source):
