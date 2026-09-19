@@ -1,70 +1,46 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="theme-color" content="#17130d"/>
-  <meta name="description" content="RPG Companion is a tabletop RPG character and campaign app for players and GMs, with character sheets, dice tools, loot, campaign tracking, and shared play features."/>
-  <meta property="og:title" content="RPG Companion | Ginger Dragon Studios"/>
-  <meta property="og:description" content="Manage tabletop RPG characters and campaigns with character sheets, dice tools, loot, campaign tracking, and shared player/GM features."/>
-  <meta property="og:type" content="website"/>
-  <meta property="og:image" content="/brand/app-icon.svg"/>
-  <meta name="twitter:card" content="summary"/>
-  <meta name="twitter:title" content="RPG Companion | Ginger Dragon Studios"/>
-  <meta name="twitter:description" content="A tabletop RPG character and campaign companion for players and GMs, with sheets, dice, loot, tracking, and shared play tools."/>
-  <link rel="manifest" href="/manifest.webmanifest"/>
-  <link rel="icon" href="/brand/app-icon.svg" type="image/svg+xml"/>
-  <link rel="apple-touch-icon" href="/brand/app-icon.svg"/>
-  <link rel="stylesheet" href="/brand/brand.css"/>
-  <title>RPG Companion | Ginger Dragon Studios</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090806">
+  <meta name="description" content="Ginger Dragon RPG Companion — tabletop adventures, characters, campaigns, tools, and more.">
+  <meta property="og:title" content="Ginger Dragon RPG Companion">
+  <meta property="og:description" content="Your story belongs in bigger worlds.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/brand/homepage-exact.webp">
+  <link rel="icon" href="/brand/app-icon.svg" type="image/svg+xml">
+  <title>Ginger Dragon RPG Companion</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#090806}
+    body{min-height:100vh;display:flex;justify-content:center;align-items:flex-start;overflow-x:hidden}
+    .stage{position:relative;width:min(100vw,calc(100vh * 16 / 9));aspect-ratio:16/9;margin:0 auto;background:#090806}
+    .stage>img{display:block;width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none}
+    .enter{
+      position:absolute;left:4.0%;top:42.2%;width:24.5%;height:8.5%;
+      display:block;border-radius:10px;text-decoration:none;cursor:pointer;
+      -webkit-tap-highlight-color:transparent;touch-action:manipulation
+    }
+    .enter span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .enter:hover,.enter:focus-visible{
+      outline:3px solid rgba(255,216,140,.95);outline-offset:2px;
+      box-shadow:0 0 22px rgba(255,170,60,.55);background:rgba(255,190,90,.035)
+    }
+    .enter:active{background:rgba(255,190,90,.09)}
+    @media(max-width:700px){
+      .stage{width:100vw;height:auto}
+      .enter{min-height:34px}
+    }
+    @media(prefers-reduced-motion:reduce){.enter{scroll-behavior:auto}}
+  </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="module" src="/src/preflight-stability.ts"></script>
-  <script type="module" src="/src/main.tsx"></script>
-  <script type="module" src="/src/studio-landing-final.ts"></script>
-  <script type="module" src="/src/runtime-panel-host.ts"></script>
-  <script type="module" src="/src/runtime-fixes.ts"></script>
-  <script type="module" src="/src/spell-system.ts"></script>
-  <script type="module" src="/src/custom-spells.ts"></script>
-  <script type="module" src="/src/tutorial.ts"></script>
-  <script type="module" src="/src/campaign-context.ts"></script>
-  <script type="module" src="/src/campaign-role-visibility.ts"></script>
-  <script type="module" src="/src/gm-rewards.ts"></script>
-  <script type="module" src="/src/loot-boxes.ts"></script>
-  <script type="module" src="/src/gm-loot-reveal-guard.ts"></script>
-  <script type="module" src="/src/smart-loot.ts"></script>
-  <script type="module" src="/src/equipment-stats.ts"></script>
-  <script type="module" src="/src/combat-damage.ts"></script>
-  <script type="module" src="/src/magic-items.ts"></script>
-  <script type="module" src="/src/mobile-resource-hud.ts"></script>
-  <script type="module" src="/src/mobile-brand.ts"></script>
-  <script type="module" src="/src/character-portrait-fix.ts"></script>
-  <script type="module" src="/src/character-portrait.ts"></script>
-  <script type="module" src="/src/cloud-portrait-sync.ts"></script>
-  <script type="module" src="/src/cloud-character-sync.ts"></script>
-  <script type="module" src="/src/two-character-mode.ts"></script>
-  <script type="module" src="/src/race-class-help.ts"></script>
-  <script type="module" src="/src/character-import-safety.ts"></script>
-  <script type="module" src="/src/native-tab-routing.ts"></script>
-  <script type="module" src="/src/emergency-ui-repair.ts"></script>
-  <script type="module" src="/src/character-dashboard-v2.ts"></script>
-  <script type="module" src="/src/character-dashboard-polish.ts"></script>
-  <script type="module" src="/src/character-dice-upgrade.ts"></script>
-  <script type="module" src="/src/character-extra-sections.ts"></script>
-  <script type="module" src="/src/settings-panel.ts"></script>
-  <script type="module" src="/src/final-ui-stability-fix.ts"></script>
-  <script type="module" src="/src/beta-cleanup.ts"></script>
-  <script type="module" src="/src/last-minute-character-fix.ts"></script>
-  <script type="module" src="/src/dashboard-health-cleanup.ts"></script>
-  <script type="module" src="/src/character-sheet-spells.ts"></script>
-  <script type="module" src="/src/character-wizard-tab.ts"></script>
-  <script type="module" src="/src/final-beta-stabilizer.ts"></script>
-  <script type="module" src="/src/character-hotbar-loadout.ts"></script>
-  <script type="module" src="/src/final-release-fix.ts"></script>
-  <script type="module" src="/src/dice-tab-polyhedral.ts"></script>
-  <script type="module" src="/src/character-interaction-cleanup.ts"></script>
-  <script type="module" src="/src/exact-brand-banner.ts"></script>
-  <script type="module" src="/src/character-sheet-parchment.ts"></script>
+  <main class="stage" aria-label="Ginger Dragon RPG Companion">
+    <img src="/brand/homepage-exact.webp" alt="Ginger Dragon RPG Companion fantasy homepage">
+    <a class="enter" href="https://crawl-companion-quest.base44.app" aria-label="Begin your adventure in RPG Companion">
+      <span>Begin your adventure</span>
+    </a>
+  </main>
 </body>
 </html>
