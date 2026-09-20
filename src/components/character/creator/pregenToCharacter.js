@@ -36,6 +36,7 @@ const enrichSkill = (skill) => {
     ...skill,
     id: skill.id ?? def.id,
     description: skill.description ?? def.description ?? "",
+    ai_favor: skill.ai_favor ?? def.ai_favor ?? null,
   };
 };
 
