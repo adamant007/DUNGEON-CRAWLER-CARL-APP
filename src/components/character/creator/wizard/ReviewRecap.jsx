@@ -3,7 +3,7 @@ import { makeThresholdLookup } from "@/rules-profile";
 import { derivedStatsFromDraft } from "./derivedStats";
 import { startingCombatSnapshot } from "./StepAbilities";
 
-/* CHARACTER RECAP for the Review & Create hub (Step 8 polish). Broken down
+/* CHARACTER RECAP for the Review & Create hub. Broken down
    by the CHARACTER SHEET'S OWN anatomy — sheet header, EQUIPPED slots,
    INVENTORY carried items, hotlist — so the recap reads like the sheet the
    crawler will populate. Display only: populated ENTIRELY from the
@@ -72,6 +72,7 @@ export default function ReviewRecap({ steps = [], draft, profile, onJumpTo }) {
   const equipped = g.equipped ?? {};
   const sc = draft?.startingCombat ?? {};
   const heal = profile?.spells?.starting_spell ?? null;
+  const story = draft?.storyHooks ?? {};
 
   const genderText = (draft?.gender?.custom ?? "").trim() || (draft?.gender?.choice ?? "");
   const pronouns = (draft?.pronouns ?? "").trim();
@@ -151,6 +152,18 @@ export default function ReviewRecap({ steps = [], draft, profile, onJumpTo }) {
             <Row label="Pronouns" value={orNone(pronouns)} faint={!pronouns} />
             <Row label="Floor" value="1" />
             <Row label="AI Favor" value={orNone(derived.aiFavor)} />
+          </div>
+        </Section>
+
+        <Section
+          title="Traumas, Loose Ends & Regrets"
+          wide
+          edits={[edit("story", "EDIT")]}
+        >
+          <div className="grid grid-cols-1 gap-x-5 md:grid-cols-3">
+            <Row label="Past Trauma" value={orNone((story.pastTrauma ?? "").trim())} faint={!(story.pastTrauma ?? "").trim()} />
+            <Row label="Loose End" value={orNone((story.looseEnd ?? "").trim())} faint={!(story.looseEnd ?? "").trim()} />
+            <Row label="Regret" value={orNone((story.regret ?? "").trim())} faint={!(story.regret ?? "").trim()} />
           </div>
         </Section>
 
