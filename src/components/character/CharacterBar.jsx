@@ -19,6 +19,7 @@ export default function CharacterBar({
   onNew,
   onSave,
   onLoad,
+  onPrint,
   onPigments,
   saveState = "idle",
   busy = false,
@@ -78,6 +79,15 @@ export default function CharacterBar({
         )}
         <button type="button" className={BTN} onClick={onLoad} disabled={busy}>
           Load Character
+        </button>
+        <button
+          type="button"
+          className={BTN}
+          onClick={onPrint}
+          disabled={busy}
+          title="Print a printer-friendly character sheet"
+        >
+          Print Sheet
         </button>
         {/* Pigments of Poor Decisions — recolor the sheet's panels; visual
             preference, so it is always available (not gated by EDIT
