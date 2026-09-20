@@ -40,6 +40,7 @@ export default function StepBackground({ draft, updateDraft, profile, errors = {
   /* Optional per-category description list — tap/keyboard toggle, never
      hover-only, so phone and desktop discover the same information. */
   const [openDesc, setOpenDesc] = React.useState(null);
+  const [openSkillDesc, setOpenSkillDesc] = React.useState(null);
   const stateOf = (cat) => bgs[cat.id] ?? { background: null, skills: [] };
 
   /* No double-dipping: a skill picked in another category is unavailable here. */
@@ -173,32 +174,53 @@ export default function StepBackground({ draft, updateDraft, profile, errors = {
                     const taken = chosenElsewhere(cat.id, id);
                     const checked = sel.skills.includes(id);
                     const locked = !checked && (taken || sel.skills.length >= skillsPer);
+                    const skillDescKey = `${cat.id}:${id}`;
                     return (
-                      <label
+                      <div
                         key={id}
-                        className={`flex items-center justify-between gap-2 px-1 py-0.5 ${
-                          locked ? "opacity-60" : ""
-                        }`}
+                        className={`px-1 py-0.5 ${locked ? "opacity-60" : ""}`}
                       >
-                        <span className="flex flex-wrap items-center gap-2 font-fell text-[14px] text-[#24180f]">
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            disabled={locked}
-                            onChange={() => toggleSkill(cat, id)}
-                            className="h-3.5 w-3.5 accent-[#24180f]"
-                          />
-                          {skill?.name ?? id}
-                          {taken && (
-                            <em className="font-fell text-[11px] italic text-[var(--hp)]">
-                              Already selected from another background.
-                            </em>
-                          )}
-                        </span>
-                        <span className="font-fell text-[13px] text-[var(--ink-soft)]">
-                          {modText(skill)}
-                        </span>
-                      </label>
+                        <div className="flex items-center justify-between gap-2">
+                          <label className="flex min-w-0 flex-1 flex-wrap items-center gap-2 font-fell text-[14px] text-[#24180f]">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              disabled={locked}
+                              onChange={() => toggleSkill(cat, id)}
+                              className="h-3.5 w-3.5 accent-[#24180f]"
+                            />
+                            <span>{skill?.name ?? id}</span>
+                            {taken && (
+                              <em className="font-fell text-[11px] italic text-[var(--hp)]">
+                                Already selected from another background.
+                              </em>
+                            )}
+                          </label>
+                          <span className="flex shrink-0 items-center gap-1.5">
+                            <span className="font-fell text-[13px] text-[var(--ink-soft)]">
+                              {modText(skill)}
+                            </span>
+                            {skill?.description && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setOpenSkillDesc(openSkillDesc === skillDescKey ? null : skillDescKey)
+                                }
+                                aria-label={`${openSkillDesc === skillDescKey ? "Hide" : "Show"} ${skill.name} description`}
+                                aria-expanded={openSkillDesc === skillDescKey}
+                                className="ink-box px-1.5 py-1 text-[#24180f]"
+                              >
+                                <Info className="h-3.5 w-3.5" aria-hidden="true" />
+                              </button>
+                            )}
+                          </span>
+                        </div>
+                        {openSkillDesc === skillDescKey && skill?.description && (
+                          <p className="ml-5 mt-1 border-l-2 border-[var(--rule)] pl-2 font-fell text-[12px] leading-snug text-[var(--ink-soft)]">
+                            {skill.description}
+                          </p>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
