@@ -203,6 +203,11 @@ export function sheetFromWizard(profile, draft) {
       startingSpecies: { ...sp },
       currentRace: draft?.currentRace ?? null,
     },
+    storyHooks: {
+      pastTrauma: (draft?.storyHooks?.pastTrauma ?? "").trim(),
+      looseEnd: (draft?.storyHooks?.looseEnd ?? "").trim(),
+      regret: (draft?.storyHooks?.regret ?? "").trim(),
+    },
     /* The wizard's own choices preserved for later Review-style detail —
        additive, exactly like pregen-sourced characters preserve their
        template data. */
