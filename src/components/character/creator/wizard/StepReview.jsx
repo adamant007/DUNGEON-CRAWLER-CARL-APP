@@ -3,12 +3,12 @@ import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { wizardReview } from "./wizardSteps";
 import ReviewRecap from "./ReviewRecap";
 
-/* Step 8 — REVIEW & CREATE (Step 3B.9): the single validation and
+/* Step 9 — REVIEW & CREATE: the single validation and
    correction hub for the whole Wizard. It calls the SAME shared
    per-step validators the steps use (wizardReview -> stepIssues) — no
    duplicated validation logic — recomputed LIVE from the current draft
    on every render, so a fix applied anywhere updates this view the
-   moment the player returns. Steps 1–7 never block NEXT; this is where
+   moment the player returns. Steps 1–8 never block NEXT; this is where
    required information must finally be complete AND valid. CREATE
    CHARACTER is enabled only when every required issue is resolved —
    no partial, placeholder, or invented data is ever written. */
@@ -92,7 +92,7 @@ export default function StepReview({
       ))}
 
       {/* Compact recap — display only, fully draft/profile-driven, live on
-          every return to Step 8; EDIT jumps preserve the entire draft. */}
+          every return to Step 9; EDIT jumps preserve the entire draft. */}
       <ReviewRecap steps={steps} draft={draft} profile={profile} onJumpTo={onJumpTo} />
 
       <div className="mt-1 flex flex-col items-center gap-1.5">
