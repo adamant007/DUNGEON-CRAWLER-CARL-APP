@@ -35,6 +35,22 @@ export default function SkillActionCard({ skill, marked = false, onRoll, onToggl
           </span>
         </div>
 
+        {s.ai_favor?.value != null && (
+          <div className="border border-[var(--rule)] bg-[rgba(255,248,220,0.28)] px-3 py-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className={LABEL}>AI FAVOR</span>
+              <span className="ink-box px-2 h-7 inline-flex items-center text-[12px] font-bold">
+                +{s.ai_favor.value}
+              </span>
+            </div>
+            {s.ai_favor.condition && (
+              <p className="mt-1 font-fell text-[12px] italic leading-snug text-[var(--ink-soft)]">
+                {s.ai_favor.condition}
+              </p>
+            )}
+          </div>
+        )}
+
         {s.description && (
           <div className="border border-[var(--rule)] bg-[rgba(255,248,220,0.22)] px-3 py-2">
             <span className={`${LABEL} block mb-1`}>What It Does</span>
