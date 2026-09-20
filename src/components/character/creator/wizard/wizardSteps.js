@@ -13,6 +13,7 @@ export const WIZARD_STEPS = {
     { key: "derived", title: "Derived Stats", blurb: "Derived values — health, mana, evade, and movement — will be configured in this step." },
     { key: "abilities", title: "Starting Combat & Spells", blurb: "Second combat option — Weapon, Attack Spell, or Unarmed / Hand-to-Hand — plus the automatic Heal spell and Hotlist placement." },
     { key: "gear", title: "Starting Gear", blurb: "Starting equipment will be configured in this step." },
+    { key: "story", title: "Traumas, Loose Ends & Regrets", blurb: "Record the crawler’s past trauma, loose end, and regret for the Character Sheet and GM story hooks." },
     { key: "review", title: "Review & Create", blurb: "A final review of every choice before the Character is created." },
   ],
 };
@@ -73,6 +74,8 @@ export const blankWizardDraft = (selection) => ({
   healToHotlist: true, // ADD HEAL TO HOTLIST defaults ON
   startingSpells: null, // [heal, optional attack spell] — written on NEXT
   startingHotlist: null, // intended Hotlist entries — written on NEXT
+  /* Story hooks — required creation details that appear on the Character Sheet. */
+  storyHooks: { pastTrauma: "", looseEnd: "", regret: "" },
   /* Step 7 — STARTING GEAR: physical possessions only — Skill knowledge
      from Steps 2–6 is never changed here. equipped maps each ACTIVE
      PROFILE gear-slot id to the item worn/carried there (empty string =
@@ -231,7 +234,7 @@ export const weaponPolicyForType = (profile, typeId) => {
 
 /* ===== Shared step validation — ONE validator per step =====
    The SAME validators power BOTH each step's inline messages and the
-   Step 8 Review hub — Step 8 never duplicates validation logic.
+   Review hub — it never duplicates validation logic.
 
    stepIssues returns tagged issues:
    - kind "incomplete" = required data missing / blank (no number, only 3
@@ -240,7 +243,7 @@ export const weaponPolicyForType = (profile, typeId) => {
      crawler number, duplicate Standard Array value, Attack Spell without
      the INT requirement, secondary weapon without a known Skill)
 
-   GLOBAL BROWSE BEHAVIOR: neither kind ever blocks NEXT on Steps 1–7 —
+   GLOBAL BROWSE BEHAVIOR: neither kind ever blocks NEXT on Steps 1–8 —
    players may browse freely with the draft fully preserved. NEITHER kind
    may be used to create the final Character: the Review hub gates
    CREATE CHARACTER until every required issue is complete AND valid.
@@ -427,6 +430,20 @@ export const stepIssues = (stepKey, draft, profile, usedNumbers = null) => {
           ? "Choose your second combat option — a Weapon, Attack Spell, or Unarmed / Hand-to-Hand Skill."
           : "Choose your second combat option — an Attack Spell or Unarmed / Hand-to-Hand Skill."
       );
+    }
+    return issues;
+  }
+
+  if (stepKey === "story") {
+    const story = draft.storyHooks ?? {};
+    if (!(story.pastTrauma ?? "").trim()) {
+      add("pastTrauma", "incomplete", "Describe one past trauma for your crawler.");
+    }
+    if (!(story.looseEnd ?? "").trim()) {
+      add("looseEnd", "incomplete", "Describe one loose end for your crawler.");
+    }
+    if (!(story.regret ?? "").trim()) {
+      add("regret", "incomplete", "Describe one regret for your crawler.");
     }
     return issues;
   }
