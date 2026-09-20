@@ -163,6 +163,9 @@ export function sheetFromWizard(profile, draft) {
   }
   if (draft?.baselineAttack?.id) pushSkill(draft.baselineAttack.id, draft.baselineAttack.rank ?? 3);
   if (sc.secondOptionType === "weapon" && w?.rulesSkillId) pushSkill(w.rulesSkillId, w.rank ?? 3);
+  if (sc.secondOptionType === "hand_to_hand" && sc.handToHand?.attackSkillId) {
+    pushSkill(sc.handToHand.attackSkillId, sc.handToHand.rank ?? 3);
+  }
   const spellDetails =
     combatStepDef(profile)?.options?.find((o) => o.id === "attack_spell")?.spell_details ?? {};
   if (sc.secondOptionType === "attack_spell" && sc.attackSpellId) {
