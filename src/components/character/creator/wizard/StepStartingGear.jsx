@@ -96,6 +96,8 @@ export default function StepStartingGear({ draft, updateDraft, profile, errors =
   const weaponLabel = weapon ? customName || mechLabel : "";
   const spellId = sc.secondOptionType === "attack_spell" ? sc.attackSpellId : "";
   const spellName = spellId ? catalog[spellId]?.name ?? spellId : "";
+  const hand = sc.secondOptionType === "hand_to_hand" ? sc.handToHand ?? null : null;
+  const handName = hand ? catalog[hand.attackSkillId]?.name ?? hand.attackSkillId : "";
   const spellRank = spellId ? spellDetails[spellId]?.rank ?? 3 : 3;
   const bringWeapon = g.bringPrimaryWeapon !== false;
 
@@ -175,6 +177,10 @@ export default function StepStartingGear({ draft, updateDraft, profile, errors =
                   ) : spellName ? (
                     <p className="font-fell text-[13px] italic leading-snug text-[var(--ink-faint)]">
                       — (Attack Spell caster)
+                    </p>
+                  ) : handName ? (
+                    <p className="font-fell text-[13px] italic leading-snug text-[var(--ink-faint)]">
+                      — ({handName} — unarmed / hand-to-hand)
                     </p>
                   ) : (
                     <p className="font-fell text-[13px] italic text-[var(--ink-faint)]">—</p>
