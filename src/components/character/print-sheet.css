@@ -1,0 +1,282 @@
+/* ===== Printer-friendly Character Sheet =====
+   A SEPARATE print layout — not the dark parchment app. It renders in a
+   portal at the end of <body>; printing hides the whole app (#root) and
+   prints ONLY this page. Defaults to INK SAVER: white background, black
+   text, thin gray borders, no decorative fills. Turning Ink Saver OFF is
+   the only color mode (a light parchment tint). Formatted for US Letter
+   (8.5 x 11") with 0.5" page margins; sections avoid splitting across
+   pages wherever possible. The browser's own print dialog picks the
+   printer, Save-as-PDF, paper size, and orientation. */
+
+@page {
+  size: letter;
+  margin: 0.5in;
+}
+
+/* --- On screen: an overlay PREVIEW of the sheet, above the app --- */
+#print-sheet-root {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+}
+.ps-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 8, 4, 0.78);
+}
+.ps-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ps-toolbar {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  padding: 10px 16px;
+  background: #17110b;
+  border-bottom: 1px solid rgba(176, 138, 62, 0.5);
+}
+.ps-toolbar-spacer {
+  flex: 1 1 auto;
+}
+.ps-opt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  color: #e8d8b5;
+  font-family: "IM Fell English", serif;
+  font-size: 13px;
+}
+.ps-opt input {
+  accent-color: #d4a055;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+.ps-hint {
+  font-family: "IM Fell English", serif;
+  font-style: italic;
+  font-size: 11px;
+  color: #8a775c;
+}
+.ps-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1.5px solid var(--gold);
+  border-radius: 3px;
+  background: transparent;
+  color: #ecc277;
+  font-family: "Cinzel", serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.ps-btn:hover {
+  border-color: var(--gold-bright);
+  color: #f5e3b8;
+}
+.ps-btn-print {
+  border-color: var(--gold-bright);
+  color: var(--gold-bright);
+}
+.ps-scroll {
+  flex: 1;
+  overflow: auto;
+  padding: 20px 14px 48px;
+}
+
+/* --- The printable page itself: white, black text, thin borders --- */
+.ps-page {
+  width: 100%;
+  max-width: 7.5in;
+  margin: 0 auto;
+  background: #fff;
+  color: #111;
+  font-family: Georgia, "Times New Roman", serif;
+  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.55);
+}
+.ps-page * {
+  box-sizing: border-box;
+}
+.ps-page.ps-tinted {
+  background: #f7f1e2;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.ps-page h1,
+.ps-page h2,
+.ps-page p {
+  margin: 0;
+}
+.ps-body {
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+.ps-section {
+  border: 1px solid #8f8f8f;
+  padding: 6px 9px 8px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.ps-h {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-bottom: 1px solid #8f8f8f;
+  padding-bottom: 3px;
+  margin-bottom: 7px;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+.ps-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.ps-name {
+  font-size: 24px;
+  line-height: 1.1;
+}
+.ps-identity {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  max-width: 5in;
+}
+.ps-portrait {
+  flex-shrink: 0;
+  width: 1.1in;
+  height: 1.4in;
+  border: 1px solid #8f8f8f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 9px;
+  color: #777;
+}
+.ps-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ps-l {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #555;
+}
+.ps-v {
+  font-size: 12px;
+}
+.ps-boxes {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+.ps-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+.ps-box {
+  border: 1px solid #8f8f8f;
+  text-align: center;
+  padding: 3px 2px;
+}
+.ps-box .ps-v {
+  font-size: 14px;
+  font-weight: 700;
+}
+.ps-none {
+  font-size: 11px;
+  color: #777;
+  font-style: italic;
+}
+.ps-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10.5px;
+}
+.ps-table th,
+.ps-table td {
+  border: 1px solid #9f9f9f;
+  padding: 2px 5px;
+  text-align: left;
+  vertical-align: top;
+}
+.ps-table th {
+  font-size: 8.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+.ps-kv {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px 14px;
+}
+.ps-notes {
+  white-space: pre-wrap;
+  font-size: 11px;
+}
+
+/* Phone preview only — print always lays out at paper width. */
+@media (max-width: 640px) {
+  .ps-boxes {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .ps-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* --- PRINT MODE: the app disappears; only this page prints. All
+       interactive controls (toolbar/options) are hidden. --- */
+@media print {
+  html,
+  body {
+    background: #fff !important;
+  }
+  #root {
+    display: none !important;
+  }
+  #print-sheet-root {
+    position: static !important;
+    inset: auto !important;
+    z-index: auto !important;
+  }
+  .ps-backdrop,
+  .ps-toolbar {
+    display: none !important;
+  }
+  .ps-screen {
+    position: static !important;
+    display: block !important;
+  }
+  .ps-scroll {
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+  .ps-page {
+    max-width: none !important;
+    width: auto !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+}
