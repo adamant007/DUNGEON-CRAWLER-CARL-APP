@@ -12,6 +12,7 @@ import StepDerivedStats from "./StepDerivedStats";
 import { derivedStatsFromDraft } from "./derivedStats";
 import StepAbilities, { startingCombatSnapshot } from "./StepAbilities";
 import StepStartingGear from "./StepStartingGear";
+import StepStoryHooks from "./StepStoryHooks";
 import StepReview from "./StepReview";
 
 /* Character Creator Wizard — Rules Profile-driven multi-step shell
@@ -33,6 +34,7 @@ const STEP_BODIES = {
   derived: StepDerivedStats,
   abilities: StepAbilities,
   gear: StepStartingGear,
+  story: StepStoryHooks,
   review: StepReview,
 };
 
@@ -82,8 +84,8 @@ export default function CharacterCreatorWizard({ selection, onCancel, onCreate }
   };
   const StepBody = STEP_BODIES[steps[index].key] ?? WizardStepBody;
 
-  /* GLOBAL BROWSE BEHAVIOR: NEXT NEVER blocks on Steps 1–7. Required-but-
-     blank or invalid input is always navigable — Step 8 (Review & Create)
+  /* GLOBAL BROWSE BEHAVIOR: NEXT NEVER blocks on Steps 1–8. Required-but-
+     blank or invalid input is always navigable — Step 9 (Review & Create)
      is the single validation and correction hub. The step being left still
      records its inline messages, so returning to it shows what is missing
      without gating navigation. The identity name is trimmed on advance —
@@ -102,7 +104,7 @@ export default function CharacterCreatorWizard({ selection, onCancel, onCreate }
     setIndex((i) => Math.min(steps.length - 1, i + 1));
   };
 
-  /* Direct step return (Step 8 Review hub): jump straight to any step
+  /* Direct step return (Step 9 Review hub): jump straight to any step
      with its CURRENT validation shown inline. The draft is never reset —
      every choice from every step is preserved. */
   const jumpTo = (targetIndex) => {
