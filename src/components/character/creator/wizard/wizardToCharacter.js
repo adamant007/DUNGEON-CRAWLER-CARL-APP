@@ -157,6 +157,7 @@ export function sheetFromWizard(profile, draft) {
       mod,
       check: "",
       description: def.description ?? "",
+      ai_favor: def.ai_favor ?? null,
     });
   };
   for (const cat of profile?.creation_flow?.backgrounds?.[sp.type] ?? []) {
