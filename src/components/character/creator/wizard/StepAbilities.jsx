@@ -9,8 +9,9 @@ import { weaponPolicyForType } from "./wizardSteps";
    second combat option. The player then picks exactly ONE second combat
    option from the ACTIVE PROFILE's combat_approach step: a WEAPON (approved
    category list; a custom display name may ride on an approved weapon Skill,
-   never invented mechanics) OR an ATTACK SPELL (the profile's approved
-   starting spells; requires the profile's minimum Enhanced Intelligence).
+   never invented mechanics), an ATTACK SPELL (the profile's approved
+   starting spells; requires the profile's minimum Enhanced Intelligence),
+   or a HAND-TO-HAND / UNARMED combat Skill such as Wrasslin'.
    Spell stat blocks, Heal details, weapon categories, and the Hotlist size
    all come from the profile — nothing is hardcoded here. Damage formulas are
    stored structurally and rendered with the CURRENT Step 3 INT modifier, so
@@ -56,10 +57,11 @@ export default function StepAbilities({ draft, updateDraft, profile, errors = {}
   const options = stepDef?.options ?? [];
   const weaponOption = options.find((o) => o.id === "weapon") ?? null;
   const spellOption = options.find((o) => o.id === "attack_spell") ?? null;
+  const handOption = options.find((o) => o.id === "hand_to_hand") ?? null;
   const catalog = profile?.skills?.catalog ?? {};
   const heal = profile?.spells?.starting_spell ?? null;
   const hotbarSlots = profile?.spells?.hotbar?.slots ?? 10;
-  const sc = draft.startingCombat ?? { secondOptionType: "", weapon: null, attackSpellId: "", animalWeaponOverride: false };
+  const sc = draft.startingCombat ?? { secondOptionType: "", weapon: null, attackSpellId: "", handToHand: null, animalWeaponOverride: false };
 
   /* Profile-driven weapon policy for this crawler type (Animal / Non-Human
      restriction + GM override). No policy / type not listed = fully normal
@@ -87,6 +89,9 @@ export default function StepAbilities({ draft, updateDraft, profile, errors = {}
 
   const weapon = sc.weapon ?? null;
   const weaponRank = weaponOption?.rank ?? 3;
+  const handRank = handOption?.rank ?? 3;
+  const handPairs = handOption?.pairs ?? [];
+  const selectedHand = sc.secondOptionType === "hand_to_hand" ? sc.handToHand ?? null : null;
   const weaponDetails = weaponOption?.details ?? {};
   const weaponDetail = weapon?.rulesSkillId ? weaponDetails[weapon.rulesSkillId] ?? null : null;
   /* Compact dropdown label — DISPLAY ONLY, built from the profile's
@@ -112,14 +117,22 @@ export default function StepAbilities({ draft, updateDraft, profile, errors = {}
     if (type === "attack_spell" && !spellAllowed) return;
     if (type === "weapon" && !weaponAllowed) return;
     updateDraft({
-      startingCombat: { secondOptionType: type, weapon: null, attackSpellId: "" },
+      startingCombat: {
+        ...sc,
+        secondOptionType: type,
+        weapon: null,
+        attackSpellId: "",
+        handToHand: null,
+      },
     });
   };
   const chooseWeapon = (rulesSkillId) =>
     updateDraft({
       startingCombat: {
+        ...sc,
         secondOptionType: "weapon",
         attackSpellId: "",
+        handToHand: null,
         weapon: { displayName: weapon?.displayName ?? "", rulesSkillId, rank: weaponRank },
       },
     });
@@ -132,8 +145,31 @@ export default function StepAbilities({ draft, updateDraft, profile, errors = {}
     });
   const chooseSpell = (id) =>
     updateDraft({
-      startingCombat: { secondOptionType: "attack_spell", weapon: null, attackSpellId: id },
+      startingCombat: {
+        ...sc,
+        secondOptionType: "attack_spell",
+        weapon: null,
+        handToHand: null,
+        attackSpellId: id,
+      },
     });
+  const chooseHandToHand = (attackSkillId) => {
+    const pair = handPairs.find((p) => p.attackSkillId === attackSkillId);
+    if (!pair) return;
+    updateDraft({
+      startingCombat: {
+        ...sc,
+        secondOptionType: "hand_to_hand",
+        weapon: null,
+        attackSpellId: "",
+        handToHand: {
+          attackSkillId: pair.attackSkillId,
+          damageEffectId: pair.damageEffectId,
+          rank: handRank,
+        },
+      },
+    });
+  };
   /* GM override — OFF clears a previously selected physical weapon (now
      invalid under the restriction) without touching stats, the Slice
      Attack baseline, or spells; ON restores the exact Human weapon path. */
@@ -199,7 +235,7 @@ export default function StepAbilities({ draft, updateDraft, profile, errors = {}
       )}
 
       <Box title="Second Combat Option">
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
           <button
             type="button"
             onClick={() => setType("weapon")}
@@ -215,6 +251,21 @@ export default function StepAbilities({ draft, updateDraft, profile, errors = {}
             </span>
             <span className="block font-fell italic text-[11px] text-[var(--ink-soft)]">
               Approved weapon Skill — Rank {weaponRank}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setType("hand_to_hand")}
+            aria-pressed={sc.secondOptionType === "hand_to_hand"}
+            className={`${CHOICE_BASE} ${
+              sc.secondOptionType === "hand_to_hand" ? CHOICE_ON : CHOICE_OFF
+            }`}
+          >
+            <span className="block font-fell-sc text-[15px] font-bold tracking-[0.04em] text-[#24180f]">
+              UNARMED / HAND-TO-HAND
+            </span>
+            <span className="block font-fell italic text-[11px] text-[var(--ink-soft)]">
+              Combat Skill such as Wrasslin' — Rank {handRank}
             </span>
           </button>
           <button
@@ -265,7 +316,7 @@ export default function StepAbilities({ draft, updateDraft, profile, errors = {}
         )}
         {!spellAllowed && (
           <Message>
-            Attack Spells require Enhanced Intelligence {minInt} or higher — choose a Weapon, or go BACK to Step 3 to revise your stats.
+            Attack Spells require Enhanced Intelligence {minInt} or higher — choose a Weapon or Hand-to-Hand option, or go BACK to Step 3 to revise your stats.
           </Message>
         )}
 
@@ -369,6 +420,40 @@ export default function StepAbilities({ draft, updateDraft, profile, errors = {}
                 Uses rules for: {catalog[weapon.rulesSkillId]?.name ?? weapon.rulesSkillId} — carried forward to Starting Gear.
               </p>
             )}
+          </div>
+        )}
+
+        {sc.secondOptionType === "hand_to_hand" && handOption && (
+          <div className="mt-1 flex flex-col gap-2">
+            <p className="font-fell text-[12px] italic leading-snug text-[var(--ink-soft)]">
+              Choose the unarmed combat Skill you want as your second combat option. Its linked Damage Effect is shown with it.
+            </p>
+            {handPairs.map((pair) => {
+              const selected = selectedHand?.attackSkillId === pair.attackSkillId;
+              const attackName = catalog[pair.attackSkillId]?.name ?? pair.attackSkillId;
+              const effectName = catalog[pair.damageEffectId]?.name ?? pair.damageEffectId;
+              return (
+                <button
+                  key={pair.attackSkillId}
+                  type="button"
+                  onClick={() => chooseHandToHand(pair.attackSkillId)}
+                  aria-pressed={selected}
+                  className={`${CHOICE_BASE} ${selected ? CHOICE_ON : CHOICE_OFF}`}
+                >
+                  <span className="flex items-baseline justify-between gap-2">
+                    <span className="font-fell-sc text-[14px] font-bold tracking-[0.04em] text-[#24180f]">
+                      {attackName.toUpperCase()}
+                    </span>
+                    <span className="font-fell text-[12px] font-bold text-[#24180f]">
+                      Rank {handRank}
+                    </span>
+                  </span>
+                  <span className="block font-fell text-[12px] text-[var(--ink-soft)]">
+                    Linked Damage Effect: {effectName}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
 

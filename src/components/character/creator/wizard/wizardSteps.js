@@ -11,7 +11,7 @@ export const WIZARD_STEPS = {
     { key: "core-stats", title: "Core Stats", blurb: "Stat generation and assignment will be configured in this step." },
     { key: "background", title: "Background & Skills", blurb: "Background selection and starting skills will be configured in this step." },
     { key: "derived", title: "Derived Stats", blurb: "Derived values — health, mana, evade, and movement — will be configured in this step." },
-    { key: "abilities", title: "Starting Combat & Spells", blurb: "Second combat option — Weapon or Attack Spell — plus the automatic Heal spell and Hotlist placement." },
+    { key: "abilities", title: "Starting Combat & Spells", blurb: "Second combat option — Weapon, Attack Spell, or Unarmed / Hand-to-Hand — plus the automatic Heal spell and Hotlist placement." },
     { key: "gear", title: "Starting Gear", blurb: "Starting equipment will be configured in this step." },
     { key: "review", title: "Review & Create", blurb: "A final review of every choice before the Character is created." },
   ],
@@ -60,8 +60,8 @@ export const blankWizardDraft = (selection) => ({
      NEXT for later steps; the step itself always recomputes LIVE, so BACK
      edits to Steps 2–3 never leave stale derived numbers. */
   derived: null,
-  /* Step 6 — STARTING COMBAT & SPELLS: the ONE second combat option (weapon
-     or attack spell) beside the Step 2 baseline attack, Heal (always known;
+  /* Step 6 — STARTING COMBAT & SPELLS: the ONE second combat option (weapon,
+     attack spell, or hand-to-hand/unarmed) beside the Step 2 baseline attack, Heal (always known;
      Hotlist placement optional), and the intended starting spells / Hotlist
      snapshots written on NEXT. A chosen weapon is only the starting weapon
      CANDIDATE — its physical gear belongs to Step 7, not this draft. */
@@ -69,7 +69,7 @@ export const blankWizardDraft = (selection) => ({
      crawler type (Animal / Non-Human): OFF by default. Turning it OFF after
      a weapon was chosen clears that now-invalid choice (StepAbilities)
      without touching stats, the Slice Attack baseline, or spells. */
-  startingCombat: { secondOptionType: "", weapon: null, attackSpellId: "", animalWeaponOverride: false },
+  startingCombat: { secondOptionType: "", weapon: null, attackSpellId: "", handToHand: null, animalWeaponOverride: false },
   healToHotlist: true, // ADD HEAL TO HOTLIST defaults ON
   startingSpells: null, // [heal, optional attack spell] — written on NEXT
   startingHotlist: null, // intended Hotlist entries — written on NEXT
@@ -378,6 +378,7 @@ export const stepIssues = (stepKey, draft, profile, usedNumbers = null) => {
     const options = stepDef?.options ?? [];
     const weaponOption = options.find((o) => o.id === "weapon");
     const spellOption = options.find((o) => o.id === "attack_spell");
+    const handOption = options.find((o) => o.id === "hand_to_hand");
     const sc = draft.startingCombat ?? {};
     /* Profile weapon policy — a weapon selected while the path is not
        allowed (e.g. the Animal GM override switched OFF) is INVALID. The
@@ -398,6 +399,15 @@ export const stepIssues = (stepKey, draft, profile, usedNumbers = null) => {
       } else if (!approved.has(sc.weapon.rulesSkillId)) {
         add("combatOption", "invalid", "Choose an approved weapon Skill — custom weapons still need one.");
       }
+    } else if (sc.secondOptionType === "hand_to_hand") {
+      const pairs = handOption?.pairs ?? [];
+      const chosen = sc.handToHand ?? {};
+      const pair = pairs.find((p) => p.attackSkillId === chosen.attackSkillId);
+      if (!pair) {
+        add("combatOption", "incomplete", "Choose an approved Unarmed / Hand-to-Hand combat Skill.");
+      } else if (pair.damageEffectId !== chosen.damageEffectId) {
+        add("combatOption", "invalid", "That Hand-to-Hand Skill is not linked to the selected Damage Effect.");
+      }
     } else if (sc.secondOptionType === "attack_spell") {
       const intEnh = draft.coreStats?.int?.enhanced;
       const minInt = spellOption?.requirement?.min_enhanced_int ?? 4;
@@ -405,7 +415,7 @@ export const stepIssues = (stepKey, draft, profile, usedNumbers = null) => {
         /* BACK to Step 3 and lowered INT — the previous selection is
            invalid. Never silently alters INT; requires a new valid
            choice. */
-        add("combatOption", "invalid", `Attack Spells require Enhanced Intelligence ${minInt} or higher — choose a Weapon instead, or go BACK to Step 3.`);
+        add("combatOption", "invalid", `Attack Spells require Enhanced Intelligence ${minInt} or higher — choose a Weapon or Hand-to-Hand option instead, or go BACK to Step 3.`);
       } else if (!(spellOption?.starting_options ?? []).includes(sc.attackSpellId)) {
         add("combatOption", "incomplete", "Choose one of the approved starting Attack Spells.");
       }
@@ -414,8 +424,8 @@ export const stepIssues = (stepKey, draft, profile, usedNumbers = null) => {
         "combatOption",
         "incomplete",
         weaponAllowed
-          ? "Choose your second combat option — a Weapon or an Attack Spell."
-          : "Choose a valid second combat option."
+          ? "Choose your second combat option — a Weapon, Attack Spell, or Unarmed / Hand-to-Hand Skill."
+          : "Choose your second combat option — an Attack Spell or Unarmed / Hand-to-Hand Skill."
       );
     }
     return issues;
