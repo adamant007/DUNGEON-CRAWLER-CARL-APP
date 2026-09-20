@@ -1,5 +1,6 @@
 import { blankSheet, recordFromSheet } from "@/components/character/characterStorage";
 import { consumableRow } from "@/components/character/consumableEffect";
+import { SKILL_CATALOG } from "@/rules-profile/adapters/dungeon_crawler_carl/skillCatalog";
 
 /* Step 3A.4 — copies a verified FIRST FLOOR pregen TEMPLATE into the
    canonical Character record shape.
@@ -18,6 +19,24 @@ const GEAR_SLOT_MAP = {
   Feet: "feet",
   "Hands/Holding": "mainHand",
   Accessory: "other",
+};
+
+const SKILL_BY_NAME = Object.fromEntries(
+  Object.values(SKILL_CATALOG).flatMap((def) => [
+    [def.name, def],
+    ...(def.display_name ? [[def.display_name, def]] : []),
+    ...((def.aliases ?? []).map((alias) => [alias, def])),
+  ])
+);
+
+const enrichSkill = (skill) => {
+  const def = (skill?.id && SKILL_CATALOG[skill.id]) || SKILL_BY_NAME[skill?.name] || null;
+  if (!def) return skill;
+  return {
+    ...skill,
+    id: skill.id ?? def.id,
+    description: skill.description ?? def.description ?? "",
+  };
 };
 
 const attackNotes = (a) =>
@@ -124,7 +143,7 @@ export function sheetFromPregen(template) {
   sheet.sourceTemplateId = template.id;
   sheet.rulesetData = {
     stats: template.stats,
-    skills: template.skills,
+    skills: (template.skills ?? []).map(enrichSkill),
     attacks: template.attacks,
     hotlist: template.hotlist,
     gear: template.gear,
