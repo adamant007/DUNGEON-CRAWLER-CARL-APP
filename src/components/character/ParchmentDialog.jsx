@@ -3,20 +3,32 @@ import { X } from "lucide-react";
 
 /* Small centered parchment modal used by the character-management dialogs.
    ink-border (not hand-frame) on purpose — hand-frame's background shorthand
-   would wipe the parchment texture. Closes on Escape or backdrop click. */
-export default function ParchmentDialog({ title, onClose, children, wide = false, large = false, medium = false }) {
+   would wipe the parchment texture. Most dialogs close on Escape/backdrop/X;
+   critical flows can set dismissible={false} and rely only on their explicit
+   in-dialog navigation controls. */
+export default function ParchmentDialog({
+  title,
+  onClose,
+  children,
+  wide = false,
+  large = false,
+  medium = false,
+  dismissible = true,
+}) {
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === "Escape") onClose?.();
+      if (dismissible && e.key === "Escape") onClose?.();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [dismissible, onClose]);
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(24,15,7,0.6)] p-4"
-      onClick={() => onClose?.()}
+      onClick={() => {
+        if (dismissible) onClose?.();
+      }}
     >
       <div
         role="dialog"
@@ -35,14 +47,16 @@ export default function ParchmentDialog({ title, onClose, children, wide = false
       >
         <div className="mb-2 flex shrink-0 items-center justify-between gap-3">
           <h3 className="section-title text-[20px] font-bold text-[#24180f]">{title}</h3>
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={() => onClose?.()}
-            className="ink-box flex h-5 w-5 shrink-0 items-center justify-center"
-          >
-            <X size={11} />
-          </button>
+          {dismissible && (
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => onClose?.()}
+              className="ink-box flex h-5 w-5 shrink-0 items-center justify-center"
+            >
+              <X size={11} />
+            </button>
+          )}
         </div>
         {/* Mobile-safe scroll area: the modal caps at the dynamic viewport
             height (dvh — shrinks with browser chrome), the header stays
