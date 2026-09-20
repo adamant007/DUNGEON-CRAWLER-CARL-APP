@@ -128,6 +128,7 @@ export default function SkillsPanel({ profile, rulesetData, rankDraft = null, on
       ...drafted,
       ...(def?.id && !drafted?.id ? { id: def.id } : {}),
       ...(def?.description && !drafted?.description ? { description: def.description } : {}),
+      ...(def?.ai_favor && !drafted?.ai_favor ? { ai_favor: def.ai_favor } : {}),
     };
   });
   const editing = !playMode;
