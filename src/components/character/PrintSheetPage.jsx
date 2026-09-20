@@ -1,6 +1,4 @@
 import React from "react";
-import { formatCrawlerNumber } from "@/components/character/crawlerNumber";
-
 /* The printable page — built from the LIVE sheet snapshot passed in.
    Presentation only: plain black-on-white markup with thin gray borders;
    all styling (screen preview + @media print) lives in print-sheet.css.
@@ -26,6 +24,12 @@ const GEAR_SLOTS = [
 ];
 
 const txt = (v) => String(v ?? "").trim();
+const formatCrawlerNumber = (value) => {
+  const digits = String(value ?? "").replace(/\D/g, "");
+  if (!digits) return "";
+  const n = parseInt(digits, 10);
+  return Number.isFinite(n) && n > 0 ? n.toLocaleString("en-US") : "";
+};
 const ddMod = (score) => Math.floor(((Number(score) || 10) - 10) / 2);
 const fmtMod = (m) => (m >= 0 ? `+${m}` : `${m}`);
 
