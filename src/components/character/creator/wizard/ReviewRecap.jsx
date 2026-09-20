@@ -93,6 +93,7 @@ export default function ReviewRecap({ steps = [], draft, profile, onJumpTo }) {
     profile?.creation_flow?.steps?.find((s) => s.id === "combat_approach")?.options ?? [];
   const weaponDetails = combatOptions.find((o) => o.id === "weapon")?.details ?? {};
   const spellDetails = combatOptions.find((o) => o.id === "attack_spell")?.spell_details ?? {};
+  const handOption = combatOptions.find((o) => o.id === "hand_to_hand") ?? null;
   const spellGrants = combatOptions.find((o) => o.id === "attack_spell")?.grants ?? null;
   const w = sc.secondOptionType === "weapon" ? sc.weapon : null;
   const weaponDetail = w?.rulesSkillId ? weaponDetails[w.rulesSkillId] ?? null : null;
@@ -107,6 +108,14 @@ export default function ReviewRecap({ steps = [], draft, profile, onJumpTo }) {
     : "";
   const spellId = sc.secondOptionType === "attack_spell" ? sc.attackSpellId : "";
   const spellDet = spellId ? spellDetails[spellId] ?? null : null;
+  const hand = sc.secondOptionType === "hand_to_hand" ? sc.handToHand ?? null : null;
+  const handPair = hand
+    ? (handOption?.pairs ?? []).find((p) => p.attackSkillId === hand.attackSkillId) ?? null
+    : null;
+  const handName = hand ? catalog[hand.attackSkillId]?.name ?? hand.attackSkillId : "";
+  const handEffectName = handPair
+    ? catalog[handPair.damageEffectId]?.name ?? handPair.damageEffectId
+    : "";
   const spellDamage = spellDet?.damage?.dice
     ? `${spellDet.damage.dice}${spellDet.damage.plus_int_mod ? " + INT Mod" : ""}`
     : "";
@@ -148,7 +157,7 @@ export default function ReviewRecap({ steps = [], draft, profile, onJumpTo }) {
         {/* ===== EQUIPPED — every sheet slot, one row each ===== */}
         <Section
           title="Equipped"
-          edits={[edit("gear", "EDIT SLOTS"), edit("abilities", "EDIT WEAPON")]}
+          edits={[edit("gear", "EDIT SLOTS"), edit("abilities", "EDIT COMBAT")]}
         >
           {(profile?.gear?.slots ?? []).map((slot) => {
             if (slot.id === WEAPON_SLOT_ID) {
@@ -158,7 +167,9 @@ export default function ReviewRecap({ steps = [], draft, profile, onJumpTo }) {
                   : "— (Skill known, not carried)"
                 : spellId
                   ? "— (Attack Spell caster)"
-                  : "";
+                  : hand
+                    ? "— (Unarmed / hand-to-hand)"
+                    : "";
               return (
                 <Row key={slot.id} label={slot.label} value={value || "—"} faint={!value} />
               );
@@ -268,6 +279,12 @@ export default function ReviewRecap({ steps = [], draft, profile, onJumpTo }) {
             />
           )}
           {w && <Row label="Weapon Skill" value={`${weaponName} — Rank ${w.rank ?? "—"}`} />}
+          {hand && (
+            <Row
+              label="Unarmed / Hand-to-Hand"
+              value={`${handName} — Rank ${hand.rank ?? handOption?.rank ?? "—"}${handEffectName ? ` · Linked Damage Effect: ${handEffectName}` : ""}`}
+            />
+          )}
           {spellId && (
             <Row
               label="Attack Spell"
@@ -278,7 +295,7 @@ export default function ReviewRecap({ steps = [], draft, profile, onJumpTo }) {
               }
             />
           )}
-          {!w && !spellId && <Row label="Second Option" value="—" faint />}
+          {!w && !spellId && !hand && <Row label="Second Option" value="—" faint />}
         </Section>
       </div>
     </div>
