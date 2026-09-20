@@ -61,6 +61,7 @@ export default function CharacterCreatorDialog({ onClose, onCreatePregen, onCrea
       wide={view === "entry" || view === "pregens"}
       large={view === "wizard" || view === "library"}
       onClose={onClose}
+      dismissible={false}
     >
       {view === "entry" ? (
         <CreatorEntryScreen
