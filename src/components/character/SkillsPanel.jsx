@@ -19,6 +19,7 @@ const DCC_SKILL_BY_NAME = Object.fromEntries(
   Object.values(SKILL_CATALOG).flatMap((def) => [
     [def.name, def],
     ...(def.display_name ? [[def.display_name, def]] : []),
+    ...((def.aliases ?? []).map((alias) => [alias, def])),
   ])
 );
 
