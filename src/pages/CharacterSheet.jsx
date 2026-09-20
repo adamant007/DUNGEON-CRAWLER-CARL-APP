@@ -18,6 +18,7 @@ import RollResultCard from "@/components/character/RollResultCard";
 import DimensionalStoragePanel from "@/components/character/DimensionalStoragePanel";
 import CraftingPanel from "@/components/character/CraftingPanel";
 import FourPageCharacterSheet from "@/components/character/FourPageCharacterSheet";
+import PrintSheetDialog from "@/components/character/PrintSheetDialog";
 import UnsavedDialog from "@/components/character/UnsavedDialog";
 import InventoryItemDialog from "@/components/character/InventoryItemDialog";
 import LoadDialog from "@/components/character/LoadDialog";
@@ -840,6 +841,7 @@ export default function CharacterSheet() {
               onNew={startNew}
               onSave={save}
               onLoad={openLoad}
+              onPrint={() => setDialog("print")}
               onPigments={() => setDialog("pigments")}
               saveState={saveState}
               dirty={dirty}
@@ -898,6 +900,14 @@ export default function CharacterSheet() {
 
       <RollResultCard result={lastRoll} onClose={() => setLastRoll(null)} />
 
+      {dialog === "print" && (
+        <PrintSheetDialog
+          sheet={currentSheet()}
+          statMods={dccStatMods(profile, rulesetData, attrs)}
+          characterId={currentId}
+          onClose={() => setDialog(null)}
+        />
+      )}
       {dialog === "new" && (
         <CharacterCreatorDialog
           onClose={() => setDialog(null)}
