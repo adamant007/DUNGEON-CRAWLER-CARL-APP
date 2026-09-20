@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import RulebookLibrary from "@/components/rulebooks/RulebookLibrary";
+import RuleSearch from "@/components/rulebooks/RuleSearch";
 import { listBuiltinProfiles } from "@/rules-profile";
 
 /* RULES & SYSTEMS — its own section, NOT routed through the character
@@ -21,6 +22,7 @@ export default function RulesSystems() {
               Your private rulebook library and Rules Profiles.
             </p>
           </header>
+          <RuleSearch />
           <RulebookLibrary
             builtins={builtins}
             onBack={() => navigate("/")}
