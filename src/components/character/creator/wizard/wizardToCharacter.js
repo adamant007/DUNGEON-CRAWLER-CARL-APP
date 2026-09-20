@@ -150,11 +150,13 @@ export function sheetFromWizard(profile, draft) {
         ? modLookup(cs[def.stat].enhanced)
         : null;
     skills.push({
+      id: def.id,
       name: def.name,
       rank,
       stat: def.stat ? def.stat.toUpperCase() : "",
       mod,
       check: "",
+      description: def.description ?? "",
     });
   };
   for (const cat of profile?.creation_flow?.backgrounds?.[sp.type] ?? []) {
