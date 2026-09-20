@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { GD_SKILLS } from "@/components/ui/GingerDragonIcons";
 import SheetPanel from "@/components/character/SheetPanel";
 import SkillActionCard from "@/components/character/SkillActionCard";
+import { SKILL_CATALOG } from "@/rules-profile/adapters/dungeon_crawler_carl/skillCatalog";
 
 /* V3 dynamic Skills panel. Dungeon Crawler Carl characters have ranked
    skills — rendered compactly from the character's preserved ruleset
@@ -14,6 +15,12 @@ const LEGACY_SKILLS = [
   "Persuasion", "Deception", "Intimidation", "Performance", "Survival",
 ];
 const COMPACT_COUNT = 5;
+const DCC_SKILL_BY_NAME = Object.fromEntries(
+  Object.values(SKILL_CATALOG).flatMap((def) => [
+    [def.name, def],
+    ...(def.display_name ? [[def.display_name, def]] : []),
+  ])
+);
 
 /* Rank + Advancement row. In play mode (editing=false) the name area is
    a button: tap to open the Skill Action Card (Roll Skill Check). Rank
@@ -113,9 +120,15 @@ export default function SkillsPanel({ profile, rulesetData, rankDraft = null, on
      save can commit a rank change mid-session. SAVE CHANGES commits the
      draft through the existing save path; CANCEL discards it. The row
      displays the drafted rank immediately. */
-  const ranked = (isDcc && Array.isArray(rulesetData?.skills) ? rulesetData.skills : []).map((s, i) =>
-    rankDraft && i in rankDraft ? { ...s, rank: rankDraft[i] } : s
-  );
+  const ranked = (isDcc && Array.isArray(rulesetData?.skills) ? rulesetData.skills : []).map((s, i) => {
+    const drafted = rankDraft && i in rankDraft ? { ...s, rank: rankDraft[i] } : s;
+    const def = (drafted?.id && SKILL_CATALOG[drafted.id]) || DCC_SKILL_BY_NAME[drafted?.name] || null;
+    return {
+      ...drafted,
+      ...(def?.id && !drafted?.id ? { id: def.id } : {}),
+      ...(def?.description && !drafted?.description ? { description: def.description } : {}),
+    };
+  });
   const editing = !playMode;
 
   /* Adjust the rank of an EXISTING skill row — one tap = exactly ±1,
