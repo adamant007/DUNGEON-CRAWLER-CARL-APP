@@ -103,6 +103,16 @@ const SKILL_DESCRIPTIONS = {
   spear: "Two-handed melee Strength reach weapon used by the pregen. Has 10-foot range and deals 1d8 + Strength Piercing.",
 };
 
+const AI_FAVOR_STANDARD = (value) => ({
+  value,
+  condition: "Use this attack for a majority of your attacks in a combat lasting at least 3 rounds.",
+});
+
+const AI_FAVOR_NO_DAMAGE_EFFECT = (value) => ({
+  value,
+  condition: "Use no Damage Effect for a majority of your hand-to-hand attacks in a combat lasting at least 3 rounds.",
+});
+
 const s = (id, name, stat = null, category = "general", extra = {}) => ({
   id,
   name,
@@ -174,16 +184,18 @@ export const SKILL_CATALOG = Object.fromEntries(
          so the live STR Mod is rendered/rolled, never frozen. */
       damage: { dice: "1d4", plus_mod_stat: "str" },
       damage_type: "Bludgeoning",
+      ai_favor: AI_FAVOR_STANDARD(1),
     }),
     s("slice_attack", "Slice Attack", null, "attack", {
       attack_stat: "dex",
       damage: { dice: "1d4", plus_mod_stat: "str" },
       damage_type: "Slashing",
+      ai_favor: AI_FAVOR_STANDARD(1),
     }),
-    s("pugilism", "Pugilism", "dex", "attack", { allowed_damage_effects: ["iron_punch"] }),
-    s("foot_soldier", "Foot Soldier", null, "attack", { allowed_damage_effects: ["smush"] }),
-    s("noggin_nocker", "Noggin Nocker", null, "attack", { allowed_damage_effects: ["skullcracker"] }),
-    s("wrasslin", "Wrasslin'", null, "attack", { allowed_damage_effects: ["toss"] }),
+    s("pugilism", "Pugilism", "dex", "attack", { allowed_damage_effects: ["iron_punch"], ai_favor: AI_FAVOR_NO_DAMAGE_EFFECT(2) }),
+    s("foot_soldier", "Foot Soldier", null, "attack", { allowed_damage_effects: ["smush"], ai_favor: AI_FAVOR_NO_DAMAGE_EFFECT(1) }),
+    s("noggin_nocker", "Noggin Nocker", null, "attack", { allowed_damage_effects: ["skullcracker"], ai_favor: AI_FAVOR_NO_DAMAGE_EFFECT(1) }),
+    s("wrasslin", "Wrasslin'", null, "attack", { allowed_damage_effects: ["toss"], ai_favor: AI_FAVOR_NO_DAMAGE_EFFECT(1) }),
 
     // Damage Effect skills — ranked skills linked to their attack skill
     s("iron_punch", "Iron Punch", null, "damage_effect", { linked_attack_skill: "pugilism" }),
@@ -194,12 +206,12 @@ export const SKILL_CATALOG = Object.fromEntries(
 
     // Weapon skills (stat known only where the supplied tables state it)
     s("club", "Club", null, "weapon"),
-    s("improvised_weapons", "Improvised Weapons", null, "weapon"),
+    s("improvised_weapons", "Improvised Weapons", null, "weapon", { ai_favor: AI_FAVOR_STANDARD(1) }),
     s("warhammer", "Warhammer", null, "weapon"),
     s("maul", "Maul", "str", "weapon"),
     s("spear", "Spear", "str", "weapon"),
     s("axe", "Axe", null, "weapon"),
-    s("dagger", "Dagger", "dex", "weapon"),
+    s("dagger", "Dagger", "dex", "weapon", { ai_favor: AI_FAVOR_STANDARD(1) }),
     s("longsword", "Longsword", null, "weapon"),
     s("rapier", "Rapier", null, "weapon"),
     s("bow", "Bow", null, "weapon"),
@@ -209,22 +221,22 @@ export const SKILL_CATALOG = Object.fromEntries(
     s("handgun", "Handgun", "dex", "weapon", { display_name: "Handgun — Pistol / Revolver" }),
     s("shotgun", "Shotgun", "dex", "weapon"),
     s("javelin", "Javelin", null, "weapon"),
-    s("shuriken", "Shuriken", null, "weapon"),
-    s("slingshot", "Slingshot", null, "weapon"),
-    s("herding_weapons", "Herding Weapons", null, "weapon"),
+    s("shuriken", "Shuriken", null, "weapon", { ai_favor: AI_FAVOR_STANDARD(1) }),
+    s("slingshot", "Slingshot", null, "weapon", { ai_favor: AI_FAVOR_STANDARD(2) }),
+    s("herding_weapons", "Herding Weapons", null, "weapon", { ai_favor: AI_FAVOR_STANDARD(1) }),
     s("lance", "Lance", null, "weapon"),
     s("polearm", "Polearm", null, "weapon"),
     s("quarterstaff", "Quarterstaff", null, "weapon"),
 
     // Spells
     s("heal", "Heal", null, "spell"),
-    s("dirt_clod", "Dirt Clod", null, "spell", { attack_spell: true }),
-    s("fire_fingers", "Fire Fingers", null, "spell", { attack_spell: true }),
-    s("frost_scar", "Frost Scar", null, "spell", { attack_spell: true }),
-    s("mind_tickle", "Mind Tickle", null, "spell", { attack_spell: true }),
-    s("magic_missile", "Magic Missile", null, "spell", { attack_spell: true }),
-    s("shock_treatment", "Shock Treatment", null, "spell", { attack_spell: true }),
-    s("soul_collector", "Soul Collector", null, "spell", { attack_spell: true }),
-    s("vine_porn", "Vine Porn", null, "spell", { attack_spell: true }),
+    s("dirt_clod", "Dirt Clod", null, "spell", { attack_spell: true, ai_favor: AI_FAVOR_STANDARD(2) }),
+    s("fire_fingers", "Fire Fingers", null, "spell", { attack_spell: true, ai_favor: AI_FAVOR_STANDARD(1) }),
+    s("frost_scar", "Frost Scar", null, "spell", { attack_spell: true, ai_favor: AI_FAVOR_STANDARD(1) }),
+    s("mind_tickle", "Mind Tickle", null, "spell", { attack_spell: true, ai_favor: AI_FAVOR_STANDARD(2) }),
+    s("magic_missile", "Magic Missile", null, "spell", { attack_spell: true, ai_favor: AI_FAVOR_STANDARD(1) }),
+    s("shock_treatment", "Shock Treatment", null, "spell", { attack_spell: true, ai_favor: AI_FAVOR_STANDARD(2) }),
+    s("soul_collector", "Soul Collector", null, "spell", { attack_spell: true, ai_favor: AI_FAVOR_STANDARD(1) }),
+    s("vine_porn", "Vine Porn", null, "spell", { attack_spell: true, ai_favor: AI_FAVOR_STANDARD(1) }),
   ].map((skill) => [skill.id, skill]),
 );
