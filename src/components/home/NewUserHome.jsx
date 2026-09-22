@@ -161,12 +161,18 @@ const available = [
     text: "Search rules you provide and keep fast explanations close to the moment you need them.",
     to: "/rules",
   },
+  {
+    icon: Layers3,
+    title: "Campaign & GM Tools",
+    text: "Create a campaign, invite players, make guest crawlers without requiring an account first, and edit assigned character sheets from the GM view.",
+    to: "/campaign",
+  },
 ];
 
 const roadmap = [
-  { icon: Layers3, title: "Campaigns", text: "GM-led campaign state, party membership, sessions, and shared play." },
   { icon: Map, title: "Maps", text: "Table-ready maps, markers, placement, and encounter context." },
   { icon: Swords, title: "Combat", text: "Faster damage, DR, initiative, conditions, and action flow." },
+  { icon: Users, title: "Expanded Party Play", text: "More shared table state, session tools, and connected player experiences." },
 ];
 
 export default function NewUserHome() {
@@ -265,7 +271,7 @@ export default function NewUserHome() {
               <p className="mt-4 text-[14px] leading-7 text-[#93887f]">Focused on the workflows players use every session, with a clear line between what is ready now and what is still being built.</p>
             </div>
 
-            <div className="mt-12 grid gap-4 lg:grid-cols-3">
+            <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {available.map(({ icon: Icon, title, text, to }) => (
                 <Link key={title} to={to} className="group rounded-2xl border border-[#392d25] bg-[linear-gradient(180deg,#12100f,#0d0c0c)] p-6 transition hover:-translate-y-0.5 hover:border-[#765431]">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#6b4a2c] bg-[#1b120d] text-[#e0a65d]"><Icon size={19} /></div>
@@ -284,7 +290,7 @@ export default function NewUserHome() {
               <div>
                 <div className="font-display text-[10px] font-bold tracking-[0.2em] text-[#bc8848]">BUILT TO GROW</div>
                 <h2 className="mt-4 font-display text-3xl font-semibold text-[#f0dfc0] sm:text-4xl">One companion, not a pile of disconnected tools.</h2>
-                <p className="mt-4 text-[14px] leading-7 text-[#93887f]">The roadmap keeps the character sheet at the center while campaigns, maps, combat, and GM tools connect around it.</p>
+                <p className="mt-4 text-[14px] leading-7 text-[#93887f]">Campaigns and GM character tools are now part of the live product; maps, deeper combat, and expanded party play are the next connected layers.</p>
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
                 {roadmap.map(({ icon: Icon, title, text }) => (
