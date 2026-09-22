@@ -18,6 +18,9 @@ import Tapestry from './pages/Tapestry';
 import Library from './pages/Library';
 import CharacterSheet from './pages/CharacterSheet';
 import ComingSoon from './pages/ComingSoon';
+import Campaign from './pages/Campaign';
+import GmTools from './pages/GmTools';
+import ClaimCharacter from './pages/ClaimCharacter';
 import NavLayout from './components/NavLayout';
 import GdsHomeButton from './components/GdsHomeButton';
 
@@ -57,6 +60,7 @@ const AuthenticatedApp = () => {
     <Route path="/register" element={<Register />} />
     <Route path="/forgot-password" element={<ForgotPassword />} />
     <Route path="/reset-password" element={<ResetPassword />} />
+    <Route path="/claim" element={<ClaimCharacter />} />
     {/* Legacy start experience — preserved until the new home page is approved. */}
     <Route path="/legacy/tapestry" element={<Tapestry />} />
     <Route path="/library" element={<Library />} />
@@ -69,9 +73,9 @@ const AuthenticatedApp = () => {
       <Route path="/help" element={<ComingSoon title="Tutorial & Help" />} />
       <Route path="/spells" element={<ComingSoon title="Spells" />} />
       <Route path="/gear" element={<ComingSoon title="Gear" />} />
-      <Route path="/campaign" element={<ComingSoon title="Campaign" />} />
+      <Route path="/campaign" element={<Campaign />} />
       <Route path="/party" element={<ComingSoon title="Party" />} />
-      <Route path="/gm-tools" element={<ComingSoon title="GM Tools" />} />
+      <Route path="/gm-tools" element={<GmTools />} />
       <Route path="/leaderboard" element={<ComingSoon title="Leaderboard" />} />
       <Route path="/notes" element={<ComingSoon title="Notes" />} />
       <Route path="/dice-roller" element={<ComingSoon title="Dice Roller" />} />
