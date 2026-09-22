@@ -333,18 +333,20 @@ export default function CharacterSheet() {
           draft: opts.finishDraft ? false : sheet.draft,
           creationStep: opts.finishDraft ? "" : sheet.creationStep,
         });
-        const rec = idAtStart
-          ? gmMode
+        let rec;
+        if (idAtStart) {
+          rec = gmMode
             ? await base44.campaigns.gmUpdateCharacter(
                 gmCampaignId,
                 idAtStart,
                 data,
                 Boolean(opts.finishDraft)
               )
-            : await base44.entities.Character.update(idAtStart, data)
-          : gmMode
-            ? (() => { throw new Error("A GM campaign view cannot create a replacement character."); })()
-            : await base44.entities.Character.create(data);
+            : await base44.entities.Character.update(idAtStart, data);
+        } else {
+          if (gmMode) throw new Error("A GM campaign view cannot create a replacement character.");
+          rec = await base44.entities.Character.create(data);
+        }
         // Switched away mid-flight — this save landed on the old record.
         if (idAtStart && currentIdRef.current !== idAtStart) return true;
         if (!idAtStart) setCurrentId(rec.id);
