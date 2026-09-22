@@ -208,7 +208,7 @@ export default function NewUserHome() {
           <div className="relative mx-auto grid max-w-[1240px] gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[.82fr_1.18fr] lg:items-center lg:px-8 lg:py-24">
             <div className="max-w-[590px]">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#6d4b2b]/70 bg-[#17100d] px-3 py-1.5 text-[10px] font-semibold tracking-[0.14em] text-[#d9a55d]">
-                <Sparkles size={12} /> BUILT FOR THE TABLE, NOT THE DEMO
+                <Sparkles size={12} /> DESIGNED FOR REAL TABLE PLAY
               </div>
               <h1 className="mt-6 font-display text-[clamp(42px,6vw,78px)] font-semibold leading-[.96] tracking-[-0.035em] text-[#f2dfbd]">
                 Crawler Companion
@@ -232,7 +232,7 @@ export default function NewUserHome() {
               <div className="mt-9 flex flex-wrap gap-x-5 gap-y-2 text-[11px] text-[#887c72]">
                 <span className="flex items-center gap-1.5"><CheckCircle2 size={13} className="text-[#9c6]" /> Mobile-first</span>
                 <span className="flex items-center gap-1.5"><CheckCircle2 size={13} className="text-[#9c6]" /> Persistent records</span>
-                <span className="flex items-center gap-1.5"><CheckCircle2 size={13} className="text-[#9c6]" /> No fake social proof</span>
+                <span className="flex items-center gap-1.5"><CheckCircle2 size={13} className="text-[#9c6]" /> Clear product status</span>
               </div>
             </div>
 
@@ -262,7 +262,7 @@ export default function NewUserHome() {
             <div className="mx-auto max-w-[720px] text-center">
               <div className="font-display text-[10px] font-bold tracking-[0.2em] text-[#bc8848]">AVAILABLE NOW</div>
               <h2 className="mt-4 font-display text-3xl font-semibold text-[#f0dfc0] sm:text-4xl">The core experience is already useful at the table.</h2>
-              <p className="mt-4 text-[14px] leading-7 text-[#93887f]">We would rather show what works than invent numbers, testimonials, or features that are not ready.</p>
+              <p className="mt-4 text-[14px] leading-7 text-[#93887f]">Focused on the workflows players use every session, with a clear line between what is ready now and what is still being built.</p>
             </div>
 
             <div className="mt-12 grid gap-4 lg:grid-cols-3">
