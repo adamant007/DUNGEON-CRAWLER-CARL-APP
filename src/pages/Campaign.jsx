@@ -88,7 +88,7 @@ export default function Campaign() {
             <p className="font-fell-sc text-xs tracking-[0.18em] text-[#d4a055]">CAMPAIGNS</p>
             <h1 className="font-display text-2xl font-bold">Your Dungeon Tables</h1>
             <p className="mt-1 max-w-2xl font-fell text-sm text-[#cbb99b]">
-              Create a table as GM or join one with an invite code. Players can join before the GM starts play.
+              Create a table as GM or join one with an invite code. Keep the whole table together without forcing everyone through setup first.
             </p>
           </div>
           {active?.role === "gm" && (
