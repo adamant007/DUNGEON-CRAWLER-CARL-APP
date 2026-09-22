@@ -514,7 +514,7 @@ const campaigns = {
     );
     const ids = (links || []).map((row) => row.character_id).filter(Boolean);
     if (!ids.length) return [];
-    const inList = ids.map((id) => '"' + String(id).replace(/"/g, "") + '"').join(",");
+    const inList = ids.map((id) => String(id).replace(/[^a-f0-9-]/gi, "")).join(",");
     const rows = await apiFetch(
       "/rest/v1/crawler_characters?select=*&id=in.(" + encodeURIComponent(inList) + ")"
     );
