@@ -9,6 +9,7 @@ test('current product contracts include guest crawlers, GM editing, and expandab
   const api = fs.readFileSync('src/api/supabaseCompat.js', 'utf8');
   const gm = fs.readFileSync('src/pages/GmTools.jsx', 'utf8');
   const storage = fs.readFileSync('src/components/character/characterStorage.js', 'utf8');
+  const dimensionalStorage = fs.readFileSync('src/components/character/DimensionalStoragePanel.jsx', 'utf8');
 
   expect(app).toContain('path="/campaign"');
   expect(app).toContain('path="/gm-tools"');
@@ -24,13 +25,16 @@ test('current product contracts include guest crawlers, GM editing, and expandab
 
   expect(storage).toContain('MIN_INVENTORY_ROWS = 4');
   expect(storage).toContain('padRows(r.inventory, MIN_INVENTORY_ROWS');
+  expect(dimensionalStorage).toContain('else next.push');
+  expect(dimensionalStorage).toContain('Capacity');
+  expect(dimensionalStorage).toContain('UNLIMITED');
 });
 
 test('public home, login, register, and claim-link error states render', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Crawler Companion' })).toBeVisible();
   await expect(page.getByText('GINGER DRAGON STUDIOS', { exact: true }).first()).toBeVisible();
-  await expect(page.getByRole('link', { name: /GET STARTED/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'GET STARTED', exact: true })).toBeVisible();
 
   await page.goto('/login');
   await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
