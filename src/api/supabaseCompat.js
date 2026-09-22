@@ -451,6 +451,117 @@ const auth = {
   },
 };
 
+const campaigns = {
+  async list() {
+    const userId = currentUserId();
+    if (!userId) throw makeError("Authentication required", 401);
+    const rows = await apiFetch(
+      "/rest/v1/campaign_members?select=role,campaigns(id,name,description,invite_code,owner_id,created_at,updated_at)&user_id=eq." +
+        encodeURIComponent(userId) +
+        "&order=joined_at.desc"
+    );
+    return (rows || [])
+      .filter((row) => row?.campaigns)
+      .map((row) => ({ ...row.campaigns, title: row.campaigns.name, role: row.role }));
+  },
+
+  async create(name) {
+    const userId = currentUserId();
+    if (!userId) throw makeError("Authentication required", 401);
+    const cleanName = String(name || "").trim() || "My Crawler Campaign";
+    const invite =
+      crypto.randomUUID().replace(/-/g, "").slice(0, 4).toUpperCase() +
+      "-" +
+      crypto.randomUUID().replace(/-/g, "").slice(0, 4).toUpperCase();
+    const created = await apiFetch("/rest/v1/campaigns", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        owner_id: userId,
+        name: cleanName,
+        description: "",
+        invite_code: invite,
+      }),
+    });
+    const campaign = created?.[0];
+    if (!campaign?.id) throw makeError("Campaign could not be created", 500);
+    await apiFetch("/rest/v1/campaign_members", {
+      method: "POST",
+      headers: { Prefer: "return=minimal,resolution=merge-duplicates" },
+      body: JSON.stringify({ campaign_id: campaign.id, user_id: userId, role: "gm" }),
+    });
+    return { ...campaign, title: campaign.name, role: "gm" };
+  },
+
+  async join(inviteCode) {
+    const code = String(inviteCode || "").trim().toUpperCase();
+    if (!code) throw makeError("Enter a campaign invite code", 400);
+    const data = await apiFetch("/rest/v1/rpc/join_campaign_by_code", {
+      method: "POST",
+      body: JSON.stringify({ p_invite_code: code }),
+    });
+    const campaign = Array.isArray(data) ? data[0] : data;
+    if (!campaign?.id) throw makeError("Campaign code not found", 404);
+    return { ...campaign, title: campaign.name, role: "player" };
+  },
+
+  async characters(campaignId) {
+    if (!campaignId) return [];
+    const links = await apiFetch(
+      "/rest/v1/campaign_characters?select=character_id,user_id,joined_at&campaign_id=eq." +
+        encodeURIComponent(campaignId) +
+        "&order=joined_at.asc"
+    );
+    const ids = (links || []).map((row) => row.character_id).filter(Boolean);
+    if (!ids.length) return [];
+    const inList = ids.map((id) => '"' + String(id).replace(/"/g, "") + '"').join(",");
+    const rows = await apiFetch(
+      "/rest/v1/crawler_characters?select=*&id=in.(" + encodeURIComponent(inList) + ")"
+    );
+    const linkByCharacter = new Map((links || []).map((row) => [row.character_id, row]));
+    return (rows || []).map((row) => ({
+      ...recordFromRow(row),
+      owner_user_id: row.user_id || null,
+      campaign_user_id: linkByCharacter.get(row.id)?.user_id || null,
+      is_guest: !row.user_id,
+    }));
+  },
+
+  async createGuest(campaignId, name, data) {
+    const result = await apiFetch("/rest/v1/rpc/create_guest_crawler", {
+      method: "POST",
+      body: JSON.stringify({
+        p_campaign_id: campaignId,
+        p_name: String(name || "").trim(),
+        p_data: data || {},
+      }),
+    });
+    return Array.isArray(result) ? result[0] : result;
+  },
+
+  async claimGuest(token) {
+    const result = await apiFetch("/rest/v1/rpc/claim_guest_crawler", {
+      method: "POST",
+      body: JSON.stringify({ p_claim_token: String(token || "").trim() }),
+    });
+    return Array.isArray(result) ? result[0] : result;
+  },
+
+  async gmUpdateCharacter(campaignId, characterId, data, recordEvent = false) {
+    const result = await apiFetch("/rest/v1/rpc/gm_update_campaign_character", {
+      method: "POST",
+      body: JSON.stringify({
+        p_campaign_id: campaignId,
+        p_character_id: characterId,
+        p_data: data || {},
+        p_record_event: Boolean(recordEvent),
+      }),
+    });
+    const row = Array.isArray(result) ? result[0] : result;
+    return recordFromRow(row);
+  },
+};
+
 const functions = {
   async invoke(name, payload = {}) {
     if (name === "uploadRulebook") {
@@ -490,6 +601,7 @@ export const supabaseBase44Compat = {
     },
   },
   auth,
+  campaigns,
   entities: {
     Character: entity("crawler_characters"),
     Rulebook: entity("rulebooks"),
