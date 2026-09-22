@@ -29,6 +29,7 @@ export default function CharacterBar({
   onToggleEdit,
   onSaveChanges,
   onCancelChanges,
+  gmMode = false,
 }) {
   let status = "";
   if (saveState === "saving") status = "Saving…";
@@ -41,18 +42,22 @@ export default function CharacterBar({
       <div className="flex min-w-0 flex-1 flex-wrap md:flex-nowrap items-center gap-1.5 gap-y-1">
         {/* Rulebooks — the same private Rulebook Library the Character
             Creator reaches; never a gate before New Character. */}
-        <button
-          type="button"
-          className={BTN}
-          onClick={onRulebooks}
-          disabled={busy}
-          title="Manage Games & Rules"
-        >
-          Rulebooks
-        </button>
-        <button type="button" className={BTN} onClick={onNew} disabled={busy}>
-          New Character
-        </button>
+        {!gmMode && (
+          <>
+            <button
+              type="button"
+              className={BTN}
+              onClick={onRulebooks}
+              disabled={busy}
+              title="Manage Games & Rules"
+            >
+              Rulebooks
+            </button>
+            <button type="button" className={BTN} onClick={onNew} disabled={busy}>
+              New Character
+            </button>
+          </>
+        )}
         {editMode ? (
           <>
             <button
@@ -72,14 +77,16 @@ export default function CharacterBar({
               CANCEL
             </button>
           </>
-        ) : (
+        ) : !gmMode ? (
           <button type="button" className={BTN} onClick={onSave} disabled={busy || saveState === "saving"}>
             Save Character
           </button>
+        ) : null}
+        {!gmMode && (
+          <button type="button" className={BTN} onClick={onLoad} disabled={busy}>
+            Load Character
+          </button>
         )}
-        <button type="button" className={BTN} onClick={onLoad} disabled={busy}>
-          Load Character
-        </button>
         <button
           type="button"
           className={BTN}
