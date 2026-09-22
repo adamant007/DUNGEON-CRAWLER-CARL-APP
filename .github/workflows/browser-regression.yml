@@ -11,12 +11,12 @@ on:
 jobs:
   local-regression:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
       - run: npm install
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e -- --project=chromium-desktop
@@ -29,20 +29,20 @@ jobs:
             test-results/
           retention-days: 7
 
+  # Base44 is the production publishing path. A GitHub push does NOT imply
+  # the live site has been deployed, so live smoke runs manually and daily,
+  # not on every source-code push.
   production-smoke:
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
       - run: npm install
       - run: npx playwright install --with-deps chromium
-      - name: Wait for production deployment propagation
-        if: github.event_name == 'push'
-        run: sleep 45
       - name: Test live Ginger Dragon Studios site
         env:
           E2E_BASE_URL: https://gingerdragonstudios.com
