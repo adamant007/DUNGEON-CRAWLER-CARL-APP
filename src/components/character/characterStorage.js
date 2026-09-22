@@ -9,6 +9,7 @@ import { DEFAULT_CUSTOMIZATION } from "./customizeOptions";
 const ATTACK_BLANK = { name: "", bonus: "", damage: "", type: "", notes: "" };
 const SPELL_BLANK = { name: "", cost: "", type: "", notes: "" };
 const INVENTORY_BLANK = { item: "", qty: "", notes: "" };
+const MIN_INVENTORY_ROWS = 4; // display/storage floor only — inventory has no maximum item count
 const DETAILS_BLANK = { race: "", class: "", level: 1, floor: 1, crawler: "", size: "", alignment: "", background: "", title: "" };
 const GEAR_BLANK = { head: "", chest: "", hands: "", legs: "", feet: "", mainHand: "", offHand: "", other: "" };
 const ATTRS_BLANK = { str: 10, dex: 10, con: 10, int: 10, cha: 10 };
@@ -83,7 +84,7 @@ export function blankSheet() {
     attacks: Array.from({ length: 4 }, () => ({ ...ATTACK_BLANK })),
     spells: Array.from({ length: 4 }, () => ({ ...SPELL_BLANK })),
     hotbar: Array.from({ length: 10 }, () => ""),
-    inventory: Array.from({ length: 4 }, () => ({ ...INVENTORY_BLANK })),
+    inventory: Array.from({ length: MIN_INVENTORY_ROWS }, () => ({ ...INVENTORY_BLANK })),
     currency: {},
     notes: "",
     draft: false,
@@ -119,7 +120,7 @@ export function recordFromSheet(s) {
     attacks: padRows(s.attacks, 4, ATTACK_BLANK),
     spells: padRows(s.spells, 4, SPELL_BLANK),
     hotbar: padList(s.hotbar, 10),
-    inventory: padRows(s.inventory, 4, INVENTORY_BLANK),
+    inventory: padRows(s.inventory, MIN_INVENTORY_ROWS, INVENTORY_BLANK),
     currency: { ...(s.currency ?? {}) },
     notes: s.notes ?? "",
     draft: s.draft ?? false,
@@ -157,7 +158,7 @@ export function sheetFromRecord(rec) {
     attacks: padRows(r.attacks, 4, ATTACK_BLANK),
     spells: padRows(r.spells, 4, SPELL_BLANK),
     hotbar: padList(r.hotbar, 10),
-    inventory: padRows(r.inventory, 4, INVENTORY_BLANK),
+    inventory: padRows(r.inventory, MIN_INVENTORY_ROWS, INVENTORY_BLANK),
     currency: { ...(r.currency ?? {}) },
     notes: r.notes ?? "",
     draft: r.draft ?? false,

@@ -34,6 +34,10 @@ import "./character-dark.css";
    hydrates from that record and every edit stays local until Save. */
 export default function CharacterSheet() {
   const b = blankSheet();
+  const entryParams = new URLSearchParams(window.location.search);
+  const gmCampaignId = entryParams.get("gmCampaign") || "";
+  const gmCharacterId = entryParams.get("gmCharacter") || "";
+  const gmMode = Boolean(gmCampaignId && gmCharacterId);
   const [name, setName] = useState(b.name);
   const [portrait, setPortrait] = useState(b.portrait);
   const [portraitSettings, setPortraitSettings] = useState({ ...b.portraitSettings });
@@ -80,6 +84,7 @@ export default function CharacterSheet() {
   const [manageInv, setManageInv] = useState(null); // Inventory row open for restock/manage (index into the canonical inventory)
   const [currency, setCurrency] = useState({ ...b.currency }); // canonical currency amounts (profile-defined id -> count)
   const [activeSheetPage, setActiveSheetPage] = useState(1); // four-page digital character sheet tabs
+  const [gmAccessError, setGmAccessError] = useState("");
 
   /* Latest-value refs — saves fired from timers, Retry, and dialogs must
      always read the CURRENT sheet, character id, and snapshot, never a
@@ -226,17 +231,25 @@ export default function CharacterSheet() {
           return;
         }
       }
-      if (authed && guest) {
+      if (authed && gmMode) {
+        try {
+          rec = await base44.entities.Character.get(gmCharacterId);
+        } catch (err) {
+          rec = null;
+          setGmAccessError(err?.message || "This crawler is not available to this campaign GM.");
+        }
+      }
+      if (!gmMode && authed && guest) {
         try {
           rec = await base44.entities.Character.create(guest);
           localStorage.removeItem(GUEST_DRAFT_KEY);
         } catch {
           rec = null;
         }
-      } else if (!authed && guest) {
+      } else if (!gmMode && !authed && guest) {
         rec = guest; // returning visitor — pick the try-out back up
       }
-      if (authed && !rec) {
+      if (!gmMode && authed && !rec) {
         const activeId = me?.active_character_id;
         if (activeId) {
           try {
@@ -320,9 +333,20 @@ export default function CharacterSheet() {
           draft: opts.finishDraft ? false : sheet.draft,
           creationStep: opts.finishDraft ? "" : sheet.creationStep,
         });
-        const rec = idAtStart
-          ? await base44.entities.Character.update(idAtStart, data)
-          : await base44.entities.Character.create(data);
+        let rec;
+        if (idAtStart) {
+          rec = gmMode
+            ? await base44.campaigns.gmUpdateCharacter(
+                gmCampaignId,
+                idAtStart,
+                data,
+                Boolean(opts.finishDraft)
+              )
+            : await base44.entities.Character.update(idAtStart, data);
+        } else {
+          if (gmMode) throw new Error("A GM campaign view cannot create a replacement character.");
+          rec = await base44.entities.Character.create(data);
+        }
         // Switched away mid-flight — this save landed on the old record.
         if (idAtStart && currentIdRef.current !== idAtStart) return true;
         if (!idAtStart) setCurrentId(rec.id);
@@ -330,7 +354,7 @@ export default function CharacterSheet() {
         savedJsonRef.current = snap;
         setSavedJson(snap);
         if (opts.finishDraft) setDraft(false);
-        setActive(rec.id);
+        if (!gmMode) setActive(rec.id);
         setSaveState("success");
         return true;
       } catch {
@@ -835,8 +859,20 @@ export default function CharacterSheet() {
           style={pigmentStyle}
         >
           <div className="relative z-[1]">
+            {gmMode && (
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-md border border-[#8a642f] bg-[#23170e] px-3 py-2 text-[#f2e5cb]">
+                <div>
+                  <strong className="font-fell-sc text-xs tracking-[0.12em] text-[#e2b363]">GM CHARACTER VIEW</strong>
+                  <p className="font-fell text-[11px] text-[#d6c2a0]">
+                    You are viewing a crawler assigned to this campaign. EDIT CHARACTER saves back to this crawler only.
+                  </p>
+                </div>
+                <a href="/gm-tools" className="font-fell-sc text-xs font-bold underline text-[#f2d49b]">BACK TO GM TOOLS</a>
+              </div>
+            )}
             <CharacterBar
               className="-mt-2 sm:-mt-5 mb-1"
+              gmMode={gmMode}
               onRulebooks={openRulebooks}
               onNew={startNew}
               onSave={save}
@@ -856,6 +892,12 @@ export default function CharacterSheet() {
               <p className="py-16 text-center font-fell italic text-sm text-[var(--ink-soft)]">
                 Unrolling your parchment…
               </p>
+            ) : gmAccessError ? (
+              <div className="mx-auto my-10 max-w-xl rounded border border-[#8b2f2a] bg-[#2a1210]/80 p-5 text-center">
+                <p className="font-display text-lg font-bold text-[#f2d5c8]">Crawler unavailable</p>
+                <p className="mt-2 font-fell text-sm text-[#dcc6b8]">{gmAccessError}</p>
+                <a href="/gm-tools" className="mt-4 inline-block font-fell-sc text-xs font-bold underline">Return to GM Tools</a>
+              </div>
             ) : (
               <FourPageCharacterSheet
                 page={activeSheetPage}

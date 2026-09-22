@@ -228,7 +228,7 @@ function InventoryPage({ inventory, onManageStorage }) {
   const rows = (Array.isArray(inventory) ? inventory : []).filter((r) => (r?.item ?? "").toString().trim());
   return (
     <div>
-      <SheetTitle action={<button type="button" onClick={onManageStorage} className="font-fell-sc text-[8px] underline">MANAGE</button>}>INVENTORY</SheetTitle>
+      <SheetTitle action={<button type="button" onClick={onManageStorage} className="font-fell-sc text-[8px] underline">MANAGE / ADD ITEMS</button>}>INVENTORY</SheetTitle>
       <div className="mb-2 grid grid-cols-3 gap-1 text-center">
         <Field label="Storage">Dimensional</Field>
         <Field label="Capacity">Unlimited</Field>
