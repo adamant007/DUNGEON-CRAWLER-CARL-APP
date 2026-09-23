@@ -32,7 +32,7 @@ test('current product contracts include guest crawlers, GM editing, and expandab
 
 test('public home, login, register, and claim-link error states render', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Crawler Companion' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ginger Dragon RPG Companion' })).toBeVisible();
   await expect(page.getByText('GINGER DRAGON STUDIOS', { exact: true }).first()).toBeVisible();
   await expect(page.getByRole('link', { name: 'GET STARTED', exact: true })).toBeVisible();
 
