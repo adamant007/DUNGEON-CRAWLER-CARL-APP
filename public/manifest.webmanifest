@@ -1,8 +1,8 @@
 {
-  "name": "RPG Companion — Ginger Dragon Fire Studios",
-  "short_name": "RPG Companion",
-  "description": "Mobile-first tabletop RPG companion by Ginger Dragon Fire Studios.",
-  "start_url": "/crawler-companion",
+  "name": "Ginger Dragon RPG Companion",
+  "short_name": "Ginger Dragon",
+  "description": "Independent tabletop RPG companion by Ginger Dragon Studios.",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0c0f14",
