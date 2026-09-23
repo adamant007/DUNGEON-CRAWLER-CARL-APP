@@ -263,6 +263,49 @@ function entity(table, options = {}) {
   };
 }
 
+async function uploadStorageObject(bucket, path, file, retryAuth = true) {
+  const token = await accessToken();
+  const url =
+    SUPABASE_URL +
+    "/storage/v1/object/" +
+    bucket +
+    "/" +
+    path.split("/").map(encodeURIComponent).join("/");
+
+  /* XMLHttpRequest is intentionally used for binary uploads instead of the
+     JSON-oriented apiFetch helper. It has no short application timeout and is
+     more reliable for multi-megabyte PDFs on mobile/tablet browsers. */
+  try {
+    await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      xhr.timeout = 0;
+      xhr.setRequestHeader("apikey", SUPABASE_KEY);
+      xhr.setRequestHeader("Authorization", "Bearer " + token);
+      xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+      xhr.setRequestHeader("x-upsert", "false");
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+          return;
+        }
+        let data = null;
+        try { data = JSON.parse(xhr.responseText || "null"); } catch { data = xhr.responseText; }
+        reject(makeError(data?.message || data?.error || "Upload failed", xhr.status, data));
+      };
+      xhr.onerror = () => reject(makeError("Network error while uploading file", 0));
+      xhr.onabort = () => reject(makeError("Upload was cancelled", 0));
+      xhr.send(file);
+    });
+  } catch (error) {
+    if (retryAuth && error?.status === 401) {
+      await refreshSession();
+      return uploadStorageObject(bucket, path, file, false);
+    }
+    throw error;
+  }
+}
+
 async function uploadToBucket(bucket, file, makePublic) {
   const userId = currentUserId();
   if (!userId) throw makeError("Authentication required", 401);
@@ -270,17 +313,7 @@ async function uploadToBucket(bucket, file, makePublic) {
     .replace(/[^a-zA-Z0-9._-]+/g, "-")
     .replace(/^-+|-+$/g, "") || "upload";
   const path = `${userId}/${crypto.randomUUID()}-${safeName}`;
-  await apiFetch(
-    `/storage/v1/object/${bucket}/${path.split("/").map(encodeURIComponent).join("/")}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": file.type || "application/octet-stream",
-        "x-upsert": "false",
-      },
-      body: file,
-    }
-  );
+  await uploadStorageObject(bucket, path, file);
   return {
     path,
     publicUrl: makePublic
