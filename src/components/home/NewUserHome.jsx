@@ -37,7 +37,7 @@ function ProductPreview() {
           <div className="flex items-center gap-2.5">
             <GdsEmblem size={30} />
             <div>
-              <div className="font-display text-[10px] font-bold tracking-[0.13em] text-[#e4bd78]">CRAWLER COMPANION</div>
+              <div className="font-display text-[10px] font-bold tracking-[0.13em] text-[#e4bd78]">GINGER DRAGON RPG COMPANION</div>
               <div className="mt-0.5 text-[9px] text-[#8f8172]">Live product interface preview</div>
             </div>
           </div>
@@ -217,7 +217,7 @@ export default function NewUserHome() {
                 <Sparkles size={12} /> DESIGNED FOR REAL TABLE PLAY
               </div>
               <h1 className="mt-6 font-display text-[clamp(42px,6vw,78px)] font-semibold leading-[.96] tracking-[-0.035em] text-[#f2dfbd]">
-                Crawler Companion
+                Ginger Dragon RPG Companion
               </h1>
               <p className="mt-6 max-w-[560px] font-garamond text-[clamp(20px,2.2vw,28px)] leading-snug text-[#d7c8b6]">
                 A polished digital companion for character creation, live play, and rules at the table.
@@ -316,7 +316,7 @@ export default function NewUserHome() {
                 <div>
                   <div className="font-display text-[10px] font-bold tracking-[0.18em] text-[#c18b48]">GINGER DRAGON STUDIOS</div>
                   <h2 className="mt-4 max-w-[700px] font-display text-3xl font-semibold leading-tight text-[#f1dfbf] sm:text-4xl">Less friction at the table. More attention on the game.</h2>
-                  <p className="mt-4 max-w-[650px] text-[14px] leading-7 text-[#a19489]">Crawler Companion is being built as a real product: consistent UI, clear state, mobile ergonomics, and features that earn their place.</p>
+                  <p className="mt-4 max-w-[650px] text-[14px] leading-7 text-[#a19489]">Ginger Dragon RPG Companion is built and operated by Ginger Dragon Studios: consistent UI, clear state, mobile ergonomics, and features that earn their place.</p>
                 </div>
                 <Link to="/register" className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#d5a254] px-5 py-3 text-[12px] font-bold text-[#1b1209] hover:bg-[#e2b46a]">
                   Get started <ArrowRight size={15} />
@@ -333,11 +333,11 @@ export default function NewUserHome() {
             <GdsEmblem size={34} />
             <div>
               <div className="font-display text-[10px] font-bold tracking-[0.14em] text-[#d5a254]">GINGER DRAGON STUDIOS</div>
-              <div className="mt-1 text-[10px] text-[#756a61]">Crawler Companion</div>
+              <div className="mt-1 text-[10px] text-[#756a61]">Ginger Dragon RPG Companion</div>
             </div>
           </div>
           <div className="max-w-[620px] text-[10px] leading-5 text-[#665e58] md:text-right">
-            Independent tabletop companion software. Game and product trademarks belong to their respective owners. No affiliation or endorsement is implied.
+            Ginger Dragon RPG Companion is an independent third-party tabletop tool developed and operated by Ginger Dragon Studios. Game and product trademarks belong to their respective owners. No affiliation or endorsement is implied.
           </div>
         </div>
       </footer>
