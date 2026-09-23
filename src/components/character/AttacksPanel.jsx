@@ -2,6 +2,7 @@ import React from "react";
 import { GD_ATTACKS, GD_PHYSICAL_ATTACK, GD_MAGIC_ATTACK } from "@/components/ui/GingerDragonIcons";
 import SheetPanel from "@/components/character/SheetPanel";
 import { resolveStatMods } from "@/components/character/dice";
+import AttackActionCard from "@/components/character/AttackActionCard";
 
 const hasContent = (r) => !!(r.name || r.bonus || r.damage || r.type || r.notes || r.range);
 
@@ -30,6 +31,7 @@ function StaticChip({ label, value }) {
    preserved attack, else the "Range …" prefix of the notes (which is
    then not shown again). */
 export default function AttacksPanel({ attacks, rulesetData, onAttackRoll, onDamageRoll }) {
+  const [openAttack, setOpenAttack] = React.useState(null);
   const preservedRange = (row) => rulesetData?.attacks?.find((a) => a?.name === row.name)?.range || "";
   /* "Range: …" can sit anywhere in the notes (mid-list after "Attack:
      DEX"), so match on a segment boundary — not just the start. */
@@ -62,9 +64,14 @@ export default function AttacksPanel({ attacks, rulesetData, onAttackRoll, onDam
                 ) : (
                   <GD_PHYSICAL_ATTACK size={40} className="shrink-0" />
                 )}
-                <span className="font-garamond text-[13px] font-semibold text-[var(--ink)] truncate">
+                <button
+                  type="button"
+                  onClick={() => setOpenAttack(row)}
+                  aria-label={`${row.name} — attack details`}
+                  className="touch-manipulation min-w-0 flex-1 truncate text-left font-garamond text-[13px] font-semibold text-[var(--ink)] underline decoration-[var(--rule)] underline-offset-2"
+                >
                   {row.name}
-                </span>
+                </button>
               </span>
               {/* HIT — rolls d20 + the attack's EXISTING stored final bonus
                   (never recalculated, never double-added). Same roll path
@@ -116,6 +123,14 @@ export default function AttacksPanel({ attacks, rulesetData, onAttackRoll, onDam
           </div>
         );
       })}
+      {openAttack && (
+        <AttackActionCard
+          attack={openAttack}
+          onAttackRoll={onAttackRoll}
+          onDamageRoll={onDamageRoll}
+          onClose={() => setOpenAttack(null)}
+        />
+      )}
     </SheetPanel>
   );
 }

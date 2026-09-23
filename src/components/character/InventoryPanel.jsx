@@ -1,7 +1,8 @@
 import React from "react";
 import { GD_INVENTORY } from "@/components/ui/GingerDragonIcons";
 import SheetPanel from "@/components/character/SheetPanel";
-import { parseQty } from "@/components/character/consumableEffect";
+import { parseQty, parseConsumableEffect } from "@/components/character/consumableEffect";
+import ConsumableActionCard from "@/components/character/ConsumableActionCard";
 
 /* V3 compact Inventory panel — a read-only view of the character's live
    canonical Inventory items (the SAME single source of truth the Hotbar's
@@ -9,7 +10,8 @@ import { parseQty } from "@/components/character/consumableEffect";
    using a Hotbar consumable decrements the same row this panel displays.
    Adding/managing carried items belongs to character creation and future
    gear management — this panel never edits. */
-export default function InventoryPanel({ inventory }) {
+export default function InventoryPanel({ inventory, onUseConsumable, onManageConsumable }) {
+  const [openIndex, setOpenIndex] = React.useState(null);
   const rows = (Array.isArray(inventory) ? inventory : []).filter((it) =>
     (it?.item ?? "").toString().trim() !== ""
   );
@@ -22,9 +24,20 @@ export default function InventoryPanel({ inventory }) {
       {rows.map((it, i) => (
         <div key={i} className="py-0.5 border-b border-[var(--rule)]/50 last:border-b-0">
           <div className="flex items-center gap-2">
-            <span className="font-garamond text-[12px] font-semibold text-[var(--ink)] min-w-0 flex-1 truncate">
-              {it.item}
-            </span>
+            {parseConsumableEffect(it.item, it.notes) ? (
+              <button
+                type="button"
+                onClick={() => setOpenIndex(i)}
+                aria-label={`${it.item} — consumable details`}
+                className="touch-manipulation min-w-0 flex-1 truncate text-left font-garamond text-[12px] font-semibold text-[var(--ink)] underline decoration-[var(--rule)] underline-offset-2"
+              >
+                {it.item}
+              </button>
+            ) : (
+              <span className="font-garamond text-[12px] font-semibold text-[var(--ink)] min-w-0 flex-1 truncate">
+                {it.item}
+              </span>
+            )}
             <span className="ink-box px-1.5 h-6 inline-flex items-center text-[10px] font-bold tabular-nums shrink-0 select-none">
               ×{parseQty(it.qty)}
             </span>
@@ -36,6 +49,20 @@ export default function InventoryPanel({ inventory }) {
           )}
         </div>
       ))}
+      {openIndex !== null && rows[openIndex] && parseConsumableEffect(rows[openIndex].item, rows[openIndex].notes) ? (
+        <ConsumableActionCard
+          name={rows[openIndex].item}
+          qty={rows[openIndex].qty}
+          effect={rows[openIndex].notes ?? ""}
+          onUse={() => onUseConsumable?.(openIndex, rows[openIndex].notes ?? "")}
+          onManage={() => {
+            const index = openIndex;
+            setOpenIndex(null);
+            onManageConsumable?.(index);
+          }}
+          onClose={() => setOpenIndex(null)}
+        />
+      ) : null}
     </SheetPanel>
   );
 }
