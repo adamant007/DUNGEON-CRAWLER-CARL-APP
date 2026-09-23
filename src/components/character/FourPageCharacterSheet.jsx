@@ -1,4 +1,7 @@
 import React from "react";
+import AttackActionCard from "@/components/character/AttackActionCard";
+import ConsumableActionCard from "@/components/character/ConsumableActionCard";
+import { parseConsumableEffect } from "@/components/character/consumableEffect";
 
 const STAT_ROWS = [
   ["str", "Strength"],
@@ -109,6 +112,7 @@ function CorePage({
 }) {
   const pronouns = rulesetData?.identity?.pronouns ?? "";
   const rows = (Array.isArray(attacks) ? attacks : []).filter((r) => r?.name);
+  const [openAttackIndex, setOpenAttackIndex] = React.useState(null);
   return (
     <div className="space-y-2">
       <div className="grid gap-2 lg:grid-cols-[180px_1fr_180px]">
@@ -206,7 +210,18 @@ function CorePage({
             <tbody>
               {(rows.length ? rows : [{ name: "" }]).map((row, i) => (
                 <tr key={i}>
-                  <td className="border border-[var(--rule)] px-2 py-2 font-garamond text-[12px]">{row.name || "—"}</td>
+                  <td className="border border-[var(--rule)] px-2 py-2 font-garamond text-[12px]">
+                    {row.name ? (
+                      <button
+                        type="button"
+                        onClick={() => setOpenAttackIndex(i)}
+                        className="touch-manipulation min-h-9 w-full text-left font-garamond text-[12px] font-semibold underline decoration-[#6b472a] underline-offset-2"
+                        aria-label={`${row.name} — attack details`}
+                      >
+                        {row.name}
+                      </button>
+                    ) : "—"}
+                  </td>
                   <td className="border border-[var(--rule)] px-2 py-2 text-center">
                     {row.bonus ? <button type="button" onClick={() => onAttackRoll?.(row.name, row.bonus)} className="font-garamond text-[12px] font-bold underline">{row.bonus}</button> : "—"}
                   </td>
@@ -219,13 +234,26 @@ function CorePage({
             </tbody>
           </table>
         </div>
+        {openAttackIndex !== null && rows[openAttackIndex] ? (
+          <AttackActionCard
+            attack={rows[openAttackIndex]}
+            onAttackRoll={onAttackRoll}
+            onDamageRoll={onDamageRoll}
+            onClose={() => setOpenAttackIndex(null)}
+          />
+        ) : null}
       </div>
     </div>
   );
 }
 
-function InventoryPage({ inventory, onManageStorage }) {
-  const rows = (Array.isArray(inventory) ? inventory : []).filter((r) => (r?.item ?? "").toString().trim());
+function InventoryPage({ inventory, onManageStorage, onUseConsumable, onManageConsumable }) {
+  const source = Array.isArray(inventory) ? inventory : [];
+  const [openConsumableIndex, setOpenConsumableIndex] = React.useState(null);
+  const rows = source
+    .map((row, index) => ({ ...(row ?? {}), __inventoryIndex: index }))
+    .filter((r) => (r?.item ?? "").toString().trim());
+  const openItem = openConsumableIndex !== null ? source[openConsumableIndex] : null;
   return (
     <div>
       <SheetTitle action={<button type="button" onClick={onManageStorage} className="font-fell-sc text-[8px] underline">MANAGE / ADD ITEMS</button>}>INVENTORY</SheetTitle>
@@ -247,16 +275,44 @@ function InventoryPage({ inventory, onManageStorage }) {
             </tr>
           </thead>
           <tbody>
-            {[...rows, ...Array.from({ length: Math.max(8, 16 - rows.length) }, () => ({ item: "", qty: "", notes: "" }))].map((row, i) => (
-              <tr key={i}>
-                <td className="h-9 border border-[var(--rule)] px-2 font-garamond text-[12px]">{row.item}</td>
-                <td className="h-9 border border-[var(--rule)] px-2 text-center font-garamond text-[12px]">{row.qty}</td>
-                <td className="h-9 border border-[var(--rule)] px-2 font-fell text-[10px]">{row.notes}</td>
-              </tr>
-            ))}
+            {[...rows, ...Array.from({ length: Math.max(8, 16 - rows.length) }, () => ({ item: "", qty: "", notes: "", __inventoryIndex: null }))].map((row, i) => {
+              const executable = row.__inventoryIndex !== null && !!parseConsumableEffect(row.item, row.notes);
+              return (
+                <tr key={i}>
+                  <td className="h-9 border border-[var(--rule)] px-2 font-garamond text-[12px]">
+                    {executable ? (
+                      <button
+                        type="button"
+                        onClick={() => setOpenConsumableIndex(row.__inventoryIndex)}
+                        className="touch-manipulation min-h-9 w-full text-left font-garamond text-[12px] font-semibold underline decoration-[#6b472a] underline-offset-2"
+                        aria-label={`${row.item} — consumable details`}
+                      >
+                        {row.item}
+                      </button>
+                    ) : row.item}
+                  </td>
+                  <td className="h-9 border border-[var(--rule)] px-2 text-center font-garamond text-[12px]">{row.qty}</td>
+                  <td className="h-9 border border-[var(--rule)] px-2 font-fell text-[10px]">{row.notes}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
+      {openItem && parseConsumableEffect(openItem.item, openItem.notes) ? (
+        <ConsumableActionCard
+          name={openItem.item}
+          qty={openItem.qty}
+          effect={openItem.notes ?? ""}
+          onUse={() => onUseConsumable?.(openConsumableIndex, openItem.notes ?? "")}
+          onManage={() => {
+            const index = openConsumableIndex;
+            setOpenConsumableIndex(null);
+            onManageConsumable?.(index);
+          }}
+          onClose={() => setOpenConsumableIndex(null)}
+        />
+      ) : null}
     </div>
   );
 }
