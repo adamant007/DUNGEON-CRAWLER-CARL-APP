@@ -7,6 +7,7 @@ import { DOCUMENT_TYPE_LABELS } from "./rulebookProfile";
    touched). The form collects and uploads; persistence happens in the
    library's onSubmit. */
 const FIELD = "ink-box px-2 py-1.5 text-left text-[14px]";
+const MAX_RULEBOOK_BYTES = 50 * 1024 * 1024;
 
 /* Source game/system identification ONLY — this list names which game a
    rulebook belongs to. It does NOT imply the system is supported by the
@@ -70,6 +71,11 @@ export default function RulebookMetadataForm({
       setError("Only PDF rulebooks are supported for now.");
       return;
     }
+    if (picked && Number(picked.size) > MAX_RULEBOOK_BYTES) {
+      setFile(null);
+      setError("Rulebook PDFs are limited to 50 MB.");
+      return;
+    }
     setError("");
     setFile(picked);
   };
@@ -113,7 +119,7 @@ export default function RulebookMetadataForm({
          with the selected file preserved so the player can retry. */
       setError(
         file && allowFile
-          ? "Upload failed — no rulebook was saved. Please try again."
+          ? "Upload failed — no rulebook was saved. Check your connection and try again. Large PDFs can take a little while."
           : "Couldn\u2019t save this rulebook. Please try again."
       );
       setSaving(false);
