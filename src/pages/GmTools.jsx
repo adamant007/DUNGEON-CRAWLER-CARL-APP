@@ -15,6 +15,12 @@ export default function GmTools() {
   const [claimLink, setClaimLink] = useState("");
   const [status, setStatus] = useState("Loading GM tools…");
   const [busy, setBusy] = useState(false);
+  const [mobs, setMobs] = useState([]);
+  const [mobQuery, setMobQuery] = useState("");
+  const [mobEditingId, setMobEditingId] = useState("");
+  const [mobDraft, setMobDraft] = useState({
+    name: "", hp: "", evade: "", dr: "", move: "", attacks: "", traits: "", notes: "",
+  });
 
   const active = useMemo(
     () => campaigns.find((c) => c.id === activeId) || campaigns[0] || null,
@@ -30,6 +36,80 @@ export default function GmTools() {
     setCharacters(rows);
   };
 
+  const refreshMobs = async (campaignId) => {
+    if (!campaignId) {
+      setMobs([]);
+      return;
+    }
+    const rows = await base44.campaigns.mobs(campaignId);
+    setMobs(rows ?? []);
+  };
+
+  const resetMobDraft = () => {
+    setMobEditingId("");
+    setMobDraft({ name: "", hp: "", evade: "", dr: "", move: "", attacks: "", traits: "", notes: "" });
+  };
+
+  const saveMob = async (e) => {
+    e.preventDefault();
+    if (!active?.id || !mobDraft.name.trim() || busy) return;
+    setBusy(true);
+    setStatus("Saving mob stat block…");
+    try {
+      await base44.campaigns.saveMob(active.id, {
+        ...mobDraft,
+        id: mobEditingId || undefined,
+        name: mobDraft.name.trim(),
+      });
+      await refreshMobs(active.id);
+      resetMobDraft();
+      setStatus("Mob stat block saved.");
+    } catch (err) {
+      setStatus(err?.message || "Could not save mob stat block.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const editMob = (mob) => {
+    setMobEditingId(mob.id);
+    setMobDraft({
+      name: mob.name ?? "",
+      hp: mob.hp ?? "",
+      evade: mob.evade ?? "",
+      dr: mob.dr ?? "",
+      move: mob.move ?? "",
+      attacks: mob.attacks ?? "",
+      traits: mob.traits ?? "",
+      notes: mob.notes ?? "",
+    });
+  };
+
+  const deleteMob = async (id) => {
+    if (!id || busy) return;
+    setBusy(true);
+    setStatus("Removing mob…");
+    try {
+      await base44.campaigns.deleteMob(id);
+      await refreshMobs(active?.id);
+      if (mobEditingId === id) resetMobDraft();
+      setStatus("Mob removed.");
+    } catch (err) {
+      setStatus(err?.message || "Could not remove mob.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const filteredMobs = mobs.filter((mob) => {
+    const q = mobQuery.trim().toLowerCase();
+    if (!q) return true;
+    return [mob.name, mob.attacks, mob.traits, mob.notes]
+      .join(" ")
+      .toLowerCase()
+      .includes(q);
+  });
+
   const load = async () => {
     try {
       const me = await base44.auth.me();
@@ -41,7 +121,7 @@ export default function GmTools() {
       if (chosen) {
         setActiveId(chosen.id);
         localStorage.setItem(ACTIVE_CAMPAIGN_KEY, chosen.id);
-        await refreshCharacters(chosen.id);
+        await Promise.all([refreshCharacters(chosen.id), refreshMobs(chosen.id)]);
         setStatus("");
       } else {
         setStatus("You do not have a GM campaign yet. Create one from Campaign.");
@@ -61,7 +141,8 @@ export default function GmTools() {
     setClaimLink("");
     setStatus("Loading crawlers…");
     try {
-      await refreshCharacters(id);
+      await Promise.all([refreshCharacters(id), refreshMobs(id)]);
+      resetMobDraft();
       setStatus("");
     } catch (err) {
       setStatus(err?.message || "Could not load crawlers.");
@@ -187,6 +268,113 @@ export default function GmTools() {
               </div>
             </div>
           </div>
+        )}
+
+        {active && (
+          <section className="mt-4 rounded-lg border border-[#4f3922] bg-black/20 p-3">
+            <div className="flex flex-wrap items-end justify-between gap-2">
+              <div>
+                <h2 className="font-display text-lg font-bold">Mob Stat Library</h2>
+                <p className="font-fell text-xs text-[#cbb99b]">
+                  Save and search your own campaign mob stats. These are private to the campaign GM.
+                </p>
+              </div>
+              <input
+                className={input + " max-w-sm"}
+                value={mobQuery}
+                onChange={(e) => setMobQuery(e.target.value)}
+                placeholder="Search saved mobs…"
+              />
+            </div>
+
+            <div className="mt-3 grid gap-4 lg:grid-cols-[1.1fr_.9fr]">
+              <div className="grid content-start gap-2">
+                {!filteredMobs.length && (
+                  <p className="font-fell italic text-sm text-[#a9916e]">
+                    {mobs.length ? "No saved mobs match that search." : "No mob stat blocks saved yet."}
+                  </p>
+                )}
+                {filteredMobs.map((mob) => (
+                  <button
+                    key={mob.id}
+                    type="button"
+                    onClick={() => editMob(mob)}
+                    className="rounded border border-[#4f3922] bg-[#0f0c09] p-3 text-left hover:border-[#d4a055]"
+                  >
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <strong className="font-garamond text-lg text-[#f2e5cb]">{mob.name}</strong>
+                      {mob.hp !== "" && <span className="font-fell text-xs text-[#cbb99b]">HP {mob.hp}</span>}
+                      {mob.evade !== "" && <span className="font-fell text-xs text-[#cbb99b]">Evade {mob.evade}</span>}
+                      {mob.dr !== "" && <span className="font-fell text-xs text-[#cbb99b]">DR {mob.dr}</span>}
+                      {mob.move !== "" && <span className="font-fell text-xs text-[#cbb99b]">Move {mob.move}</span>}
+                    </div>
+                    {mob.attacks && <p className="mt-1 font-fell text-xs text-[#d9c7a7]"><strong>Attacks:</strong> {mob.attacks}</p>}
+                    {mob.traits && <p className="mt-1 font-fell text-xs text-[#b9a483]"><strong>Traits:</strong> {mob.traits}</p>}
+                  </button>
+                ))}
+              </div>
+
+              <form onSubmit={saveMob} className="rounded border border-[#4f3922] bg-[#0f0c09] p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="font-display text-base font-bold">
+                    {mobEditingId ? "Edit Mob" : "Add Mob"}
+                  </h3>
+                  {mobEditingId && (
+                    <button type="button" className={button} onClick={resetMobDraft}>NEW</button>
+                  )}
+                </div>
+
+                <input
+                  className={input + " mt-3"}
+                  value={mobDraft.name}
+                  onChange={(e) => setMobDraft((d) => ({ ...d, name: e.target.value }))}
+                  placeholder="Mob name *"
+                />
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  {[
+                    ["hp", "HP"],
+                    ["evade", "Evade"],
+                    ["dr", "DR"],
+                    ["move", "Move"],
+                  ].map(([key, label]) => (
+                    <input
+                      key={key}
+                      className={input}
+                      value={mobDraft[key]}
+                      onChange={(e) => setMobDraft((d) => ({ ...d, [key]: e.target.value }))}
+                      placeholder={label}
+                    />
+                  ))}
+                </div>
+                {[
+                  ["attacks", "Attacks"],
+                  ["traits", "Traits / abilities"],
+                  ["notes", "GM notes"],
+                ].map(([key, label]) => (
+                  <textarea
+                    key={key}
+                    className={input + " mt-2 min-h-[72px]"}
+                    value={mobDraft[key]}
+                    onChange={(e) => setMobDraft((d) => ({ ...d, [key]: e.target.value }))}
+                    placeholder={label}
+                  />
+                ))}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button className={button} disabled={busy || !mobDraft.name.trim()}>
+                    {busy ? "SAVING…" : "SAVE MOB"}
+                  </button>
+                  {mobEditingId && (
+                    <button type="button" className={button} disabled={busy} onClick={() => void deleteMob(mobEditingId)}>
+                      DELETE
+                    </button>
+                  )}
+                </div>
+                <p className="mt-2 font-fell text-[11px] italic text-[#a9916e]">
+                  Add your own stats or notes here. Ginger Dragon does not republish publisher-owned monster stat blocks.
+                </p>
+              </form>
+            </div>
+          </section>
         )}
 
         <p aria-live="polite" className="mt-3 min-h-5 font-fell text-xs text-[#cbb99b]">{status}</p>
