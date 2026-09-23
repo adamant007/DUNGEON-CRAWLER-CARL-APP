@@ -580,6 +580,64 @@ const campaigns = {
     return Array.isArray(result) ? result[0] : result;
   },
 
+  async mobs(campaignId) {
+    if (!campaignId) return [];
+    const rows = await apiFetch(
+      "/rest/v1/campaign_mobs?select=*&campaign_id=eq." +
+        encodeURIComponent(campaignId) +
+        "&order=name.asc"
+    );
+    return (rows || []).map((row) => ({
+      id: row.id,
+      campaign_id: row.campaign_id,
+      name: row.name,
+      ...(row.stats || {}),
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    }));
+  },
+
+  async saveMob(campaignId, mob) {
+    if (!campaignId) throw makeError("Campaign required", 400);
+    const name = String(mob?.name || "").trim();
+    if (!name) throw makeError("Mob name required", 400);
+    const { id, campaign_id, created_at, updated_at, ...stats } = mob || {};
+    if (id) {
+      const rows = await apiFetch(
+        "/rest/v1/campaign_mobs?id=eq." + encodeURIComponent(id),
+        {
+          method: "PATCH",
+          headers: { Prefer: "return=representation" },
+          body: JSON.stringify({
+            name,
+            stats,
+            updated_at: new Date().toISOString(),
+          }),
+        }
+      );
+      return rows?.[0] || null;
+    }
+    const rows = await apiFetch("/rest/v1/campaign_mobs", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        campaign_id: campaignId,
+        name,
+        stats,
+      }),
+    });
+    return rows?.[0] || null;
+  },
+
+  async deleteMob(id) {
+    if (!id) return true;
+    await apiFetch(
+      "/rest/v1/campaign_mobs?id=eq." + encodeURIComponent(id),
+      { method: "DELETE", headers: { Prefer: "return=minimal" } }
+    );
+    return true;
+  },
+
   async gmUpdateCharacter(campaignId, characterId, data, recordEvent = false) {
     const result = await apiFetch("/rest/v1/rpc/gm_update_campaign_character", {
       method: "POST",
