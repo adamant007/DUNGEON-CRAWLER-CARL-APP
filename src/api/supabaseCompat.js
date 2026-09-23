@@ -263,6 +263,49 @@ function entity(table, options = {}) {
   };
 }
 
+async function uploadStorageObject(bucket, path, file, retryAuth = true) {
+  const token = await accessToken();
+  const url =
+    SUPABASE_URL +
+    "/storage/v1/object/" +
+    bucket +
+    "/" +
+    path.split("/").map(encodeURIComponent).join("/");
+
+  /* XMLHttpRequest is intentionally used for binary uploads instead of the
+     JSON-oriented apiFetch helper. It has no short application timeout and is
+     more reliable for multi-megabyte PDFs on mobile/tablet browsers. */
+  try {
+    await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      xhr.timeout = 0;
+      xhr.setRequestHeader("apikey", SUPABASE_KEY);
+      xhr.setRequestHeader("Authorization", "Bearer " + token);
+      xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+      xhr.setRequestHeader("x-upsert", "false");
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+          return;
+        }
+        let data = null;
+        try { data = JSON.parse(xhr.responseText || "null"); } catch { data = xhr.responseText; }
+        reject(makeError(data?.message || data?.error || "Upload failed", xhr.status, data));
+      };
+      xhr.onerror = () => reject(makeError("Network error while uploading file", 0));
+      xhr.onabort = () => reject(makeError("Upload was cancelled", 0));
+      xhr.send(file);
+    });
+  } catch (error) {
+    if (retryAuth && error?.status === 401) {
+      await refreshSession();
+      return uploadStorageObject(bucket, path, file, false);
+    }
+    throw error;
+  }
+}
+
 async function uploadToBucket(bucket, file, makePublic) {
   const userId = currentUserId();
   if (!userId) throw makeError("Authentication required", 401);
@@ -270,17 +313,7 @@ async function uploadToBucket(bucket, file, makePublic) {
     .replace(/[^a-zA-Z0-9._-]+/g, "-")
     .replace(/^-+|-+$/g, "") || "upload";
   const path = `${userId}/${crypto.randomUUID()}-${safeName}`;
-  await apiFetch(
-    `/storage/v1/object/${bucket}/${path.split("/").map(encodeURIComponent).join("/")}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": file.type || "application/octet-stream",
-        "x-upsert": "false",
-      },
-      body: file,
-    }
-  );
+  await uploadStorageObject(bucket, path, file);
   return {
     path,
     publicUrl: makePublic
@@ -545,6 +578,64 @@ const campaigns = {
       body: JSON.stringify({ p_claim_token: String(token || "").trim() }),
     });
     return Array.isArray(result) ? result[0] : result;
+  },
+
+  async mobs(campaignId) {
+    if (!campaignId) return [];
+    const rows = await apiFetch(
+      "/rest/v1/campaign_mobs?select=*&campaign_id=eq." +
+        encodeURIComponent(campaignId) +
+        "&order=name.asc"
+    );
+    return (rows || []).map((row) => ({
+      id: row.id,
+      campaign_id: row.campaign_id,
+      name: row.name,
+      ...(row.stats || {}),
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    }));
+  },
+
+  async saveMob(campaignId, mob) {
+    if (!campaignId) throw makeError("Campaign required", 400);
+    const name = String(mob?.name || "").trim();
+    if (!name) throw makeError("Mob name required", 400);
+    const { id, campaign_id, created_at, updated_at, ...stats } = mob || {};
+    if (id) {
+      const rows = await apiFetch(
+        "/rest/v1/campaign_mobs?id=eq." + encodeURIComponent(id),
+        {
+          method: "PATCH",
+          headers: { Prefer: "return=representation" },
+          body: JSON.stringify({
+            name,
+            stats,
+            updated_at: new Date().toISOString(),
+          }),
+        }
+      );
+      return rows?.[0] || null;
+    }
+    const rows = await apiFetch("/rest/v1/campaign_mobs", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        campaign_id: campaignId,
+        name,
+        stats,
+      }),
+    });
+    return rows?.[0] || null;
+  },
+
+  async deleteMob(id) {
+    if (!id) return true;
+    await apiFetch(
+      "/rest/v1/campaign_mobs?id=eq." + encodeURIComponent(id),
+      { method: "DELETE", headers: { Prefer: "return=minimal" } }
+    );
+    return true;
   },
 
   async gmUpdateCharacter(campaignId, characterId, data, recordEvent = false) {
