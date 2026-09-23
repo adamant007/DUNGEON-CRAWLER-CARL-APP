@@ -233,7 +233,13 @@ export default function CharacterSheet() {
       }
       if (authed && gmMode) {
         try {
-          rec = await base44.entities.Character.get(gmCharacterId);
+          /* A campaign GM is allowed to view the canonical characters linked
+             to their campaign even when RLS correctly prevents a generic
+             Character.get() on another player's private row. Resolve through
+             the campaign-scoped API, then open the matching full sheet. */
+          const campaignCharacters = await base44.campaigns.characters(gmCampaignId);
+          rec = (campaignCharacters ?? []).find((row) => row.id === gmCharacterId) ?? null;
+          if (!rec) throw new Error("This crawler is not linked to that campaign.");
         } catch (err) {
           rec = null;
           setGmAccessError(err?.message || "This crawler is not available to this campaign GM.");
