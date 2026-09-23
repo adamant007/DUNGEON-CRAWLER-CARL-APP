@@ -920,6 +920,8 @@ export default function CharacterSheet() {
                 onAttackRoll={rollAttack}
                 onDamageRoll={rollDamage}
                 inventory={inventory}
+                onUseConsumable={useConsumable}
+                onManageConsumable={(idx) => setManageInv(idx)}
                 rankDraft={rankDraft}
                 editing={editMode}
                 onAdjustRank={adjustSkillRank}
