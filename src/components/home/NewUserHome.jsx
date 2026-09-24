@@ -170,6 +170,65 @@ const available = [
   },
 ];
 
+const capabilities = [
+  {
+    title: "TTRPG Character Creator",
+    text: "Build characters with a guided creation wizard, clear skill descriptions, history choices, combat options, and persistent records.",
+  },
+  {
+    title: "Digital Character Sheet",
+    text: "Keep stats, skills, HP, mana, defense, conditions, gear, notes, and play-time controls together on a live tabletop character sheet.",
+  },
+  {
+    title: "Automated Dice & Skill Checks",
+    text: "Roll directly from the sheet with character modifiers and skill ranks applied by the app, with results kept close to the action.",
+  },
+  {
+    title: "Attacks & Damage Tools",
+    text: "Run attacks from character action cards and keep attack details, damage information, defenses, and combat resources in one workflow.",
+  },
+  {
+    title: "Spells & Action Hotbar",
+    text: "Track spells and keep frequently used attacks, spells, and consumables available from the character's play-time action area.",
+  },
+  {
+    title: "Gear, Inventory & Consumables",
+    text: "Manage equipment, carried items, consumables, quantities, currency, and character resources without leaving the character sheet.",
+  },
+  {
+    title: "Crafting & Dimensional Storage",
+    text: "Use built-in character tools for crafting and dimensional storage alongside the rest of the character record.",
+  },
+  {
+    title: "Save, Load & Print Characters",
+    text: "Keep persistent characters, return to the active character, switch between saved characters, and use a printable four-page sheet.",
+  },
+  {
+    title: "RPG Campaign Manager",
+    text: "Create campaigns as a GM, join campaigns with invite codes, and keep player characters connected to the table.",
+  },
+  {
+    title: "Guest Character Creation",
+    text: "GMs can create guest characters for players who are not signed in yet, then give them a claim link so ownership can transfer later.",
+  },
+  {
+    title: "GM Character Viewer & Editor",
+    text: "Open assigned campaign characters from the GM view and manage the character sheet through a campaign-scoped workflow.",
+  },
+  {
+    title: "GM Mob Stat Library",
+    text: "Save, edit, delete, and search private campaign mob stat blocks for faster encounter reference during play.",
+  },
+  {
+    title: "Private RPG Rules Search",
+    text: "Search the rules material you provide and keep quick reference information close to the character and campaign tools.",
+  },
+  {
+    title: "Mobile & Tablet TTRPG Tools",
+    text: "Use touch-first controls designed for phones and tablets so the companion can stay open and usable at the physical table.",
+  },
+];
+
 const roadmap = [
   { icon: Map, title: "Maps", text: "Table-ready maps, markers, placement, and encounter context." },
   { icon: Swords, title: "Combat", text: "Faster damage, DR, initiative, conditions, and action flow." },
@@ -194,7 +253,7 @@ export default function NewUserHome() {
           <nav className="hidden items-center gap-7 text-[12px] text-[#b3aaa2] lg:flex">
             <a href="#product" className="transition-colors hover:text-white">Product</a>
             <a href="#features" className="transition-colors hover:text-white">Features</a>
-            <a href="#roadmap" className="transition-colors hover:text-white">Roadmap</a>
+            <a href="/features.html" className="transition-colors hover:text-white">All tools</a>\n            <a href="#roadmap" className="transition-colors hover:text-white">Roadmap</a>
             <Link to="/rules" className="transition-colors hover:text-white">Rules</Link>
           </nav>
 
@@ -291,6 +350,39 @@ export default function NewUserHome() {
           </div>
         </section>
 
+
+        <section aria-labelledby="all-tools-title" className="border-t border-[#30251d] bg-[#080707] py-20 sm:py-24">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            <div className="max-w-[820px]">
+              <div className="font-display text-[10px] font-bold tracking-[0.2em] text-[#bc8848]">TTRPG TOOLKIT</div>
+              <h2 id="all-tools-title" className="mt-4 font-display text-3xl font-semibold text-[#f0dfc0] sm:text-4xl">
+                Character sheets, dice, campaign management, and GM tools in one companion.
+              </h2>
+              <p className="mt-4 text-[14px] leading-7 text-[#93887f]">
+                These are the live workflows Crawler Companion is built around. The wording is intentionally plain so players—and search engines—can understand exactly what the web app does.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {capabilities.map(({ title, text }) => (
+                <article key={title} className="rounded-xl border border-[#362b23] bg-[#100e0d] p-5">
+                  <h3 className="font-display text-[14px] font-semibold text-[#ead7b7]">{title}</h3>
+                  <p className="mt-2 text-[12px] leading-6 text-[#8f857c]">{text}</p>
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-8">
+              <a
+                href="/features.html"
+                className="inline-flex items-center gap-2 rounded-lg border border-[#6d4b2b] bg-[#15100d] px-4 py-2.5 text-[11px] font-bold text-[#d9a55d] transition hover:border-[#9b6c38] hover:text-[#f0dfc0]"
+              >
+                View the full crawlable feature guide <ArrowRight size={13} />
+              </a>
+            </div>
+          </div>
+        </section>
+
         <section id="roadmap" className="border-y border-[#30251d] bg-[#0d0a0a] py-20 sm:py-24">
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
             <div className="grid gap-10 lg:grid-cols-[.7fr_1.3fr] lg:items-end">
@@ -340,7 +432,7 @@ export default function NewUserHome() {
             <GdsEmblem size={34} />
             <div>
               <div className="font-display text-[10px] font-bold tracking-[0.14em] text-[#d5a254]">GINGER DRAGON STUDIOS</div>
-              <div className="mt-1 text-[10px] text-[#756a61]">Crawler Companion</div>
+              <div className="mt-1 text-[10px] text-[#756a61]">Crawler Companion · <a href="/features.html" className="hover:text-[#b49a7f]">Feature guide</a></div>
             </div>
           </div>
           <div className="max-w-[620px] text-[10px] leading-5 text-[#665e58] md:text-right">
