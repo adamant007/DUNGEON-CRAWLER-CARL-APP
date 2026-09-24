@@ -43,6 +43,12 @@
 - Push loot box includes icon/sound behavior.
 - Campaign isolation prevents GM access to unrelated campaigns.
 
+## Security hardening
+- Review the four exposed SECURITY DEFINER RPCs (guest claim/create, imported-character claim, and GM character update) and verify each has explicit authorization checks before RC1.
+- Enable Supabase leaked-password protection before public email/password launch.
+- Optimize RLS auth-function calls with init-plan-safe `(select auth.uid())` / equivalent patterns where behavior is unchanged.
+- Re-run Supabase security and performance advisors after hardening changes.
+
 ## Go / No-Go
 Ship if: core tabs, portrait, HP/Mana, dice, character persistence, and campaign isolation pass.
 Defer non-blocking polish if needed; do not risk a second production build before the session unless a blocking bug is confirmed.
