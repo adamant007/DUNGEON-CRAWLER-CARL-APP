@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +15,17 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoadingAuth } = useAuth();
   // Post-login destination (e.g. the MCP OAuth consent page sends users here
   // with returnTo so the grant flow can resume). Same-origin paths only.
   const returnTo = safeReturnTo();
+
+  useEffect(() => {
+    if (!isLoadingAuth && isAuthenticated) {
+      navigate(returnTo === "/" ? "/dashboard" : returnTo, { replace: true });
+    }
+  }, [isAuthenticated, isLoadingAuth, navigate, returnTo]);
 
   const handleGoogle = () => {
     base44.auth.loginWithProvider("google", returnTo);
