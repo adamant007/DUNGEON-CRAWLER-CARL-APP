@@ -117,7 +117,7 @@ public class MainActivity extends BridgeActivity {
                 suffix = "?" + query;
             }
 
-            webView.loadUrl(origin + "/login" + suffix);
+            webView.loadUrl(origin + "/dashboard?oauth_return=1" + suffix);
         }, 250);
     }
 }
