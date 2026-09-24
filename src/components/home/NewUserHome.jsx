@@ -253,7 +253,8 @@ export default function NewUserHome() {
           <nav className="hidden items-center gap-7 text-[12px] text-[#b3aaa2] lg:flex">
             <a href="#product" className="transition-colors hover:text-white">Product</a>
             <a href="#features" className="transition-colors hover:text-white">Features</a>
-            <a href="/features.html" className="transition-colors hover:text-white">All tools</a>\n            <a href="#roadmap" className="transition-colors hover:text-white">Roadmap</a>
+            <a href="/features.html" className="transition-colors hover:text-white">All tools</a>
+            <a href="#roadmap" className="transition-colors hover:text-white">Roadmap</a>
             <Link to="/rules" className="transition-colors hover:text-white">Rules</Link>
           </nav>
 
@@ -359,7 +360,7 @@ export default function NewUserHome() {
                 Character sheets, dice, campaign management, and GM tools in one companion.
               </h2>
               <p className="mt-4 text-[14px] leading-7 text-[#93887f]">
-                These are the live workflows Crawler Companion is built around. The wording is intentionally plain so players—and search engines—can understand exactly what the web app does.
+                These are the live workflows Crawler Companion is built around, described plainly so players can quickly understand exactly what the web app does.
               </p>
             </div>
 
