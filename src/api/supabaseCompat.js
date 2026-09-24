@@ -421,7 +421,14 @@ const auth = {
   },
 
   loginWithProvider(provider, returnTo = "/") {
-    const redirect = new URL(returnTo || "/", window.location.origin).toString();
+    const isNative =
+      typeof window !== "undefined" &&
+      Boolean(window.Capacitor?.isNativePlatform?.());
+
+    const redirect = isNative
+      ? "com.gingerdragonstudios.rpgcompanion://login-callback"
+      : new URL(returnTo || "/", window.location.origin).toString();
+
     window.location.href =
       `${SUPABASE_URL}/auth/v1/authorize?provider=${encodeURIComponent(provider)}&redirect_to=${encodeURIComponent(redirect)}`;
   },
