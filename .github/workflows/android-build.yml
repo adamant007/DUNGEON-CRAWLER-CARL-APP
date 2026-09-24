@@ -47,11 +47,12 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - name: Reuse Android debug signing key
-        uses: actions/cache@v4
-        with:
-          path: ~/.android/debug.keystore
-          key: ginger-dragon-android-debug-keystore-v1
+      - name: Install stable RC1 test signing key
+        run: |
+          mkdir -p ~/.android
+          base64 -d scripts/android-test-debug.keystore.b64 > ~/.android/debug.keystore
+          chmod 600 ~/.android/debug.keystore
+          keytool -list -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey >/dev/null
 
       - name: Install Android 16 SDK
         run: |
