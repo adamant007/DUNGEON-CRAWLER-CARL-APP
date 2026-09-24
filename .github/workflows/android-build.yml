@@ -115,26 +115,57 @@ jobs:
           p.write_text(text)
           PY
 
-      - name: Build debug APK
-        working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
-
       - name: Build unsigned release AAB dry run
         working-directory: android
         run: ./gradlew bundleRelease --no-daemon
 
+      - name: Give debug APK a side-by-side RC1 identity
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          gradle = Path("android/app/build.gradle")
+          text = gradle.read_text()
+          old_id = 'applicationId "com.gingerdragonstudios.rpgcompanion"'
+          new_id = 'applicationId "com.gingerdragonstudios.rpgcompanion.rc1test"'
+          if old_id not in text:
+              raise SystemExit("Production applicationId was not found before RC1 test patch")
+          gradle.write_text(text.replace(old_id, new_id, 1))
+
+          strings = Path("android/app/src/main/res/values/strings.xml")
+          s = strings.read_text()
+          s = re.sub(
+              r'(<string name="app_name">).*?(</string>)',
+              r'\1Ginger Dragon RC1 Test\2',
+              s,
+              count=1,
+          )
+          s = re.sub(
+              r'(<string name="title_activity_main">).*?(</string>)',
+              r'\1Ginger Dragon RC1 Test\2',
+              s,
+              count=1,
+          )
+          strings.write_text(s)
+          PY
+
+      - name: Build side-by-side debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
       - name: Stage Android artifacts
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk             GingerDragon-RPG-Companion-debug.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk             GingerDragon-RPG-Companion-RC1-Test.apk
           cp android/app/build/outputs/bundle/release/app-release.aab             GingerDragon-RPG-Companion-release-unsigned.aab
-          test -s GingerDragon-RPG-Companion-debug.apk
+          test -s GingerDragon-RPG-Companion-RC1-Test.apk
           test -s GingerDragon-RPG-Companion-release-unsigned.aab
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: GingerDragon-RPG-Companion-Android
-          path: GingerDragon-RPG-Companion-debug.apk
+          name: GingerDragon-RPG-Companion-RC1-Test-Android
+          path: GingerDragon-RPG-Companion-RC1-Test.apk
           if-no-files-found: error
           retention-days: 14
 
