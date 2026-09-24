@@ -22,6 +22,12 @@
 - No GM-only controls leak into ordinary player views.
 
 ## Cloud verification
+- Create/sign in with email/password on one platform and confirm the same account opens on the other platform.
+- Sign in with Google on one platform and confirm the same account opens on the other platform.
+- If email/password and Google use the same email, verify the account-linking safeguard prevents an accidental duplicate account.
+- Sign out and sign back in on both Android and web; confirm the same user/account id is restored.
+- Confirm the signed-in UI hides Log in/Get Started and shows Enter/account controls immediately after auth state changes.
+- Test password reset and session restore without losing account-linked data.
 - Sign in to a cloud account.
 - Change a saved crawler field and confirm the crawler appears in `crawler_characters`.
 - Save/choose a portrait and confirm the same crawler cloud record contains the portrait payload.
