@@ -20,7 +20,7 @@ export default function DashboardHero({ me, activeCharacter, onContinue, onCreat
         src={HERO_URL}
         alt="Ginger Dragon Studios"
         draggable={false}
-        className="absolute right-[-2%] top-1/2 h-[92%] w-auto -translate-y-1/2 object-contain opacity-85"
+        className="absolute inset-0 h-full w-full object-cover object-[50%_18%] opacity-95"
       />
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,6,.94)_0%,rgba(5,5,6,.72)_46%,rgba(5,5,6,.28)_76%,rgba(5,5,6,.12)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-[#0a0a0a]" />
