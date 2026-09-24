@@ -45,12 +45,27 @@ Crawler achievement -> Team standing -> Faction reaction/reputation -> Media att
 
 All data must remain campaign-scoped and protected by server-side authorization/RLS. Player-visible information must never expose GM-only faction/media notes. Default shipped names, lore, descriptions, artwork and personalities must be original rather than copied from licensed fictional properties. GMs may enter their own private campaign content.
 
+## RC1 account continuity
+
+Before RC1, Android and web must use the same authentication backend and the same user/account records.
+
+- Email/password login must open the same account on Android and web.
+- Google sign-in must open the same account on Android and web.
+- A user's characters, campaigns, settings, entitlements/purchases, and other account-scoped data must follow the account across devices.
+- Protect against duplicate accounts when the same email is used with more than one sign-in method.
+- Add a safe account-linking flow for email/password + Google when they represent the same person.
+- Never silently merge accounts with conflicting identities; require explicit confirmation.
+- Test sign-in, sign-out, password reset, session restore, and device switching on both Android and web.
+- Authentication state must update the UI immediately: signed-out users see Log in/Get Started; signed-in users see Enter/account controls.
+- Keep all authorization and campaign access enforced server-side/RLS, not by UI state alone.
+
 ## Release sequencing
 
 1. Finish current regression stabilization and tablet/mobile navigation fixes.
-2. Stable crawler identity and cross-device character/portrait restore.
-3. Teams data model + campaign leaderboard integration.
-4. Dungeon Factions data model + GM/player visibility.
-5. Media personalities + Shows + Interview Invitation event flow.
-6. Connect reputation, fame, rewards and team/faction/media events.
-7. Security/RLS and multi-campaign isolation regression tests before production release.
+2. Complete RC1 cross-platform account continuity and account-linking safeguards.
+3. Stable crawler identity and cross-device character/portrait restore.
+4. Teams data model + campaign leaderboard integration.
+5. Dungeon Factions data model + GM/player visibility.
+6. Media personalities + Shows + Interview Invitation event flow.
+7. Connect reputation, fame, rewards and team/faction/media events.
+8. Security/RLS and multi-campaign isolation regression tests before production release.
