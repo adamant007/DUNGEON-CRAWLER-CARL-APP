@@ -101,12 +101,15 @@ jobs:
               raise SystemExit("Could not enforce API 36 in android/variables.gradle")
           PY
 
-      - name: Apply Ginger Dragon launcher icon
+      - name: Apply approved Ginger Dragon launcher icon
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq librsvg2-bin
+          sudo apt-get install -y -qq imagemagick
           mkdir -p android/app/src/main/res/drawable-nodpi
-          rsvg-convert -w 512 -h 512 public/brand/app-icon.svg             -o android/app/src/main/res/drawable-nodpi/ginger_dragon_icon.png
+          convert public/brand/ginger-dragon-studios-tapestry.png \
+            -crop 560x560+230+90 +repage \
+            -resize 512x512! \
+            android/app/src/main/res/drawable-nodpi/ginger_dragon_icon.png
           python - <<'PY'
           from pathlib import Path
           p = Path("android/app/src/main/AndroidManifest.xml")
