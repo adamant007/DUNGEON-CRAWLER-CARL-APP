@@ -1,4 +1,5 @@
 name: Android Test APK
+# Builds the current main branch into an installable Ginger Dragon test package.
 
 on:
   push:
