@@ -1,0 +1,146 @@
+name: Android Test APK
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "capacitor.config.json"
+      - "index.html"
+      - "package.json"
+      - "package-lock.json"
+      - "src/**"
+      - "public/**"
+      - "scripts/apply-android-native-polish.mjs"
+      - ".github/workflows/android-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-test-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Use Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Reuse Android debug signing key
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: ginger-dragon-android-debug-keystore-v1
+
+      - name: Install Android 16 SDK
+        run: |
+          SDKMANAGER="$(command -v sdkmanager || true)"
+          if [ -z "$SDKMANAGER" ]; then
+            SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -perm -u+x 2>/dev/null | sort -V | tail -n 1)"
+          fi
+          if [ -z "$SDKMANAGER" ]; then
+            echo "sdkmanager was not found under $ANDROID_HOME"
+            exit 1
+          fi
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Install web dependencies
+        run: npm ci
+
+      - name: Install Capacitor build tooling
+        run: |
+          npm install --no-save --package-lock=false             @capacitor/cli@8             @capacitor/core@8             @capacitor/android@8
+
+      - name: Build current web app
+        run: npm run build
+
+      - name: Generate Android project
+        run: |
+          rm -rf android
+          npx cap add android
+          npx cap sync android
+
+      - name: Apply Ginger Dragon native Android polish
+        run: node scripts/apply-android-native-polish.mjs
+
+      - name: Enforce Android 16 target
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path("android/variables.gradle")
+          text = p.read_text()
+          text = re.sub(r"compileSdkVersion\s*=\s*\d+", "compileSdkVersion = 36", text)
+          text = re.sub(r"targetSdkVersion\s*=\s*\d+", "targetSdkVersion = 36", text)
+          p.write_text(text)
+          if "compileSdkVersion = 36" not in text or "targetSdkVersion = 36" not in text:
+              raise SystemExit("Could not enforce API 36 in android/variables.gradle")
+          PY
+
+      - name: Apply Ginger Dragon launcher icon
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq librsvg2-bin
+          mkdir -p android/app/src/main/res/drawable-nodpi
+          rsvg-convert -w 512 -h 512 public/brand/app-icon.svg             -o android/app/src/main/res/drawable-nodpi/ginger_dragon_icon.png
+          python - <<'PY'
+          from pathlib import Path
+          p = Path("android/app/src/main/AndroidManifest.xml")
+          text = p.read_text()
+          text = text.replace('android:icon="@mipmap/ic_launcher"', 'android:icon="@drawable/ginger_dragon_icon"')
+          text = text.replace('android:roundIcon="@mipmap/ic_launcher_round"', 'android:roundIcon="@drawable/ginger_dragon_icon"')
+          p.write_text(text)
+          PY
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Build unsigned release AAB dry run
+        working-directory: android
+        run: ./gradlew bundleRelease --no-daemon
+
+      - name: Stage Android artifacts
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk             GingerDragon-RPG-Companion-debug.apk
+          cp android/app/build/outputs/bundle/release/app-release.aab             GingerDragon-RPG-Companion-release-unsigned.aab
+          test -s GingerDragon-RPG-Companion-debug.apk
+          test -s GingerDragon-RPG-Companion-release-unsigned.aab
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: GingerDragon-RPG-Companion-Android
+          path: GingerDragon-RPG-Companion-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload unsigned release AAB dry run
+        uses: actions/upload-artifact@v4
+        with:
+          name: GingerDragon-RPG-Companion-Release-AAB-Unsigned
+          path: GingerDragon-RPG-Companion-release-unsigned.aab
+          if-no-files-found: error
+          retention-days: 7
