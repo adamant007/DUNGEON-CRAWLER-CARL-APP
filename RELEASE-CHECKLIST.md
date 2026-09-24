@@ -3,7 +3,7 @@
 ## Before production deploy
 - GitHub Browser Regression workflow passes on current `main`.
 - Vercel Hobby build-rate limit has cleared.
-- Deploy exactly once from current `main` to Ginger Dragon Fire Studios production.
+- Deploy exactly once from current `main` to Ginger Dragon Studios production.
 
 ## Tablet verification
 - App opens without a blank screen or long-page regression.
@@ -15,6 +15,7 @@
 - Character switch does not lose the active portrait or sheet state.
 
 ## Phone verification
+- Installed launcher icon matches the approved Ginger Dragon Studios burgundy-dragon / ginger-mane / teal-d20 emblem.
 - Portrait is visible and uncropped.
 - Tabs are usable without forcing one long page.
 - HP/Mana HUD is visible.
@@ -24,6 +25,7 @@
 ## Cloud verification
 - Create/sign in with email/password on one platform and confirm the same account opens on the other platform.
 - Sign in with Google on one platform and confirm the same account opens on the other platform.
+- On Android, Google OAuth must return directly into the app/dashboard and persist the Supabase session rather than returning to the login page.
 - If email/password and Google use the same email, verify the account-linking safeguard prevents an accidental duplicate account.
 - Sign out and sign back in on both Android and web; confirm the same user/account id is restored.
 - Confirm the signed-in UI hides Log in/Get Started and shows Enter/account controls immediately after auth state changes.
