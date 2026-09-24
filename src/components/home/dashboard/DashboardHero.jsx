@@ -6,7 +6,7 @@ import { format } from "date-fns";
 /* Dashboard hero — dragon-hoard backdrop with the welcome heading, the
    Continue Playing card, secondary action buttons, and the parchment
    flourish banner. Reproduced from the approved mockup. */
-const HERO_URL = "https://mitbmrdeksicjzxjajyx.supabase.co/storage/v1/object/public/app-assets/519d34ad1_generated_image.png";
+const HERO_URL = "/brand/app-icon.svg";
 
 export default function DashboardHero({ me, activeCharacter, onContinue, onCreateNew }) {
   const firstName = (me?.full_name || "").trim().split(" ")[0] || "";
@@ -15,9 +15,14 @@ export default function DashboardHero({ me, activeCharacter, onContinue, onCreat
     : "";
 
   return (
-    <section className="relative overflow-hidden rounded-lg border border-[#3c352a]">
-      <img src={HERO_URL} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
-      <div className="absolute inset-0 bg-[rgba(0,0,0,0.45)]" />
+    <section className="relative overflow-hidden rounded-lg border border-[#3c352a] bg-[radial-gradient(circle_at_82%_42%,rgba(110,25,36,.26),transparent_30%),linear-gradient(135deg,#150d0d_0%,#0b0d12_58%,#08090c_100%)]">
+      <img
+        src={HERO_URL}
+        alt="Ginger Dragon Studios"
+        draggable={false}
+        className="absolute right-[-2%] top-1/2 h-[92%] w-auto -translate-y-1/2 object-contain opacity-85"
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,6,.94)_0%,rgba(5,5,6,.82)_46%,rgba(5,5,6,.18)_76%,rgba(5,5,6,.06)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-[#0a0a0a]" />
 
       {/* Parchment flourish — top right */}
