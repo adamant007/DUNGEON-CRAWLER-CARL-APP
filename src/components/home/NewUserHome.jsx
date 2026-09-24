@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import GdsEmblem from "@/components/home/GdsEmblem";
+import { useAuth } from "@/lib/AuthContext";
 
 const gold = "#d4a055";
 const cream = "#f0e2c8";
@@ -176,6 +177,8 @@ const roadmap = [
 ];
 
 export default function NewUserHome() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <div className="min-h-[100svh] bg-[#080707] text-white">
       <header className="sticky top-0 z-50 border-b border-[#4c3824]/70 bg-[rgba(8,7,7,.88)] backdrop-blur-xl">
@@ -196,12 +199,16 @@ export default function NewUserHome() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link to="/login" className="hidden px-3 py-2 text-[12px] font-semibold text-[#c6bbb1] hover:text-white sm:block">Log in</Link>
+            {!isAuthenticated && (
+              <Link to="/login" className="hidden px-3 py-2 text-[12px] font-semibold text-[#c6bbb1] hover:text-white sm:block">
+                Log in
+              </Link>
+            )}
             <Link
-              to="/register"
+              to={isAuthenticated ? "/dashboard" : "/register"}
               className="inline-flex items-center gap-2 rounded-lg border border-[#d4a055]/80 bg-[linear-gradient(180deg,#8d1b28,#5f1018)] px-3.5 py-2.5 font-display text-[10px] font-bold tracking-[0.08em] text-[#f5e7ce] shadow-[0_8px_30px_rgba(115,20,30,.22)] transition hover:brightness-110 sm:px-4"
             >
-              GET STARTED <ArrowRight size={13} />
+              {isAuthenticated ? "ENTER" : "GET STARTED"} <ArrowRight size={13} />
             </Link>
             <button aria-label="Open navigation" className="flex h-9 w-9 items-center justify-center text-[#b8ada4] lg:hidden"><Menu size={18} /></button>
           </div>
