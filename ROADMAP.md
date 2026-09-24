@@ -58,6 +58,9 @@ Before RC1, Android and web must use the same authentication backend and the sam
 - Test sign-in, sign-out, password reset, session restore, and device switching on both Android and web.
 - Authentication state must update the UI immediately: signed-out users see Log in/Get Started; signed-in users see Enter/account controls.
 - Keep all authorization and campaign access enforced server-side/RLS, not by UI state alone.
+- Google OAuth provider is configured and Supabase has confirmed a successful Google OAuth login; remaining Android work is session handoff/return-to-app verification.
+- Imported legacy characters must be claimed only after the authenticated session is established; verify restored characters before RC1 sign-off.
+- Keep the Android/PWA launcher icon synchronized with the approved Ginger Dragon Studios burgundy-dragon / ginger-mane / teal-d20 emblem.
 
 ## Release sequencing
 
