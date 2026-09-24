@@ -17,10 +17,13 @@ export default function Dashboard() {
     let alive = true;
     (async () => {
       try {
-        const [user, rows] = await Promise.all([
-          base44.auth.me().catch(() => null),
-          base44.entities.Character.list("-updated_date", 20).catch(() => []),
-        ]);
+        // Resolve auth + imported-character claim before loading the character list.
+        // Doing these in parallel could render an empty dashboard on the first
+        // successful OAuth login while the legacy claim was still committing.
+        const user = await base44.auth.me().catch(() => null);
+        const rows = user
+          ? await base44.entities.Character.list("-updated_date", 20).catch(() => [])
+          : [];
         if (!alive) return;
         setMe(user);
         setCharacters(rows ?? []);
