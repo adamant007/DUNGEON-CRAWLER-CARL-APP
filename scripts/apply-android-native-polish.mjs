@@ -41,6 +41,8 @@ fs.writeFileSync(
   mainActivityPath,
   `package ${packageName};
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.WebView;
 
@@ -50,6 +52,9 @@ import androidx.appcompat.app.AppCompatDelegate;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+    private static final String AUTH_SCHEME = "com.gingerdragonstudios.rpgcompanion";
+    private static final String AUTH_HOST = "login-callback";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
@@ -70,6 +75,50 @@ public class MainActivity extends BridgeActivity {
                 setEnabled(true);
             }
         });
+
+        handleAuthIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleAuthIntent(intent);
+    }
+
+    private void handleAuthIntent(Intent intent) {
+        Uri data = intent != null ? intent.getData() : null;
+        if (data == null
+                || !AUTH_SCHEME.equals(data.getScheme())
+                || !AUTH_HOST.equals(data.getHost())) {
+            return;
+        }
+
+        WebView webView = getBridge() != null ? getBridge().getWebView() : null;
+        if (webView == null) return;
+
+        final String fragment = data.getEncodedFragment();
+        final String query = data.getEncodedQuery();
+
+        webView.postDelayed(() -> {
+            String origin = "https://localhost";
+            try {
+                Uri current = Uri.parse(webView.getUrl());
+                if (current.getScheme() != null && current.getAuthority() != null) {
+                    origin = current.getScheme() + "://" + current.getAuthority();
+                }
+            } catch (Exception ignored) {
+            }
+
+            String suffix = "";
+            if (fragment != null && !fragment.isEmpty()) {
+                suffix = "#" + fragment;
+            } else if (query != null && !query.isEmpty()) {
+                suffix = "?" + query;
+            }
+
+            webView.loadUrl(origin + "/login" + suffix);
+        }, 250);
     }
 }
 `,
@@ -92,6 +141,22 @@ manifest = manifest.replace(
     return next + close;
   },
 );
+
+if (!manifest.includes('android:scheme="com.gingerdragonstudios.rpgcompanion"')) {
+  manifest = manifest.replace(
+    /(<activity\b[^>]*android:name="\.MainActivity"[\s\S]*?)(<\/activity>)/,
+    `$1
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="com.gingerdragonstudios.rpgcompanion"
+                    android:host="login-callback" />
+            </intent-filter>
+        $2`,
+  );
+}
 fs.writeFileSync(manifestPath, manifest);
 
 let styles = fs.readFileSync(stylesPath, "utf8");
