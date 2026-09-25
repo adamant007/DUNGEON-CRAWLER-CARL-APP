@@ -132,6 +132,18 @@ const BOSS_TYPES = [
   "Living Dungeon / Location",
   "Secret / Optional",
   "Final / Capstone",
+  "Assassin / Stalker",
+  "Commander / Support",
+  "Mirror / Copycat",
+  "Trapmaster / Architect",
+  "Army / Warlord",
+  "Colossus / Kaiju",
+  "Timed Survival",
+  "Objective Defense",
+  "Resource Drain / Attrition",
+  "Multi-Arena / Moving Fight",
+  "Unkillable / Escape Objective",
+  "Mythic / Reality-Bending",
 ];
 
 const pick = (items) => items[Math.floor(Math.random() * items.length)];
@@ -522,11 +534,12 @@ export default function DungeonInABox({ campaignId, campaignName, characters = [
       defeated: false,
     };
 
+    const layoutStyle = pick(["Linear", "Branching", "Hub & Spoke", "Looping", "Maze-Like"]);
     setFloor((current) => ({
       ...current,
-      layoutStyle: pick(["Linear", "Branching", "Hub & Spoke", "Looping", "Maze-Like"]),
+      layoutStyle,
       layoutNotes: "Use room order as the default path, then add shortcuts, locked branches, or alternate routes as needed.",
-      rooms: arrangeRooms(rooms, current.layoutStyle || "Branching"),
+      rooms: arrangeRooms(rooms, layoutStyle),
       mobs: mobGroups,
       traps,
       loot,
@@ -641,7 +654,7 @@ export default function DungeonInABox({ campaignId, campaignName, characters = [
           const health = Math.min(maxHealth, Number(characterData.health || 0) + amount);
           title = title || `${amount} healing`;
           detail = detail || `Health changed to ${health}.`;
-          await base44.campaigns.gmUpdateCharacter(campaignId, targetId, { ...character, health }, true);
+          await base44.campaigns.gmUpdateCharacter(campaignId, targetId, { ...characterData, health }, true);
         } else if (kind === "condition") {
           title = title || "GM Condition";
           detail = detail || "A GM-applied condition is active.";
