@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { blankCharacter } from "@/components/character/characterStorage";\nimport DungeonInABox from "@/components/gm/DungeonInABox";
+import { blankCharacter } from "@/components/character/characterStorage";
+import DungeonInABox from "@/components/gm/DungeonInABox";
 
 const ACTIVE_CAMPAIGN_KEY = "gds_active_campaign_id";
 const panel = "rounded-xl border border-[#6d4b26]/70 bg-[#17110d]/95 p-4 shadow-xl";
