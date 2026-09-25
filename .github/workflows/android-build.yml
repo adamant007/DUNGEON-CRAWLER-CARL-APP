@@ -105,11 +105,8 @@ jobs:
 
       - name: Apply approved Ginger Dragon launcher icon
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq imagemagick
           mkdir -p android/app/src/main/res/drawable-nodpi
-          convert public/brand/ginger-dragon-app-icon.png \
-            -resize 512x512! \
+          cp public/brand/ginger-dragon-app-icon.png \
             android/app/src/main/res/drawable-nodpi/ginger_dragon_icon.png
           python - <<'PY'
           from pathlib import Path
