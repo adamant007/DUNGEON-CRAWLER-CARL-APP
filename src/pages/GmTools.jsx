@@ -273,7 +273,7 @@ export default function GmTools() {
 
         {active && (
           <div className="mt-4">
-            <DungeonInABox campaignId={active.id} campaignName={active.name} />
+            <DungeonInABox campaignId={active.id} campaignName={active.name} characters={characters} />
           </div>
         )}
 
