@@ -146,6 +146,23 @@ const BOSS_TYPES = [
   "Mythic / Reality-Bending",
 ];
 
+const BOSS_HINTS = {
+  "Solo / Apex": "One centerpiece enemy with strong action economy, movement, and phase changes.",
+  "Duo / Twins": "Two bosses whose abilities interact; defeating one changes the other.",
+  "Council / Multiple Leaders": "Several distinct leaders with different jobs and shared objectives.",
+  "Swarm / Hive Mind": "Many bodies acting as one encounter; damage can reduce capability instead of only HP.",
+  "Puzzle / Gimmick": "The party must understand and disrupt a mechanic, not simply race HP to zero.",
+  "Environmental / Hazard Boss": "The arena or disaster is the boss; objectives and survival matter more than a creature stat block.",
+  "Siege Engine / Vehicle": "Break components, board it, disable systems, or attack weak points.",
+  "Chase / Pursuit": "Position, distance, obstacles, and escape/catch conditions drive the fight.",
+  "Social / Negotiation": "Victory can come through leverage, persuasion, bargains, exposure, or changing loyalties.",
+  "Transforming / Multi-Phase": "The boss changes form, rules, arena, or priorities between phases.",
+  "Raid / Set-Piece": "Large encounter with simultaneous objectives, adds, hazards, and assigned party jobs.",
+  "Living Dungeon / Location": "The place itself is alive; rooms, organs, nodes, or systems function as boss parts.",
+  "Unkillable / Escape Objective": "The boss cannot be defeated normally; success is surviving, escaping, sealing, or delaying it.",
+  "Mythic / Reality-Bending": "Rules of the encounter change as reality, time, terrain, or causality shifts.",
+};
+
 const pick = (items) => items[Math.floor(Math.random() * items.length)];
 const makeId = () => (globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
@@ -224,6 +241,12 @@ const defaultFloor = (campaignName = "") => ({
     dr: "",
     attacks: "",
     phases: ["Opening phase", "Escalation phase", "Final phase"],
+    minions: "",
+    arena: "",
+    enrage: "",
+    victoryCondition: "Defeat the boss or complete the encounter objective.",
+    alternateWin: "",
+    defeatConsequence: "",
     weakness: "",
     tactics: "",
     reward: "",
@@ -525,9 +548,15 @@ export default function DungeonInABox({ campaignId, campaignName, characters = [
       attacks: "One reliable attack, one heavy telegraphed attack, and one movement/control ability.",
       phases: [
         "Opening: tests the party and uses the room.",
-        "Escalation: summons help or activates a floor hazard at roughly 60% HP.",
-        "Final: becomes more aggressive at roughly 25% HP.",
+        "Escalation: changes the problem at roughly 60% progress.",
+        "Final: raises the stakes at roughly 25% progress.",
       ],
+      minions: bossType.includes("Summoner") || bossType.includes("Commander") || bossType.includes("Raid") ? "Uses supporting creatures or reinforcements with distinct battlefield jobs." : "",
+      arena: "The arena contains at least one interactive feature that can help or hurt either side.",
+      enrage: "If the party stalls, escalate pressure with reinforcements, hazards, lost cover, or a stronger move.",
+      victoryCondition: bossType.includes("Social") ? "Win the confrontation by changing the boss's decision, leverage, or support." : bossType.includes("Unkillable") ? "Survive, escape, seal, delay, or complete the objective instead of reducing HP to zero." : "Defeat the boss or complete the encounter objective.",
+      alternateWin: "A clue, environmental interaction, bargain, or secondary objective can create a non-damage path to victory.",
+      defeatConsequence: "If the party fails, advance the floor threat instead of ending the entire campaign unless the GM wants a lethal result.",
       weakness: "A clue or interaction elsewhere on the floor can suppress one boss advantage.",
       tactics: "Move the boss, use terrain, and change behavior between phases rather than only increasing damage.",
       reward: pick(theme.loot),
@@ -707,6 +736,10 @@ export default function DungeonInABox({ campaignId, campaignName, characters = [
       "BOSS",
       floor.boss.name ? `${floor.boss.name} [${floor.boss.type}] — HP ${floor.boss.maxHp}, Evade ${floor.boss.evade}, DR ${floor.boss.dr}` : "Not configured",
       ...floor.boss.phases.map((phase, index) => `  Phase ${index + 1}: ${phase}`),
+      floor.boss.victoryCondition ? `  Victory: ${floor.boss.victoryCondition}` : "",
+      floor.boss.alternateWin ? `  Alternate win: ${floor.boss.alternateWin}` : "",
+      floor.boss.arena ? `  Arena: ${floor.boss.arena}` : "",
+      floor.boss.enrage ? `  Escalation: ${floor.boss.enrage}` : "",
       "",
       "TRAPS / HAZARDS",
       ...floor.traps.map((trap) => `• ${trap.name}: ${trap.trigger}; consequence: ${trap.consequence}`),
@@ -1014,6 +1047,9 @@ export default function DungeonInABox({ campaignId, campaignName, characters = [
                   {BOSS_TYPES.map((type) => <option key={type}>{type}</option>)}
                 </select>
               </label>
+              <div className="sm:col-span-2 lg:col-span-4 rounded border border-[#4f3922] bg-[#0f0c09] p-2 font-fell text-xs text-[#cbb99b]">
+                {BOSS_HINTS[floor.boss.type] || "Use this archetype to shape the boss's action economy, objectives, arena, and phase changes."}
+              </div>
               <Field label="Role / Job" value={floor.boss.role} onChange={(role) => updateFloor({ boss: { ...floor.boss, role } })} />
               <Field label="Max HP" type="number" min={0} value={floor.boss.maxHp} onChange={(maxHp) => updateFloor({ boss: { ...floor.boss, maxHp, currentHp: Math.min(floor.boss.currentHp || maxHp, maxHp) } })} />
               <Field label="Current HP" type="number" min={0} value={floor.boss.currentHp} onChange={(currentHp) => updateFloor({ boss: { ...floor.boss, currentHp } })} />
@@ -1021,22 +1057,37 @@ export default function DungeonInABox({ campaignId, campaignName, characters = [
               <Field label="DR" value={floor.boss.dr} onChange={(dr) => updateFloor({ boss: { ...floor.boss, dr } })} />
             </div>
             <TextArea label="Attacks / Signature Moves" value={floor.boss.attacks} onChange={(attacks) => updateFloor({ boss: { ...floor.boss, attacks } })} />
-            <div className="mt-3 grid gap-2">
-              {floor.boss.phases.map((phase, index) => (
-                <TextArea
-                  key={index}
-                  label={`Phase ${index + 1}`}
-                  value={phase}
-                  onChange={(value) => {
-                    const phases = [...floor.boss.phases];
-                    phases[index] = value;
-                    updateFloor({ boss: { ...floor.boss, phases } });
-                  }}
-                  rows={2}
-                />
-              ))}
+            <div className="mt-3">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <h4 className="font-display text-sm font-bold">Boss Phases</h4>
+                <div className="flex gap-2">
+                  <button type="button" className={button} onClick={() => updateFloor({ boss: { ...floor.boss, phases: [...floor.boss.phases, "New phase"] } })}>ADD PHASE</button>
+                  {floor.boss.phases.length > 1 && <button type="button" className={dangerButton} onClick={() => updateFloor({ boss: { ...floor.boss, phases: floor.boss.phases.slice(0, -1) } })}>REMOVE LAST</button>}
+                </div>
+              </div>
+              <div className="grid gap-2">
+                {floor.boss.phases.map((phase, index) => (
+                  <TextArea
+                    key={index}
+                    label={`Phase ${index + 1}`}
+                    value={phase}
+                    onChange={(value) => {
+                      const phases = [...floor.boss.phases];
+                      phases[index] = value;
+                      updateFloor({ boss: { ...floor.boss, phases } });
+                    }}
+                    rows={2}
+                  />
+                ))}
+              </div>
             </div>
             <div className="mt-3 grid gap-3 lg:grid-cols-2">
+              <TextArea label="Minions / Adds" value={floor.boss.minions} onChange={(minions) => updateFloor({ boss: { ...floor.boss, minions } })} />
+              <TextArea label="Arena / Lair Mechanics" value={floor.boss.arena} onChange={(arena) => updateFloor({ boss: { ...floor.boss, arena } })} />
+              <TextArea label="Enrage / Escalation" value={floor.boss.enrage} onChange={(enrage) => updateFloor({ boss: { ...floor.boss, enrage } })} />
+              <TextArea label="Victory Condition" value={floor.boss.victoryCondition} onChange={(victoryCondition) => updateFloor({ boss: { ...floor.boss, victoryCondition } })} />
+              <TextArea label="Alternate Win Condition" value={floor.boss.alternateWin} onChange={(alternateWin) => updateFloor({ boss: { ...floor.boss, alternateWin } })} />
+              <TextArea label="Failure / Defeat Consequence" value={floor.boss.defeatConsequence} onChange={(defeatConsequence) => updateFloor({ boss: { ...floor.boss, defeatConsequence } })} />
               <TextArea label="Weakness / Counterplay" value={floor.boss.weakness} onChange={(weakness) => updateFloor({ boss: { ...floor.boss, weakness } })} />
               <TextArea label="Tactics" value={floor.boss.tactics} onChange={(tactics) => updateFloor({ boss: { ...floor.boss, tactics } })} />
               <TextArea label="Boss Reward" value={floor.boss.reward} onChange={(reward) => updateFloor({ boss: { ...floor.boss, reward } })} />
