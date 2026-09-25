@@ -8,6 +8,7 @@ const dangerButton = "rounded-md border border-[#7e3f32] bg-[#2c1310] px-3 py-2 
 const TABS = [
   ["setup", "Floor Setup"],
   ["rooms", "Rooms"],
+  ["layout", "Layout"],
   ["mobs", "Mobs"],
   ["boss", "Boss"],
   ["traps", "Traps"],
@@ -89,6 +90,8 @@ const defaultFloor = (campaignName = "") => ({
   roomCount: 8,
   timer: "",
   notes: "",
+  layoutStyle: "Branching",
+  layoutNotes: "",
   rooms: [],
   mobs: [],
   boss: {
@@ -275,6 +278,8 @@ export default function DungeonInABox({ campaignId, campaignName }) {
 
     setFloor((current) => ({
       ...current,
+      layoutStyle: pick(["Linear", "Branching", "Hub & Spoke", "Looping", "Maze-Like"]),
+      layoutNotes: "Use room order as the default path, then add shortcuts, locked branches, or alternate routes as needed.",
       rooms,
       mobs: mobGroups,
       traps,
@@ -335,6 +340,7 @@ export default function DungeonInABox({ campaignId, campaignName }) {
       `Theme: ${floor.theme} | Tone: ${floor.tone} | Difficulty: ${floor.difficulty}`,
       `Party: ${floor.partySize} crawler(s), level ${floor.partyLevel}`,
       `Objective: ${floor.objective || "Not set"}`,
+      `Layout: ${floor.layoutStyle}${floor.layoutNotes ? ` — ${floor.layoutNotes}` : ""}`,
       floor.timer ? `Timer / Pressure: ${floor.timer}` : "",
       "",
       "ROOMS",
@@ -490,6 +496,40 @@ export default function DungeonInABox({ campaignId, campaignName }) {
               ))}
               {!floor.rooms.length && <p className="font-fell italic text-sm text-[#a9916e]">No rooms yet. Generate a floor or add one manually.</p>}
             </div>
+          </div>
+        )}
+
+        {activeTab === "layout" && (
+          <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+            <Card>
+              <h3 className="font-display text-lg font-bold">Floor Layout</h3>
+              <label className="mt-3 grid gap-1">
+                <span className="font-fell-sc text-[11px] text-[#d4a055]">Layout Style</span>
+                <select className={input} value={floor.layoutStyle} onChange={(e) => updateFloor({ layoutStyle: e.target.value })}>
+                  {["Linear", "Branching", "Hub & Spoke", "Looping", "Maze-Like", "Open Zone"].map((style) => <option key={style}>{style}</option>)}
+                </select>
+              </label>
+              <div className="mt-3">
+                <TextArea label="Connections / Secret Routes / Locked Paths" value={floor.layoutNotes} onChange={(layoutNotes) => updateFloor({ layoutNotes })} rows={7} />
+              </div>
+              <p className="mt-2 font-fell text-xs text-[#a9916e]">
+                This is the planning layer now. Later it can feed the full Ginger Dragon map placement system without changing your room data.
+              </p>
+            </Card>
+            <Card>
+              <h3 className="font-display text-lg font-bold">Room Order</h3>
+              <p className="mt-1 font-fell text-xs text-[#cbb99b]">Use this as the main path while you describe branches and shortcuts in the layout notes.</p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {floor.rooms.map((room, index) => (
+                  <div key={room.id} className="rounded border border-[#4f3922] bg-[#0f0c09] p-3">
+                    <div className="font-fell-sc text-[10px] text-[#d4a055]">ROOM {index + 1}</div>
+                    <div className="font-garamond text-lg font-bold">{room.name}</div>
+                    <div className="font-fell text-xs text-[#cbb99b]">{room.type} · {room.feature || "No special feature"}</div>
+                  </div>
+                ))}
+                {!floor.rooms.length && <p className="font-fell italic text-sm text-[#a9916e]">Generate or add rooms first.</p>}
+              </div>
+            </Card>
           </div>
         )}
 
