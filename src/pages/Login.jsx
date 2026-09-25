@@ -20,7 +20,10 @@ export default function Login() {
   // Post-login destination (e.g. the MCP OAuth consent page sends users here
   // with returnTo so the grant flow can resume). Same-origin paths only.
   const returnTo = safeReturnTo();
-  // A normal sign-in should enter the companion, not bounce back to the\n  // public marketing page. Preserve explicit invite/deep-link destinations.\n  const postLoginDestination = returnTo === "/" ? "/dashboard" : returnTo;\n
+  // A normal sign-in should enter the companion, not bounce back to the
+  // public marketing page. Preserve explicit invite/deep-link destinations.
+  const postLoginDestination = returnTo === "/" ? "/dashboard" : returnTo;
+
   useEffect(() => {
     if (!isLoadingAuth && isAuthenticated) {
       navigate(postLoginDestination, { replace: true });
