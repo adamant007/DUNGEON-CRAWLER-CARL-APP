@@ -1,11 +1,11 @@
 import React from "react";
 
-/* Canonical Ginger Dragon Studios mark. Keep this tied to the approved
-   full-resolution Ginger Dragon artwork used by the installed app icon. */
+/* Canonical Ginger Dragon Studios mark. Keep this tied to the exact
+   approved dragon + teal d20 crest used by the installed app icon. */
 export default function GdsEmblem({ size = 44, className = "" }) {
   return (
     <img
-      src="/brand/app-icon.svg"
+      src="/brand/ginger-dragon-app-icon.png"
       alt="Ginger Dragon Studios"
       width={size}
       height={size}
