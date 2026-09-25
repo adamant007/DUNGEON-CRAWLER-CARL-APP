@@ -57,7 +57,7 @@ export default function CampaignEventInbox() {
     let timer = null;
 
     const poll = async () => {
-      if (!alive || pollingRef.current) return;
+      if (!alive || pollingRef.current || notice) return;
       pollingRef.current = true;
       try {
         const campaignId = localStorage.getItem(ACTIVE_CAMPAIGN_KEY) || "";
