@@ -13,7 +13,7 @@ const parts = Array.from({ length: 6 }, (_, i) =>
 const base64 = parts.map((file) => fs.readFileSync(file, "utf8").trim()).join("");
 const bytes = Buffer.from(base64, "base64");
 const hash = crypto.createHash("sha256").update(bytes).digest("hex");
-const expectedHash = "2b57e0ffe3db36fb612222dfb53d3745056c49c49ed9c13045566b3ee5f6d8af";
+const expectedHash = "997ae4f75a49fd145f591c9e888a1906b4052bb016d45ec6aaea51cdafd42365";
 
 if (hash !== expectedHash) {
   throw new Error(`Ginger Dragon icon payload hash mismatch: ${hash}`);
