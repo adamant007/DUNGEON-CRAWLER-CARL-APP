@@ -20,15 +20,15 @@ export default function Login() {
   // Post-login destination (e.g. the MCP OAuth consent page sends users here
   // with returnTo so the grant flow can resume). Same-origin paths only.
   const returnTo = safeReturnTo();
-
+  // A normal sign-in should enter the companion, not bounce back to the\n  // public marketing page. Preserve explicit invite/deep-link destinations.\n  const postLoginDestination = returnTo === "/" ? "/dashboard" : returnTo;\n
   useEffect(() => {
     if (!isLoadingAuth && isAuthenticated) {
-      navigate(returnTo === "/" ? "/dashboard" : returnTo, { replace: true });
+      navigate(postLoginDestination, { replace: true });
     }
-  }, [isAuthenticated, isLoadingAuth, navigate, returnTo]);
+  }, [isAuthenticated, isLoadingAuth, navigate, postLoginDestination]);
 
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", returnTo);
+    base44.auth.loginWithProvider("google", postLoginDestination);
   };
 
   const handleSubmit = async (e) => {
@@ -37,7 +37,7 @@ export default function Login() {
     setLoading(true);
     try {
       await base44.auth.loginViaEmailPassword(email, password);
-      window.location.href = returnTo;
+      window.location.href = postLoginDestination;
     } catch (err) {
       setError(err.message || "Invalid email or password");
     } finally {
