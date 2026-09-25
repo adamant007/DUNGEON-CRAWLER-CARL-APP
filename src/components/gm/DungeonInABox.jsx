@@ -604,6 +604,7 @@ export default function DungeonInABox({ campaignId, campaignName, characters = [
       let detail = pushDraft.detail.trim();
       const amount = Math.max(0, Number(pushDraft.amount) || 0);
       let eventType = "gm_effect";
+      let targetIsGuest = false;
 
       if (kind === "announcement") {
         title = title || "GM Announcement";
@@ -613,44 +614,61 @@ export default function DungeonInABox({ campaignId, campaignName, characters = [
         const liveCharacters = await base44.campaigns.characters(campaignId);
         const character = (liveCharacters || []).find((row) => row.id === targetId);
         if (!character) throw new Error("That crawler is no longer assigned to this campaign.");
+        targetIsGuest = Boolean(character.is_guest);
+        const characterData = { ...character };
+        delete characterData.id;
+        delete characterData.created_date;
+        delete characterData.updated_date;
+        delete characterData.created_by_id;
+        delete characterData.owner_user_id;
+        delete characterData.campaign_user_id;
+        delete characterData.is_guest;
 
         if (kind === "loot") {
           title = title || "GM Reward";
           detail = detail || "Reward added to inventory.";
-          const inventory = Array.isArray(character.inventory) ? [...character.inventory] : [];
+          const inventory = Array.isArray(characterData.inventory) ? [...characterData.inventory] : [];
           inventory.push({ item: title, qty: "1", notes: detail });
-          await base44.campaigns.gmUpdateCharacter(campaignId, targetId, { ...character, inventory }, true);
+          await base44.campaigns.gmUpdateCharacter(campaignId, targetId, { ...characterData, inventory }, true);
           eventType = "gm_reward";
         } else if (kind === "damage") {
-          const health = Math.max(0, Number(character.health || 0) - amount);
+          const health = Math.max(0, Number(characterData.health || 0) - amount);
           title = title || `${amount} damage`;
           detail = detail || `Health changed to ${health}.`;
-          await base44.campaigns.gmUpdateCharacter(campaignId, targetId, { ...character, health }, true);
+          await base44.campaigns.gmUpdateCharacter(campaignId, targetId, { ...characterData, health }, true);
         } else if (kind === "healing") {
-          const maxHealth = Math.max(0, Number(character.max_health || character.health || 0));
-          const health = Math.min(maxHealth, Number(character.health || 0) + amount);
+          const maxHealth = Math.max(0, Number(characterData.max_health || characterData.health || 0));
+          const health = Math.min(maxHealth, Number(characterData.health || 0) + amount);
           title = title || `${amount} healing`;
           detail = detail || `Health changed to ${health}.`;
           await base44.campaigns.gmUpdateCharacter(campaignId, targetId, { ...character, health }, true);
         } else if (kind === "condition") {
           title = title || "GM Condition";
           detail = detail || "A GM-applied condition is active.";
-          const ruleset = { ...(character.ruleset_data || {}) };
+          const ruleset = { ...(characterData.ruleset_data || {}) };
           const gmEffects = Array.isArray(ruleset.gmEffects) ? [...ruleset.gmEffects] : [];
           gmEffects.push({ id: makeId(), title, detail, appliedAt: new Date().toISOString(), active: true });
           ruleset.gmEffects = gmEffects;
-          await base44.campaigns.gmUpdateCharacter(campaignId, targetId, { ...character, ruleset_data: ruleset }, true);
+          await base44.campaigns.gmUpdateCharacter(campaignId, targetId, { ...characterData, ruleset_data: ruleset }, true);
         }
       }
 
-      await base44.campaigns.pushEvent(
-        campaignId,
-        eventType,
-        { kind, title, detail, amount, floorName: floor.name, pushedAt: new Date().toISOString() },
-        kind === "announcement" ? null : targetId
-      );
+      if (!(kind !== "announcement" && targetIsGuest)) {
+        await base44.campaigns.pushEvent(
+          campaignId,
+          eventType,
+          { kind, title, detail, amount, floorName: floor.name, pushedAt: new Date().toISOString() },
+          kind === "announcement" ? null : targetId
+        );
+      }
       setPushDraft((draft) => ({ ...draft, title: "", detail: "" }));
-      setStatus(kind === "announcement" ? "Announcement pushed to the campaign." : "Crawler updated and player alert pushed.");
+      setStatus(
+        kind === "announcement"
+          ? "Announcement pushed to the campaign."
+          : targetIsGuest
+            ? "Guest crawler updated. There is no player account to alert yet."
+            : "Crawler updated and player alert pushed."
+      );
     } catch (err) {
       setStatus(err?.message || "Could not push that GM action.");
     } finally {
