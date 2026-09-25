@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import GlobalNav from "@/components/GlobalNav";
 import GdsBackdrop from "@/components/home/GdsBackdrop";
+import CampaignEventInbox from "@/components/campaign/CampaignEventInbox";
 
 /* Shared shell for every destination under the toolbar. The nav lives HERE,
    not inside each page: when every page rendered its own GlobalNav, each
@@ -18,6 +19,7 @@ export default function NavLayout() {
           Content layers above; the solid root color stays as a fallback
           while the image loads. */}
       <GdsBackdrop />
+      <CampaignEventInbox />
       <div className="relative z-10 mx-auto w-full max-w-[1240px]">
         <div className="px-2 mb-2">
           <GlobalNav />
