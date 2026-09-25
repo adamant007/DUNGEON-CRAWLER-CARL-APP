@@ -8,7 +8,7 @@
   "background_color": "#0c0f14",
   "theme_color": "#17130d",
   "icons": [
-    {"src":"/brand/app-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"},
-    {"src":"/brand/app-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
+    {"src":"/brand/ginger-dragon-app-icon.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"/brand/ginger-dragon-app-icon.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ]
 }
