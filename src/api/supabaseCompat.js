@@ -645,6 +645,149 @@ const campaigns = {
     return true;
   },
 
+  async floorProjects(campaignId) {
+    const userId = currentUserId();
+    if (!userId) throw makeError("Authentication required", 401);
+    if (!campaignId) return [];
+    const rows = await apiFetch(
+      "/rest/v1/gm_floor_projects?select=*&owner_id=eq." +
+        encodeURIComponent(userId) +
+        "&campaign_id=eq." +
+        encodeURIComponent(campaignId) +
+        "&project_type=eq.floor&order=updated_at.desc"
+    );
+    return (rows || []).map((row) => ({
+      id: row.id,
+      campaign_id: row.campaign_id,
+      project_type: row.project_type,
+      scope: row.scope,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      ...(row.data || {}),
+      name: row.name || row.data?.name || "Untitled Floor",
+    }));
+  },
+
+  async floorTemplates() {
+    const userId = currentUserId();
+    if (!userId) throw makeError("Authentication required", 401);
+    const rows = await apiFetch(
+      "/rest/v1/gm_floor_projects?select=*&owner_id=eq." +
+        encodeURIComponent(userId) +
+        "&project_type=eq.template&order=updated_at.desc"
+    );
+    return (rows || []).map((row) => ({
+      id: row.id,
+      project_type: row.project_type,
+      scope: row.scope,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      ...(row.data || {}),
+      name: row.name || row.data?.name || "Untitled Template",
+    }));
+  },
+
+  async saveFloorProject(campaignId, project) {
+    const userId = currentUserId();
+    if (!userId) throw makeError("Authentication required", 401);
+    if (!campaignId) throw makeError("Campaign required", 400);
+    const id = project?.id;
+    const data = { ...(project || {}) };
+    delete data.id;
+    delete data.campaign_id;
+    delete data.project_type;
+    delete data.created_at;
+    delete data.updated_at;
+    const row = {
+      owner_id: userId,
+      campaign_id: campaignId,
+      name: String(project?.name || "Untitled Floor").trim() || "Untitled Floor",
+      project_type: "floor",
+      scope: String(project?.scope || "Dungeon Floor"),
+      data,
+      updated_at: new Date().toISOString(),
+    };
+    if (id) {
+      const rows = await apiFetch(
+        "/rest/v1/gm_floor_projects?id=eq." + encodeURIComponent(id),
+        {
+          method: "PATCH",
+          headers: { Prefer: "return=representation" },
+          body: JSON.stringify(row),
+        }
+      );
+      return rows?.[0] || null;
+    }
+    const rows = await apiFetch("/rest/v1/gm_floor_projects", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify(row),
+    });
+    return rows?.[0] || null;
+  },
+
+  async saveFloorTemplate(project) {
+    const userId = currentUserId();
+    if (!userId) throw makeError("Authentication required", 401);
+    const data = { ...(project || {}) };
+    delete data.id;
+    delete data.campaign_id;
+    delete data.project_type;
+    delete data.created_at;
+    delete data.updated_at;
+    const rows = await apiFetch("/rest/v1/gm_floor_projects", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        owner_id: userId,
+        campaign_id: null,
+        name: String(project?.name || "Untitled Template").trim() || "Untitled Template",
+        project_type: "template",
+        scope: String(project?.scope || "Dungeon Floor"),
+        data,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    return rows?.[0] || null;
+  },
+
+  async deleteFloorProject(id) {
+    if (!id) return true;
+    await apiFetch(
+      "/rest/v1/gm_floor_projects?id=eq." + encodeURIComponent(id),
+      { method: "DELETE", headers: { Prefer: "return=minimal" } }
+    );
+    return true;
+  },
+
+  async pushEvent(campaignId, eventType, payload, targetCharacterId = null) {
+    const userId = currentUserId();
+    if (!userId) throw makeError("Authentication required", 401);
+    if (!campaignId) throw makeError("Campaign required", 400);
+    const rows = await apiFetch("/rest/v1/campaign_events", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        campaign_id: campaignId,
+        sender_id: userId,
+        event_type: eventType,
+        payload: payload || {},
+        target_character_id: targetCharacterId || null,
+      }),
+    });
+    return rows?.[0] || null;
+  },
+
+  async events(campaignId, limit = 25) {
+    if (!campaignId) return [];
+    return apiFetch(
+      "/rest/v1/campaign_events?select=*&campaign_id=eq." +
+        encodeURIComponent(campaignId) +
+        "&order=created_at.desc&limit=" +
+        Math.max(1, Math.min(100, Number(limit) || 25))
+    );
+  },
+
   async gmUpdateCharacter(campaignId, characterId, data, recordEvent = false) {
     const result = await apiFetch("/rest/v1/rpc/gm_update_campaign_character", {
       method: "POST",

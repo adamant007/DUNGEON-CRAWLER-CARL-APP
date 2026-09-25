@@ -292,6 +292,28 @@ export default function CharacterSheet() {
     };
   }, []);
 
+  /* GM campaign pushes can update a crawler while the player has the sheet
+     open. Refresh only when the open sheet is clean so a remote update can
+     never overwrite unsaved local edits. */
+  useEffect(() => {
+    let alive = true;
+    const onCampaignCharacterUpdated = async (event) => {
+      const id = event?.detail?.characterId;
+      if (!id || id !== currentIdRef.current || dirtyRef.current || gmMode) return;
+      try {
+        const rec = await base44.entities.Character.get(id);
+        if (alive && rec) apply(rec);
+      } catch {
+        // The campaign alert remains visible even if refresh is unavailable.
+      }
+    };
+    window.addEventListener("gds:campaign-character-updated", onCampaignCharacterUpdated);
+    return () => {
+      alive = false;
+      window.removeEventListener("gds:campaign-character-updated", onCampaignCharacterUpdated);
+    };
+  }, []);
+
   /* Unsaved-changes check: compares the live sheet against the last
      saved/loaded snapshot (or the blank defaults for a fresh draft). */
   const isDirty = () =>
