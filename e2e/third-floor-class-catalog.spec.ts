@@ -4,14 +4,18 @@ import {
   THIRD_FLOOR_CLASS_CATALOG,
   THIRD_FLOOR_CLASS_COUNTS,
 } from "../src/rules-profile/adapters/dungeon_crawler_carl/classCatalog.js";
+import {
+  CUSTOM_THIRD_FLOOR_RACE_CATALOG,
+  THIRD_FLOOR_RACE_COUNTS,
+} from "../src/rules-profile/adapters/dungeon_crawler_carl/raceCatalog.js";
 
 test("third-floor class catalog keeps every imported class entry", async () => {
   expect(THIRD_FLOOR_CLASS_COUNTS.official).toBe(52);
-  expect(THIRD_FLOOR_CLASS_COUNTS.custom).toBe(1);
-  expect(THIRD_FLOOR_CLASS_COUNTS.total).toBe(53);
+  expect(THIRD_FLOOR_CLASS_COUNTS.custom).toBe(6);
+  expect(THIRD_FLOOR_CLASS_COUNTS.total).toBe(58);
 
   expect(Object.keys(OFFICIAL_THIRD_FLOOR_CLASS_CATALOG)).toHaveLength(52);
-  expect(Object.keys(THIRD_FLOOR_CLASS_CATALOG)).toHaveLength(53);
+  expect(Object.keys(THIRD_FLOOR_CLASS_CATALOG)).toHaveLength(58);
 
   expect(THIRD_FLOOR_CLASS_CATALOG.boring_ol_arcanist?.name).toBe("Boring Ol’ Arcanist");
   expect(THIRD_FLOOR_CLASS_CATALOG.swashbuckler?.class_types).toEqual(["Bard", "Fighter", "Rogue"]);
@@ -20,4 +24,20 @@ test("third-floor class catalog keeps every imported class entry", async () => {
     THIRD_FLOOR_CLASS_CATALOG.health_embezzeler?.passive_skills?.find((s) => s.id === "reallocate")
       ?.target?.range_feet
   ).toBe(30);
+});
+
+
+test("user-supplied third-floor additions remain complete", async () => {
+  expect(THIRD_FLOOR_CLASS_CATALOG.storm_lancer?.earth_class).toBe(true);
+  expect(THIRD_FLOOR_CLASS_CATALOG.conspirators?.stat_caps?.int).toBe(10);
+  expect(THIRD_FLOOR_CLASS_CATALOG.sports_entertainer?.class_types).toEqual(["Barbarian", "Bard"]);
+  expect(THIRD_FLOOR_CLASS_CATALOG.carney_promoter?.class_types).toEqual(["Bard", "Rogue"]);
+  expect(THIRD_FLOOR_CLASS_CATALOG.ripper_rogue?.skill_rank_bonuses?.stealth).toBe(3);
+
+  expect(THIRD_FLOOR_RACE_COUNTS.custom).toBe(4);
+  expect(Object.keys(CUSTOM_THIRD_FLOOR_RACE_CATALOG)).toHaveLength(4);
+  expect(CUSTOM_THIRD_FLOOR_RACE_CATALOG.nigh?.size?.value).toBe(4);
+  expect(CUSTOM_THIRD_FLOOR_RACE_CATALOG.ginger?.hybrid).toBe(true);
+  expect(CUSTOM_THIRD_FLOOR_RACE_CATALOG.nullian?.stat_bonuses?.int).toBe(5);
+  expect(CUSTOM_THIRD_FLOOR_RACE_CATALOG.soother_forsoothed?.skill_rank_caps?.persuasion).toBe(20);
 });
