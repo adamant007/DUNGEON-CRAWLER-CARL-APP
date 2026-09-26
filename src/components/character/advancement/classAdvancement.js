@@ -331,7 +331,11 @@ const customBullets = (entry) => {
 export function classBenefitBullets(entry) {
   if (!entry) return [];
   if (Array.isArray(entry.benefits)) return entry.benefits.map((text) => ({ kind: "text", text }));
-  return customBullets(entry);
+  const bullets = customBullets(entry);
+  for (const id of entry.stat_skill_advantage ?? []) {
+    bullets.push({ kind: "stat_skill_advantage", id, text: `Advantage on all ${STAT_LABELS[id] ?? cap(id)}-based Skill Checks` });
+  }
+  return bullets;
 }
 
 export function raceBenefitBullets(entry) {
