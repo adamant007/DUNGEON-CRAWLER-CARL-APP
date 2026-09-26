@@ -1,6 +1,7 @@
 const SUPABASE_URL = "https://mitbmrdeksicjzxjajyx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_U2zk1sXsarpeiRkCXPwwrw_sgQnhR88";
 const SESSION_KEY = "gds_supabase_session";
+const OAUTH_RETURN_KEY = "gds_oauth_return_to";
 
 const jsonHeaders = () => ({
   apikey: SUPABASE_KEY,
@@ -37,6 +38,18 @@ function saveSession(session) {
 
 function clearSession() {
   localStorage.removeItem(SESSION_KEY);
+}
+
+function safeLocalPath(value, fallback = "/dashboard") {
+  try {
+    const url = new URL(value || fallback, window.location.origin);
+    if (url.origin !== window.location.origin) return fallback;
+    const path = url.pathname + url.search;
+    if (!path.startsWith("/") || path.startsWith("//") || path.includes("\\")) return fallback;
+    return path;
+  } catch {
+    return fallback;
+  }
 }
 
 function jwtPayload(token) {
@@ -420,17 +433,46 @@ const auth = {
     return this.updatePassword(newPassword);
   },
 
-  loginWithProvider(provider, returnTo = "/") {
+  loginWithProvider(provider, returnTo = "/dashboard") {
     const isNative =
       typeof window !== "undefined" &&
       Boolean(window.Capacitor?.isNativePlatform?.());
 
+    const target = safeLocalPath(returnTo, "/dashboard");
+
+    if (!isNative) {
+      try {
+        sessionStorage.setItem(OAUTH_RETURN_KEY, target);
+      } catch {}
+    }
+
+    // Web OAuth always returns to one stable callback URL. Supabase may fall
+    // back to its configured Site URL when a dynamic redirect is not on the
+    // allow-list; that was sending successful Google logins back to /login.
+    // The desired destination is kept separately above and applied after the
+    // returned access token has been consumed.
     const redirect = isNative
       ? "com.gingerdragonstudios.rpgcompanion://login-callback"
-      : new URL(returnTo || "/", window.location.origin).toString();
+      : window.location.origin + "/login";
 
     window.location.href =
       `${SUPABASE_URL}/auth/v1/authorize?provider=${encodeURIComponent(provider)}&redirect_to=${encodeURIComponent(redirect)}`;
+  },
+
+  pendingOAuthReturnTo() {
+    if (typeof window === "undefined") return "/dashboard";
+    try {
+      return safeLocalPath(sessionStorage.getItem(OAUTH_RETURN_KEY), "/dashboard");
+    } catch {
+      return "/dashboard";
+    }
+  },
+
+  clearOAuthReturnTo() {
+    if (typeof window === "undefined") return;
+    try {
+      sessionStorage.removeItem(OAUTH_RETURN_KEY);
+    } catch {}
   },
 
   setToken(token) {
