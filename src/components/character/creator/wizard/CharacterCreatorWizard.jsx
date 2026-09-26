@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { wizardStepsFor, blankWizardDraft, validateStep, crawlerNumbersFromRecords } from "./wizardSteps";
+import { wizardStepsFor, blankWizardDraft, validateStep, crawlerNumbersFromRecords, crawlerNumberConflict } from "./wizardSteps";
 import WizardProgress from "./WizardProgress";
 import WizardNavigation from "./WizardNavigation";
 import WizardStepBody from "./WizardStepBody";
@@ -49,7 +49,7 @@ export default function CharacterCreatorWizard({ selection, onCancel, onCreate }
   const [usedNumbers, setUsedNumbers] = useState(() => new Set());
   useEffect(() => {
     let alive = true;
-    base44.entities.Character.list()
+    base44.entities.Character.list("-updated_date", 1000)
       .then((records) => {
         if (alive) setUsedNumbers(crawlerNumbersFromRecords(records));
       })
@@ -123,11 +123,32 @@ export default function CharacterCreatorWizard({ selection, onCancel, onCreate }
     setCreating(true);
     setCreateError("");
     try {
+      /* Refresh immediately before CREATE. The set loaded when the wizard
+         opened is only friendly guidance; another tab or device could have
+         claimed the same number while this wizard remained open. */
+      try {
+        const records = await base44.entities.Character.list("-updated_date", 1000);
+        const freshUsed = crawlerNumbersFromRecords(records);
+        setUsedNumbers(freshUsed);
+        if (crawlerNumberConflict(records, draft?.crawlerNumber)) {
+          setCreating(false);
+          setCreateError("That crawler number is already in use. Choose another number or press Randomize.");
+          return;
+        }
+      } catch {
+        /* The parent save boundary and database constraint remain the
+           authority if this refresh is temporarily unavailable. */
+      }
       await onCreate?.(selection, draft);
       // the parent closes the wizard once the record exists
-    } catch {
+    } catch (error) {
       setCreating(false);
-      setCreateError("Couldn\u2019t create this character. Nothing was saved — please try again.");
+      setCreateError(
+        error?.code === "CRAWLER_NUMBER_DUPLICATE" ||
+        /crawler number.*already in use/i.test(String(error?.message ?? ""))
+          ? "That crawler number is already in use. Choose another number or press Randomize."
+          : "Couldn\u2019t create this character. Nothing was saved — please try again."
+      );
     }
   };
 
