@@ -26,7 +26,7 @@ const matchByName = (list, name) => {
   );
 };
 
-const DAMAGE_FROM_NOTES_RE = /Damage\s+(\S+)/i;
+const DAMAGE_FROM_NOTES_RE = /Damage\s+([^·]+)/i;
 const RANGE_FROM_NOTES_RE = /Range\s+([^·]+)/i;
 
 const parseDamageFromNotes = (notes) => {
