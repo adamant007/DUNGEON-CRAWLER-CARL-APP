@@ -24,6 +24,7 @@ export default function HotbarPicker({
   inventory,
   spells,
   rulesetData,
+  profile,
   onAssign,
   onRemove,
   onClose,
@@ -39,7 +40,7 @@ export default function HotbarPicker({
       !!parseConsumableEffect(it.item, it.notes)
   );
   /* SPELLS — this character's own known spells. */
-  const spellNames = knownSpells(rulesetData, spells)
+  const spellNames = knownSpells(rulesetData, spells, profile)
     .map((s) => s?.name)
     .filter(Boolean);
   /* ABILITIES — ranked skills, which have manual activation (ROLL SKILL
