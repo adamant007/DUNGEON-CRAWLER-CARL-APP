@@ -27,6 +27,8 @@ import { resolvePigment, pigmentAccentVars, pigmentAccentHex, pigmentAccentText,
 import { blankCharacter, blankSheet, recordFromSheet, sheetFromRecord } from "@/components/character/characterStorage";
 import ClassAdvancementDialog from "@/components/character/advancement/ClassAdvancementDialog";
 import RaceAdvancementDialog from "@/components/character/advancement/RaceAdvancementDialog";
+import StatAllocationDialog from "@/components/character/advancement/StatAllocationDialog";
+import DescendFloorDialog from "@/components/character/advancement/DescendFloorDialog";
 import {
   applyThirdFloorRace,
   applyThirdFloorClass,
@@ -35,6 +37,15 @@ import {
   needsThirdFloorClass,
   needsCharacterActorFloor,
 } from "@/components/character/advancement/classAdvancement";
+import {
+  allocateStatPoints,
+  descendFloor,
+  eligibleCatalog,
+  initializeThirdFloorStatPool,
+  levelUpCharacter,
+  optionEligibility,
+  progressionState,
+} from "@/components/character/advancement/progression";
 import "./character-handwritten.css";
 import "./character-tome.css";
 import "./character-dark.css";
@@ -100,6 +111,7 @@ export default function CharacterSheet() {
   const [activeSheetPage, setActiveSheetPage] = useState(1); // four-page digital character sheet tabs
   const [gmAccessError, setGmAccessError] = useState("");
   const advancementPromptRef = useRef("");
+  const [floorResult, setFloorResult] = useState(null);
 
   /* Latest-value refs — saves fired from timers, Retry, and dialogs must
      always read the CURRENT sheet, character id, and snapshot, never a
@@ -704,13 +716,22 @@ export default function CharacterSheet() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name, portrait, portraitSettings, customization, info, gear, attrs, skills, hp, maxHp, mana, maxMana, defense, attacks, spells, hotbar, inventory, currency, notes, draft, creationStep, profile, rulesetData, loading, currentId, savedJson, signedIn]);
 
-  /* Floor milestone prompt. Race is chosen before Class. Normal Floor 3
-     selection may be dismissed and reopened from the toolbar; Character
-     Actor remains a required floor-start flow after the permanent Class. */
+  /* Floor milestone prompt. On entering Floor 3, accumulated Stat points
+     are spent before Race, then Class. Later floor-start class mechanics
+     (Former Child Actor) remain after the permanent Third-Floor choices. */
   useEffect(() => {
     if (loading || gmMode || !activeRulesProfile || dialog) return;
     const sheet = currentSheetRef.current?.() ?? currentSheet();
     const floor = Number(sheet?.info?.floor) || 1;
+    const progress = progressionState(sheet);
+    if (needsThirdFloorRace(sheet) && progress.statPointsAvailable > 0) {
+      const key = `${currentId ?? "guest"}:${floor}:floor3-stats`;
+      if (advancementPromptRef.current !== key) {
+        advancementPromptRef.current = key;
+        setDialog("statAllocateRequired");
+      }
+      return;
+    }
     if (needsThirdFloorRace(sheet)) {
       const key = `${currentId ?? "guest"}:${floor}:floor3-race`;
       if (advancementPromptRef.current !== key) {
@@ -809,6 +830,54 @@ export default function CharacterSheet() {
     setDialog(null);
   };
 
+  /* ===== Core DCC Progression =====
+     Level and Floor are separate. Tutorial-floor Levels are converted into
+     the accumulated Third-Floor Stat pool on descent. Once on Floor 3 or
+     deeper, each new Level grants 3 more banked Stat points. */
+  const handleLevelUp = async () => {
+    if (!activeRulesProfile) return;
+    const result = levelUpCharacter(currentSheet());
+    const ok = await persistAdvancedSheet(result.sheet);
+    if (!ok) return;
+    if (result.statPointsGained > 0) setDialog("statAllocate");
+  };
+
+  const handleDescend = () => setDialog("descendFloor");
+
+  const confirmDescend = async () => {
+    if (!activeRulesProfile) return;
+    const result = descendFloor(activeRulesProfile, currentSheet());
+    const ok = await persistAdvancedSheet(result.sheet);
+    if (!ok) return;
+    setFloorResult(result);
+    const progress = progressionState(result.sheet);
+    if (result.to === 3 && needsThirdFloorRace(result.sheet) && progress.statPointsAvailable > 0) {
+      setDialog("statAllocateRequired");
+      return;
+    }
+    if (result.rolls.length) {
+      setDialog("floorResult");
+      return;
+    }
+    setDialog(null);
+  };
+
+  const confirmStatAllocation = async (allocation, forced = false) => {
+    if (!activeRulesProfile) return { ok: false, reason: "No active DCC rules profile." };
+    const result = allocateStatPoints(activeRulesProfile, currentSheet(), allocation);
+    if (!result.ok) return result;
+    const ok = await persistAdvancedSheet(result.sheet);
+    if (!ok) return { ok: false, reason: "Could not save the Stat allocation." };
+
+    const remaining = progressionState(result.sheet).statPointsAvailable;
+    if (forced && remaining > 0) {
+      return { ok: false, reason: `Spend all ${remaining} remaining Stat points before Race selection.` };
+    }
+    if (forced && needsThirdFloorRace(result.sheet)) setDialog("raceAdvance");
+    else setDialog(null);
+    return { ok: true };
+  };
+
   /* ===== Third-Floor Class Advancement =====
      Applies to the SAME canonical character. A permanent class is applied
      once; Former Child Actor's Character Actor layer is replaced each floor. */
@@ -825,6 +894,8 @@ export default function CharacterSheet() {
     if (!activeRulesProfile) return;
     const entry = advancementRaceCatalog[raceId];
     if (!entry) return;
+    const eligibility = optionEligibility(entry, currentSheet(), activeRulesProfile, "race");
+    if (!eligibility.eligible) return;
     const floor = Math.max(3, Number(info?.floor) || 3);
     const next = applyThirdFloorRace(activeRulesProfile, currentSheet(), entry, floor);
     const ok = await persistAdvancedSheet(next);
@@ -836,6 +907,8 @@ export default function CharacterSheet() {
     if (!activeRulesProfile) return;
     const entry = advancementClassCatalog[classId];
     if (!entry) return;
+    const eligibility = optionEligibility(entry, currentSheet(), activeRulesProfile, "class");
+    if (!eligibility.eligible) return;
     const floor = Math.max(3, Number(info?.floor) || 3);
     const next = applyThirdFloorClass(activeRulesProfile, currentSheet(), entry, floor);
     const ok = await persistAdvancedSheet(next);
@@ -857,8 +930,17 @@ export default function CharacterSheet() {
   const floor3RaceNeeded = activeRulesProfile ? needsThirdFloorRace(advancementSheet()) : false;
   const floor3ClassNeeded = activeRulesProfile ? needsThirdFloorClass(advancementSheet()) : false;
   const actorFloorNeeded = activeRulesProfile ? needsCharacterActorFloor(advancementSheet()) : false;
-  const openAdvancement = () =>
-    setDialog(floor3RaceNeeded ? "raceAdvance" : actorFloorNeeded ? "characterActor" : "classAdvance");
+  const progression = progressionState(advancementSheet());
+  const qualifiedRaceCatalog = activeRulesProfile
+    ? eligibleCatalog(advancementRaceCatalog, advancementSheet(), activeRulesProfile, "race")
+    : {};
+  const qualifiedClassCatalog = activeRulesProfile
+    ? eligibleCatalog(advancementClassCatalog, advancementSheet(), activeRulesProfile, "class")
+    : {};
+  const openAdvancement = () => {
+    if (floor3RaceNeeded && progression.statPointsAvailable > 0) setDialog("statAllocateRequired");
+    else setDialog(floor3RaceNeeded ? "raceAdvance" : actorFloorNeeded ? "characterActor" : "classAdvance");
+  };
 
   const loadCharacter = (rec) => {
     apply(rec);
@@ -1009,6 +1091,11 @@ export default function CharacterSheet() {
               onPrint={() => setDialog("print")}
               onPigments={() => setDialog("pigments")}
               onAdvance={openAdvancement}
+              showProgression={profile?.systemKey === "dungeon_crawler_carl" && !!currentId}
+              onLevelUp={handleLevelUp}
+              onDescend={handleDescend}
+              onSpendStats={() => setDialog("statAllocate")}
+              statPointsAvailable={progression.statPointsAvailable}
               canAdvance={floor3RaceNeeded || floor3ClassNeeded || actorFloorNeeded}
               advanceLabel={actorFloorNeeded ? `Floor ${Number(info?.floor) || 3} Actor Class` : floor3RaceNeeded ? "Floor 3 Race" : "Floor 3 Class"}
               saveState={saveState}
@@ -1076,9 +1163,52 @@ export default function CharacterSheet() {
 
       <RollResultCard result={lastRoll} onClose={() => setLastRoll(null)} />
 
+      {dialog === "statAllocate" && activeRulesProfile && progression.statPointsAvailable > 0 && (
+        <StatAllocationDialog
+          sheet={currentSheet()}
+          available={progression.statPointsAvailable}
+          onConfirm={(allocation) => confirmStatAllocation(allocation, false)}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog === "statAllocateRequired" && activeRulesProfile && progression.statPointsAvailable > 0 && (
+        <StatAllocationDialog
+          sheet={currentSheet()}
+          available={progression.statPointsAvailable}
+          forced
+          onConfirm={(allocation) => confirmStatAllocation(allocation, true)}
+        />
+      )}
+      {dialog === "descendFloor" && activeRulesProfile && (
+        <DescendFloorDialog
+          sheet={currentSheet()}
+          onConfirm={confirmDescend}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog === "floorResult" && floorResult && (
+        <ParchmentDialog title={`Floor ${floorResult.from} Advancement`} medium onClose={() => setDialog(null)}>
+          <div className="space-y-2">
+            <p className="font-fell text-[13px] text-[#24180f]">
+              Descended to Floor {floorResult.to}. Floor-end Skill Advancement checks:
+            </p>
+            {floorResult.rolls.map((roll) => (
+              <div key={roll.id} className="border border-[var(--rule)] px-3 py-2 font-fell text-[12px] text-[#24180f]">
+                <strong>{roll.name}</strong> — d20: {roll.die} vs Rank {roll.rank}
+                {" — "}{roll.success ? `SUCCESS → Rank ${roll.nextRank}` : "No increase"}
+              </div>
+            ))}
+            <div className="flex justify-end pt-2">
+              <button type="button" className="ink-box px-3 py-2 font-fell-sc text-[13px] font-bold text-[#24180f]" onClick={() => setDialog(null)}>
+                Continue
+              </button>
+            </div>
+          </div>
+        </ParchmentDialog>
+      )}
       {dialog === "raceAdvance" && activeRulesProfile && (
         <RaceAdvancementDialog
-          catalog={advancementRaceCatalog}
+          catalog={qualifiedRaceCatalog}
           profile={activeRulesProfile}
           sheet={currentSheet()}
           floor={Math.max(3, Number(info?.floor) || 3)}
@@ -1089,7 +1219,7 @@ export default function CharacterSheet() {
       {dialog === "classAdvance" && activeRulesProfile && (
         <ClassAdvancementDialog
           mode="thirdFloor"
-          catalog={advancementClassCatalog}
+          catalog={qualifiedClassCatalog}
           profile={activeRulesProfile}
           sheet={currentSheet()}
           floor={Math.max(3, Number(info?.floor) || 3)}
