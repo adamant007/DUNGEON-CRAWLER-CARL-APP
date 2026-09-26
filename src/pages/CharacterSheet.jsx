@@ -461,8 +461,12 @@ export default function CharacterSheet() {
   const rollSkillCheck = (skill, index) => {
     const statMod = parseInt(String(skill?.mod ?? "").replace(/[+\s]/g, ""), 10) || 0;
     const rank = Number(skill?.rank) || 0;
-    const hasAdvantage = Array.isArray(rulesetData?.skillCheckAdvantages) &&
+    const skillStat = String(skill?.stat ?? "").toLowerCase();
+    const directAdvantage = Array.isArray(rulesetData?.skillCheckAdvantages) &&
       rulesetData.skillCheckAdvantages.includes(skill?.id);
+    const statSkillAdvantage = Array.isArray(rulesetData?.statSkillCheckAdvantages) &&
+      rulesetData.statSkillCheckAdvantages.includes(skillStat);
+    const hasAdvantage = directAdvantage || statSkillAdvantage;
     const first = 1 + Math.floor(Math.random() * 20);
     const second = hasAdvantage ? 1 + Math.floor(Math.random() * 20) : null;
     const die = hasAdvantage ? Math.max(first, second) : first;
