@@ -21,6 +21,9 @@ export default function CharacterBar({
   onLoad,
   onPrint,
   onPigments,
+  onAdvance,
+  canAdvance = false,
+  advanceLabel = "Advance",
   saveState = "idle",
   busy = false,
   dirty = false,
@@ -85,6 +88,11 @@ export default function CharacterBar({
         {!gmMode && (
           <button type="button" className={BTN} onClick={onLoad} disabled={busy}>
             Load Character
+          </button>
+        )}
+        {canAdvance && !gmMode && (
+          <button type="button" className={BTN} onClick={onAdvance} disabled={busy}>
+            {advanceLabel}
           </button>
         )}
         <button
