@@ -33,6 +33,7 @@ export default function Hotbar({
   playMode = false,
   spells,
   rulesetData,
+  profile,
   attacks,
   inventory,
   mana,
@@ -55,7 +56,7 @@ export default function Hotbar({
     setSlots(next);
   };
 
-  const resolverData = { spells, rulesetData, attacks, inventory };
+  const resolverData = { spells, rulesetData, attacks, inventory, profile };
 
   /* Consumable tiles display the LIVE canonical inventory quantity —
      Inventory is the single source of truth; there is never a second
@@ -172,6 +173,7 @@ export default function Hotbar({
           inventory={inventory}
           spells={spells}
           rulesetData={rulesetData}
+          profile={profile}
           onAssign={(value) => {
             update(pickerSlot, value);
             setPickerSlot(null);
