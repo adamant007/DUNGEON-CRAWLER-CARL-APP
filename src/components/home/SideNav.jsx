@@ -27,7 +27,7 @@ export default function SideNav() {
 
   return (
     <aside className="flex shrink-0 items-center gap-4 border-b border-[#3c352a] bg-[#1a1612] px-4 py-3 lg:h-auto lg:w-60 lg:flex-col lg:items-stretch lg:gap-6 lg:border-b-0 lg:border-r lg:py-6">
-      <Link to="/" className="flex items-center gap-2.5 lg:justify-center">
+      <Link to="/" className="flex shrink-0 items-center gap-2.5 lg:justify-center">
         <GdsEmblem size={36} />
         <span className="flex flex-col leading-none">
           <span className="font-display text-[13px] font-bold tracking-[0.14em] text-[#d4a055]">GDS</span>
