@@ -358,6 +358,9 @@ export function optionEligibility(entry, sheet, profile, kind) {
     const mustWorship = /must worship a deity/i.test(text);
     if (mustWorship && !hasDeity(sheet)) reasons.push("Must worship a deity.");
 
+    const cannotWorship = /cannot worship a deity/i.test(text);
+    if (cannotWorship && hasDeity(sheet)) reasons.push("Unavailable while worshipping a deity.");
+
     const cannotVanquisher = /cannot choose if you have access to Club Vanquisher/i.test(text);
     if (cannotVanquisher && hasClub(sheet, "Club Vanquisher")) reasons.push("Unavailable with Club Vanquisher access.");
 
