@@ -10,6 +10,7 @@ import RulebookLibrary from "@/components/rulebooks/RulebookLibrary";
 import { listBuiltinProfiles, resolveProfile } from "@/rules-profile";
 import { recordFromPregen } from "@/components/character/creator/pregenToCharacter";
 import { recordFromWizard } from "@/components/character/creator/wizard/wizardToCharacter";
+import { crawlerNumberConflict } from "@/components/character/creator/wizard/wizardSteps";
 import { dccStatMods, dccStatModsNumeric } from "@/components/character/statModifiers";
 import { rollDice, rollD20, resolveStatMods } from "@/components/character/dice";
 import { parseQty, parseConsumableEffect } from "@/components/character/consumableEffect";
@@ -831,6 +832,18 @@ export default function CharacterSheet() {
       setDialog(null);
       return;
     }
+
+    /* Persistence-boundary uniqueness check. This deliberately re-reads
+       the account's characters even though the wizard already validated:
+       stale tabs/devices must not be able to create the same crawler
+       number twice. The database also enforces this invariant. */
+    const records = await base44.entities.Character.list("-updated_date", 1000);
+    if (crawlerNumberConflict(records, draft?.crawlerNumber)) {
+      const error = new Error("That crawler number is already in use.");
+      error.code = "CRAWLER_NUMBER_DUPLICATE";
+      throw error;
+    }
+
     const rec = await base44.entities.Character.create(data);
     apply(rec);
     setActive(rec.id);

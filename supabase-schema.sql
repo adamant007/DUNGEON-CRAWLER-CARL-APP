@@ -16,6 +16,16 @@ create table if not exists public.crawler_characters (
 );
 create index if not exists crawler_characters_user_id_idx on public.crawler_characters(user_id);
 
+-- One crawler number per signed-in account. Keep the canonical value in
+-- data.details.crawler, but normalize punctuation/leading zeros for uniqueness.
+create unique index if not exists crawler_characters_user_crawler_number_unique
+on public.crawler_characters (
+  user_id,
+  ((nullif(regexp_replace(coalesce(data #>> '{details,crawler}', ''), '[^0-9]', '', 'g'), ''))::numeric)
+)
+where user_id is not null
+  and nullif(regexp_replace(coalesce(data #>> '{details,crawler}', ''), '[^0-9]', '', 'g'), '') is not null;
+
 create table if not exists public.campaigns (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references auth.users(id) on delete cascade,
