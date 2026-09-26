@@ -881,10 +881,24 @@ export default function CharacterSheet() {
 
   return (
     <>
-      <div className="pb-8 px-2">
+      <div className="pb-8">
         <article
-          className={`parchment crawler-tome sheet-frame sheet-edge relative mx-auto w-full max-w-[1120px] p-2.5 sm:p-7 ${!editMode ? "play-locked" : ""}${pigmentOn ? " pigment-on" : ""}${appearance === "tome" ? " tome-light" : ""}`}
-          style={pigmentStyle}
+          className={`relative mx-auto w-full rounded-xl border border-[#3c352a] bg-[#0b0b0b]/95 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-5 ${!editMode ? "play-locked" : ""}`}
+          style={{
+            ...pigmentStyle,
+            "--ink": "#f0e8dc",
+            "--ink-soft": "#aaa197",
+            "--ink-faint": "#746d63",
+            "--rule": "#3c352a",
+            "--rule-soft": "#2b2722",
+            "--parch-1": "#17130f",
+            "--parch-2": "#12100e",
+            "--parch-3": "#0c0b0a",
+            "--hp": "#9b2c28",
+            "--hp-glow": "#c23b34",
+            "--mana": "#2d6ea4",
+            "--mana-glow": "#4b8ec4",
+          }}
         >
           <div className="relative z-[1]">
             {gmMode && (
@@ -899,7 +913,7 @@ export default function CharacterSheet() {
               </div>
             )}
             <CharacterBar
-              className="-mt-2 sm:-mt-5 mb-1"
+              className="mb-4"
               gmMode={gmMode}
               onRulebooks={openRulebooks}
               onNew={startNew}
@@ -917,7 +931,7 @@ export default function CharacterSheet() {
               onCancelChanges={cancelChanges}
             />
             {loading ? (
-              <p className="py-16 text-center font-fell italic text-sm text-[var(--ink-soft)]">
+              <p className="py-16 text-center font-fell italic text-sm text-[#8d8578]">
                 Unrolling your parchment…
               </p>
             ) : gmAccessError ? (
