@@ -20,13 +20,16 @@ export default function Login() {
   // Post-login destination (e.g. the MCP OAuth consent page sends users here
   // with returnTo so the grant flow can resume). Same-origin paths only.
   const returnTo = safeReturnTo();
+  const pendingOAuthReturn = base44.auth.pendingOAuthReturnTo?.() || "/dashboard";
   // A normal sign-in should enter the companion, not bounce back to the
-  // public marketing page. Preserve explicit invite/deep-link destinations.
-  const postLoginDestination = returnTo === "/" ? "/dashboard" : returnTo;
+  // login/public pages. Preserve explicit invite/deep-link destinations.
+  const postLoginDestination =
+    returnTo !== "/" ? returnTo : pendingOAuthReturn;
 
   useEffect(() => {
     if (!isLoadingAuth && isAuthenticated) {
-      navigate(postLoginDestination, { replace: true });
+      base44.auth.clearOAuthReturnTo?.();
+      navigate(postLoginDestination || "/dashboard", { replace: true });
     }
   }, [isAuthenticated, isLoadingAuth, navigate, postLoginDestination]);
 
