@@ -9,6 +9,14 @@ const input = "w-full rounded-md border border-[#7b5a31] bg-[#0f0c09] px-3 py-2 
 const button = "rounded-md border border-[#b47a36] bg-[#2b1c10] px-4 py-2 font-fell-sc text-sm font-bold text-[#f2d49b] hover:bg-[#3a2818] disabled:opacity-50";
 
 export default function GmTools() {
+  useEffect(() => {
+    const previous = document.body.dataset.gdsPage || "";
+    document.body.dataset.gdsPage = "gm-tools";
+    return () => {
+      if (previous) document.body.dataset.gdsPage = previous;
+      else delete document.body.dataset.gdsPage;
+    };
+  }, []);
   const [campaigns, setCampaigns] = useState([]);
   const [activeId, setActiveId] = useState(() => localStorage.getItem(ACTIVE_CAMPAIGN_KEY) || "");
   const [characters, setCharacters] = useState([]);
