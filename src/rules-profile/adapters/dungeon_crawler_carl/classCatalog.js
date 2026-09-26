@@ -1052,6 +1052,28 @@ export const OFFICIAL_THIRD_FLOOR_CLASS_CATALOG = Object.fromEntries(
   official.map((entry) => [entry.id, entry])
 );
 
+export const CHARACTER_ACTOR_RULE = {
+  id: "character_actor",
+  starting_rank: 3,
+  rank_progression: "increase_by_one_on_floor_descent",
+  floor_start_class_choice: {
+    random_options: 3,
+    rank_15_choose_any_available: true,
+    benefit_roll: { die: 2, success_on: [2] },
+    duration: "current_floor",
+    keep_existing_abilities: true,
+  },
+  upgrades: {
+    5: "Offered Classes increase in rarity and power based on the crawler's Stats and Level.",
+    10: "Skill Ranks earned in newly granted Skills persist between floors; the temporary starting Ranks do not.",
+    15: "Choose the temporary Class from any available Class instead of a random list of three.",
+  },
+};
+
+if (OFFICIAL_THIRD_FLOOR_CLASS_CATALOG.former_child_actor) {
+  OFFICIAL_THIRD_FLOOR_CLASS_CATALOG.former_child_actor.character_actor = CHARACTER_ACTOR_RULE;
+}
+
 /* User-supplied custom/homebrew classes. These are intentionally kept
    separate from the official Core Rulebook catalog above. */
 export const CUSTOM_THIRD_FLOOR_CLASSES = [
@@ -1174,7 +1196,7 @@ export const CUSTOM_THIRD_FLOOR_CLASSES = [
       lore: 1,
       religion: 1,
       survival: 1,
-      pattern_recognition_disorder: 1,
+      character_actor: 1,
     },
     skill_rank_caps: "all_to_20",
     effects: [
