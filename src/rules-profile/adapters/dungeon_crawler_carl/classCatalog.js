@@ -1052,73 +1052,253 @@ export const OFFICIAL_THIRD_FLOOR_CLASS_CATALOG = Object.fromEntries(
   official.map((entry) => [entry.id, entry])
 );
 
-/* User-supplied custom class. Keep fully structured mechanics here because it
-   is not one of the Core Rulebook entries above. */
-export const HEALTH_EMBEZZELER_CLASS = {
-  id: "health_embezzeler",
-  name: "Health Embezzeler",
-  class_type: "Earth Class",
-  class_types: ["Custom"],
-  source_stage: "third_floor",
-  source: "user_supplied",
-  earth_class: true,
-  description:
-    "The twisted mix of a vampire fangirl and a corporate criminal: unlike your usual goodie two shoes healer, the Health Embezzeler knows that the best things in life are the things that they don't have to pay for. After all, why spend resources on traditional healing spells when there are perfectly good health points right there just waiting to be... \"reallocated\". Like the insidious parasites you emulated in corporate, you're hard to get rid of. And when the going gets tough, you can justify your stinginess by telling yourself that horrifically draining the lives of your victims was all just to conserve your strength so that you could cast those \"proper\" healing spells when you truly needed them.",
-  stat_bonuses: { int: 1, con: 1 },
-  skill_rank_bonuses: { drain_life: 2, heal_others: 2, heal_self: 1, cockroach: 1 },
-  effects: [
-    {
-      id: "healing_spell_extra_health_bar",
-      trigger: "healing_type_spell",
-      target_heals_additional_health_bars: 1,
-      text: "When you use a Healing-type Spell, the target heals 1 additional Health Bar.",
-    },
-    {
-      id: "double_mana_regeneration",
-      mana_regeneration_multiplier: 2,
-      text: "Your Mana regeneration rate is doubled.",
-    },
-  ],
-  granted_skills: [
-    {
-      id: "draining_shadows",
-      name: "Draining Shadows",
-      rank_rule: { kind: "floor_level", initial_rank_at_third_floor: 3 },
-      attack: {
-        range: "melee",
-        attack_stat: "int",
-        damage: {
-          dice: "1d8",
-          plus_mod_stat: "int",
-          damage_type: "Necrotic",
-          extra_d8_at_ranks: [5, 10, 15],
-        },
+/* User-supplied custom/homebrew classes. These are intentionally kept
+   separate from the official Core Rulebook catalog above. */
+export const CUSTOM_THIRD_FLOOR_CLASSES = [
+  {
+    id: "health_embezzeler",
+    name: "Health Embezzeler",
+    class_type: "Earth Class",
+    class_types: ["Custom"],
+    source_stage: "third_floor",
+    source: "user_supplied",
+    earth_class: true,
+    description:
+      "The twisted mix of a vampire fangirl and a corporate criminal: unlike your usual goodie two shoes healer, the Health Embezzeler knows that the best things in life are the things that they don't have to pay for. After all, why spend resources on traditional healing spells when there are perfectly good health points right there just waiting to be... \"reallocated\". Like the insidious parasites you emulated in corporate, you're hard to get rid of. And when the going gets tough, you can justify your stinginess by telling yourself that horrifically draining the lives of your victims was all just to conserve your strength so that you could cast those \"proper\" healing spells when you truly needed them.",
+    stat_bonuses: { int: 1, con: 1 },
+    skill_rank_bonuses: { drain_life: 2, heal_others: 2, heal_self: 1, cockroach: 1 },
+    effects: [
+      {
+        id: "healing_spell_extra_health_bar",
+        trigger: "healing_type_spell",
+        target_heals_additional_health_bars: 1,
+        text: "When you use a Healing-type Spell, the target heals 1 additional Health Bar.",
       },
-      self_heal: { on_damage: true, health_bars: 1, max_uses_per_combat: 5 },
-      text:
-        "You gain the ability to manifest shadowy tendrils that can drain the life of a nearby target. Make a melee attack using Intelligence that deals 1d8 + Int necrotic damage. Add another d8 at Rank 5, 10, and 15. The rank of this skill is equal to the floor level, and only increases by floor. When you deal damage to a creature using this skill, you can heal one of your health bars. You can heal yourself in this way up to 5 times per combat.",
+      {
+        id: "double_mana_regeneration",
+        mana_regeneration_multiplier: 2,
+        text: "Your Mana regeneration rate is doubled.",
+      },
+    ],
+    granted_skills: [
+      {
+        id: "draining_shadows",
+        name: "Draining Shadows",
+        rank_rule: { kind: "floor_level", initial_rank_at_third_floor: 3 },
+        attack: {
+          range: "melee",
+          attack_stat: "int",
+          damage: {
+            dice: "1d8",
+            plus_mod_stat: "int",
+            damage_type: "Necrotic",
+            extra_d8_at_ranks: [5, 10, 15],
+          },
+        },
+        self_heal: { on_damage: true, health_bars: 1, max_uses_per_combat: 5 },
+        text:
+          "Manifest shadowy tendrils and make a melee attack using Intelligence for 1d8 + Int Necrotic damage. Add another d8 at Ranks 5, 10, and 15. Rank equals floor level and only increases by floor. On damage, heal 1 of your own Health Bars, up to 5 times per combat.",
+      },
+    ],
+    passive_skills: [
+      {
+        id: "reallocate",
+        name: "Reallocate",
+        trigger: "deal_necrotic_damage",
+        target: { self_allowed: false, range_feet: 30 },
+        heal_health_bars: 1,
+        text:
+          "Whenever you deal Necrotic damage, heal 1 Health Bar to another creature within 30 feet.",
+      },
+    ],
+  },
+  {
+    id: "storm_lancer",
+    name: "Storm Lancer",
+    class_type: "Earth Class",
+    class_types: ["Custom"],
+    source_stage: "third_floor",
+    source: "user_supplied",
+    earth_class: true,
+    build_points: { spent: 35, total: 35 },
+    stat_bonuses: { str: 2, int: -2 },
+    skill_rank_bonuses: { lance: 3, pathfinder: 1, stealth: -2 },
+    skill_rank_caps: { lance: 20 },
+    spell_rank_bonuses: { bang_bro: 1, confusing_fog: 1 },
+    resistances: ["Electric"],
+    effects: [
+      {
+        id: "catch_the_storm",
+        name: "Catch the Storm",
+        grants_flight: true,
+        text:
+          "You can fly while surrounded by storm-cloud formations that may hug your body or appear as a large beast you ride.",
+      },
+      {
+        id: "ride_the_lightning",
+        name: "Ride the Lightning",
+        homebrew_effect: true,
+        requires: ["catch_the_storm"],
+        text:
+          "While flying with Catch the Storm, use weapons, skills, abilities, and items as though mounted on a creature one size larger than yourself; flying movement counts as mounted movement.",
+      },
+      {
+        id: "squall",
+        name: "Squall",
+        homebrew_effect: true,
+        requires: ["lance_rank_10", "wielding_lance", "catch_the_storm"],
+        text:
+          "At Lance Rank 10+, take one free Move action per round if wielding a lance and the entire movement uses Catch the Storm flight.",
+      },
+      {
+        id: "storm_flight_penalties",
+        text:
+          "While flying with Catch the Storm, you have Disadvantage on Stealth-related checks and on checks that rely on hearing.",
+      },
+    ],
+  },
+  {
+    id: "conspirators",
+    name: "Conspirators",
+    class_type: "Custom Class",
+    class_types: ["Custom"],
+    source_stage: "third_floor",
+    source: "user_supplied",
+    earth_class: null,
+    stat_bonuses: { str: 2, con: 2, dex: 2, cha: 2 },
+    stat_caps: { int: 10 },
+    skill_rank_bonuses: {
+      aliens_and_ufos: 1,
+      basic_science: 1,
+      engineering: 1,
+      lore: 1,
+      religion: 1,
+      survival: 1,
+      pattern_recognition_disorder: 1,
     },
-  ],
-  passive_skills: [
-    {
-      id: "reallocate",
-      name: "Reallocate",
-      trigger: "deal_necrotic_damage",
-      target: { self_allowed: false, range_feet: 30 },
-      heal_health_bars: 1,
-      text:
-        "Whenever you deal necrotic damage to a creature, you can heal 1 health bar to a creature other than yourself within 30ft of you.",
+    skill_rank_caps: "all_to_20",
+    effects: [
+      {
+        id: "pseudoscience_charisma",
+        text:
+          "Pseudoscience checks use Charisma instead of Intelligence; Experiments take one-tenth normal time.",
+      },
+      {
+        id: "wake_up_sheeple",
+        name: "Wake Up, Sheeple!",
+        uses_per_day: 1,
+        activation_time: "1 minute",
+        text:
+          "Rant for one minute about the nature of reality; NPCs who pay attention become Woke NPCs and remain GM-controlled.",
+      },
+      { id: "psychic_immunity", immunity: "Psychic" },
+      {
+        id: "intelligence_skill_disadvantage",
+        text: "You have Disadvantage on all Intelligence Skill checks.",
+      },
+    ],
+  },
+  {
+    id: "sports_entertainer",
+    name: "Sports Entertainer",
+    class_type: "Hybrid Class",
+    class_types: ["Barbarian", "Bard"],
+    source_stage: "third_floor",
+    source: "user_supplied",
+    earth_class: null,
+    stat_bonuses: { cha: 4, str: 3, con: 2 },
+    skill_rank_caps: { wrasslin: 20 },
+    skill_rank_bonuses: { all_hand_to_hand: 1 },
+    resistances: ["Bludgeoning damage from falling"],
+    weapon_restrictions: ["Bludgeoning weapons", "Unarmed Skills"],
+    effects: [
+      {
+        id: "wrasslin_heal",
+        text:
+          "Heal 1 Health Bar when you damage or kill with Wrasslin' (Choke or Toss), up to 5 times per combat.",
+      },
+      {
+        id: "rage",
+        text: "Melee attacks deal +1 damage for each Health Bar slot you have lost.",
+      },
+      { id: "evade_advantage", text: "Roll Evade Checks with Advantage." },
+      { id: "charisma_advantage", text: "Roll all Charisma Skill checks with Advantage." },
+    ],
+  },
+  {
+    id: "carney_promoter",
+    name: "Carney Promoter",
+    class_type: "Hybrid Class",
+    class_types: ["Bard", "Rogue"],
+    source_stage: "third_floor",
+    source: "user_supplied",
+    earth_class: null,
+    stat_bonuses: { int: 3, cha: 5 },
+    effects: [
+      { id: "charisma_advantage", text: "Roll with Advantage on all Charisma-based Skill checks." },
+      { id: "store_discount", text: "Receive a discount at all Stores." },
+      { id: "sales_bonus", text: "Receive a bonus to sales." },
+      {
+        id: "charisma_advancement_advantage",
+        text: "Roll with Advantage on Advancement Checks for Charisma Skills.",
+      },
+      { id: "poison_disease_immunity", immunities: ["Poison", "Disease"] },
+      { id: "psychic_resistance", resistance: "Psychic" },
+      { id: "doppelganger_shape_changing", text: "Gain Doppelgänger shape changing." },
+    ],
+    build_point_notes: {
+      intelligence: -3,
+      charisma: -5,
+      charisma_advantage: -6,
+      store_discount: -1,
+      sales_bonus: -1,
+      charisma_advancement_advantage: -2,
+      poison_disease_immunity: -6,
+      psychic_resistance: -2,
+      doppelganger_shape_changing: -4,
     },
-  ],
-};
+  },
+  {
+    id: "ripper_rogue",
+    name: "Ripper Rogue",
+    class_type: "Rogue Class",
+    class_types: ["Rogue"],
+    source_stage: "third_floor",
+    source: "user_supplied",
+    earth_class: null,
+    stat_bonuses: { dex: 3 },
+    skill_rank_bonuses: {
+      stealth: 3,
+      ambush: 2,
+      dagger: 2,
+      dodge: 2,
+      hide_in_shadows: 2,
+    },
+    effects: [
+      { id: "total_darkness", text: "Can see in total darkness." },
+      {
+        id: "debuff_damage",
+        text: "Attacks against enemies under a Debuff deal an extra Rank Damage Dice.",
+      },
+    ],
+    restrictions: ["Cannot choose this Class if you have access to Club Vanquisher."],
+  },
+];
+
+export const CUSTOM_THIRD_FLOOR_CLASS_CATALOG = Object.fromEntries(
+  CUSTOM_THIRD_FLOOR_CLASSES.map((entry) => [entry.id, entry])
+);
+
+/* Backward-compatible named export used by existing code/tests. */
+export const HEALTH_EMBEZZELER_CLASS = CUSTOM_THIRD_FLOOR_CLASS_CATALOG.health_embezzeler;
 
 export const THIRD_FLOOR_CLASS_CATALOG = {
   ...OFFICIAL_THIRD_FLOOR_CLASS_CATALOG,
-  [HEALTH_EMBEZZELER_CLASS.id]: HEALTH_EMBEZZELER_CLASS,
+  ...CUSTOM_THIRD_FLOOR_CLASS_CATALOG,
 };
 
 export const THIRD_FLOOR_CLASS_COUNTS = {
   official: official.length,
-  custom: 1,
-  total: official.length + 1,
+  custom: CUSTOM_THIRD_FLOOR_CLASSES.length,
+  total: official.length + CUSTOM_THIRD_FLOOR_CLASSES.length,
 };
