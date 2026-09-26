@@ -26,9 +26,12 @@ import PigmentsFlyout from "@/components/character/PigmentsFlyout";
 import { resolvePigment, pigmentAccentVars, pigmentAccentHex, pigmentAccentText, pigmentBorderVars } from "@/components/character/pigments";
 import { blankCharacter, blankSheet, recordFromSheet, sheetFromRecord } from "@/components/character/characterStorage";
 import ClassAdvancementDialog from "@/components/character/advancement/ClassAdvancementDialog";
+import RaceAdvancementDialog from "@/components/character/advancement/RaceAdvancementDialog";
 import {
+  applyThirdFloorRace,
   applyThirdFloorClass,
   applyCharacterActorFloor,
+  needsThirdFloorRace,
   needsThirdFloorClass,
   needsCharacterActorFloor,
 } from "@/components/character/advancement/classAdvancement";
@@ -71,6 +74,7 @@ export default function CharacterSheet() {
   const resolvedProfileNow = profile?.systemKey ? resolveProfile({ system_key: profile.systemKey }) : null;
   const activeRulesProfile = resolvedProfileNow?.status === "ok" ? resolvedProfileNow.profile : null;
   const advancementClassCatalog = activeRulesProfile?.advancement?.stages?.third_floor?.classes?.catalog ?? {};
+  const advancementRaceCatalog = activeRulesProfile?.advancement?.stages?.third_floor?.races?.catalog ?? {};
 
   const [loading, setLoading] = useState(true); // sheet is not editable until saved data (or its absence) is known
   const [currentId, setCurrentId] = useState(null); // null = unsaved draft
@@ -457,8 +461,12 @@ export default function CharacterSheet() {
   const rollSkillCheck = (skill, index) => {
     const statMod = parseInt(String(skill?.mod ?? "").replace(/[+\s]/g, ""), 10) || 0;
     const rank = Number(skill?.rank) || 0;
-    const hasAdvantage = Array.isArray(rulesetData?.skillCheckAdvantages) &&
+    const skillStat = String(skill?.stat ?? "").toLowerCase();
+    const directAdvantage = Array.isArray(rulesetData?.skillCheckAdvantages) &&
       rulesetData.skillCheckAdvantages.includes(skill?.id);
+    const statSkillAdvantage = Array.isArray(rulesetData?.statSkillCheckAdvantages) &&
+      rulesetData.statSkillCheckAdvantages.includes(skillStat);
+    const hasAdvantage = directAdvantage || statSkillAdvantage;
     const first = 1 + Math.floor(Math.random() * 20);
     const second = hasAdvantage ? 1 + Math.floor(Math.random() * 20) : null;
     const die = hasAdvantage ? Math.max(first, second) : first;
@@ -696,12 +704,21 @@ export default function CharacterSheet() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name, portrait, portraitSettings, customization, info, gear, attrs, skills, hp, maxHp, mana, maxMana, defense, attacks, spells, hotbar, inventory, currency, notes, draft, creationStep, profile, rulesetData, loading, currentId, savedJson, signedIn]);
 
-  /* Floor milestone prompt. Normal Floor 3 selection may be dismissed and
-     reopened from the toolbar; Character Actor is a required floor-start flow. */
+  /* Floor milestone prompt. Race is chosen before Class. Normal Floor 3
+     selection may be dismissed and reopened from the toolbar; Character
+     Actor remains a required floor-start flow after the permanent Class. */
   useEffect(() => {
     if (loading || gmMode || !activeRulesProfile || dialog) return;
     const sheet = currentSheetRef.current?.() ?? currentSheet();
     const floor = Number(sheet?.info?.floor) || 1;
+    if (needsThirdFloorRace(sheet)) {
+      const key = `${currentId ?? "guest"}:${floor}:floor3-race`;
+      if (advancementPromptRef.current !== key) {
+        advancementPromptRef.current = key;
+        setDialog("raceAdvance");
+      }
+      return;
+    }
     if (needsCharacterActorFloor(sheet)) {
       setDialog("characterActor");
       return;
@@ -804,6 +821,17 @@ export default function CharacterSheet() {
     return doSave({ finishDraft: true, values: nextSheet });
   };
 
+  const confirmThirdFloorRace = async (raceId) => {
+    if (!activeRulesProfile) return;
+    const entry = advancementRaceCatalog[raceId];
+    if (!entry) return;
+    const floor = Math.max(3, Number(info?.floor) || 3);
+    const next = applyThirdFloorRace(activeRulesProfile, currentSheet(), entry, floor);
+    const ok = await persistAdvancedSheet(next);
+    if (!ok) return;
+    setDialog("classAdvance");
+  };
+
   const confirmThirdFloorClass = async (classId) => {
     if (!activeRulesProfile) return;
     const entry = advancementClassCatalog[classId];
@@ -826,9 +854,11 @@ export default function CharacterSheet() {
   };
 
   const advancementSheet = () => currentSheet();
-  const floor3Needed = activeRulesProfile ? needsThirdFloorClass(advancementSheet()) : false;
+  const floor3RaceNeeded = activeRulesProfile ? needsThirdFloorRace(advancementSheet()) : false;
+  const floor3ClassNeeded = activeRulesProfile ? needsThirdFloorClass(advancementSheet()) : false;
   const actorFloorNeeded = activeRulesProfile ? needsCharacterActorFloor(advancementSheet()) : false;
-  const openAdvancement = () => setDialog(actorFloorNeeded ? "characterActor" : "classAdvance");
+  const openAdvancement = () =>
+    setDialog(floor3RaceNeeded ? "raceAdvance" : actorFloorNeeded ? "characterActor" : "classAdvance");
 
   const loadCharacter = (rec) => {
     apply(rec);
@@ -979,8 +1009,8 @@ export default function CharacterSheet() {
               onPrint={() => setDialog("print")}
               onPigments={() => setDialog("pigments")}
               onAdvance={openAdvancement}
-              canAdvance={floor3Needed || actorFloorNeeded}
-              advanceLabel={actorFloorNeeded ? `Floor ${Number(info?.floor) || 3} Actor Class` : "Floor 3 Class"}
+              canAdvance={floor3RaceNeeded || floor3ClassNeeded || actorFloorNeeded}
+              advanceLabel={actorFloorNeeded ? `Floor ${Number(info?.floor) || 3} Actor Class` : floor3RaceNeeded ? "Floor 3 Race" : "Floor 3 Class"}
               saveState={saveState}
               dirty={dirty}
               onRetry={() => doSave()}
@@ -1046,6 +1076,16 @@ export default function CharacterSheet() {
 
       <RollResultCard result={lastRoll} onClose={() => setLastRoll(null)} />
 
+      {dialog === "raceAdvance" && activeRulesProfile && (
+        <RaceAdvancementDialog
+          catalog={advancementRaceCatalog}
+          profile={activeRulesProfile}
+          sheet={currentSheet()}
+          floor={Math.max(3, Number(info?.floor) || 3)}
+          onConfirm={confirmThirdFloorRace}
+          onClose={() => setDialog(null)}
+        />
+      )}
       {dialog === "classAdvance" && activeRulesProfile && (
         <ClassAdvancementDialog
           mode="thirdFloor"

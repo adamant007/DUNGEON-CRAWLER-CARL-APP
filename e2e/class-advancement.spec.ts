@@ -4,10 +4,16 @@ import {
   THIRD_FLOOR_CLASS_CATALOG,
 } from "../src/rules-profile/adapters/dungeon_crawler_carl/classCatalog.js";
 import {
+  THIRD_FLOOR_RACE_CATALOG,
+} from "../src/rules-profile/adapters/dungeon_crawler_carl/raceCatalog.js";
+import {
+  applyThirdFloorRace,
   applyThirdFloorClass,
   applyCharacterActorFloor,
   characterActorClassOptions,
   classBenefitBullets,
+  needsThirdFloorRace,
+  needsThirdFloorClass,
 } from "../src/components/character/advancement/classAdvancement.js";
 
 const baseSheet = () => ({
@@ -91,4 +97,65 @@ test("Gray Man applies its complete 30-point build", async () => {
   expect(sheet.rulesetData.skills.find((s) => s.id === "tactics")?.rank).toBe(2);
   expect(sheet.rulesetData.skillRankCaps.investigation).toBe(20);
   expect(sheet.rulesetData.skillCheckAdvantages).toContain("investigation");
+});
+
+
+test("Nigh applies +2 all Stats and -2 Charisma for net zero Charisma", async () => {
+  const race = THIRD_FLOOR_RACE_CATALOG.nigh;
+  const first = applyThirdFloorRace(dungeonCrawlerCarlProfile, baseSheet(), race, 3);
+
+  expect(first.attrs.str).toBe(7);
+  expect(first.attrs.int).toBe(7);
+  expect(first.attrs.con).toBe(7);
+  expect(first.attrs.dex).toBe(7);
+  expect(first.attrs.cha).toBe(5);
+  expect(first.rulesetData.advancement.thirdFloor.raceId).toBe("nigh");
+
+  const second = applyThirdFloorRace(dungeonCrawlerCarlProfile, first, race, 3);
+  expect(second.attrs.str).toBe(7);
+  expect(second.attrs.cha).toBe(5);
+});
+
+test("Redacted Asset applies before Gray Man and both stack once", async () => {
+  let sheet = baseSheet();
+  expect(needsThirdFloorRace(sheet)).toBeTruthy();
+  expect(needsThirdFloorClass(sheet)).toBeFalsy();
+
+  sheet = applyThirdFloorRace(
+    dungeonCrawlerCarlProfile,
+    sheet,
+    THIRD_FLOOR_RACE_CATALOG.redacted_asset,
+    3
+  );
+
+  expect(sheet.info.race).toBe("Redacted Asset");
+  expect(sheet.info.size).toBe("Medium (4)");
+  expect(sheet.attrs.con).toBe(9);
+  expect(sheet.attrs.dex).toBe(8);
+  expect(sheet.attrs.int).toBe(7);
+  expect(sheet.attrs.cha).toBe(3);
+  expect(sheet.defense.move).toBe(25);
+  expect(sheet.rulesetData.skills.find((s) => s.id === "dodge")?.rank).toBe(2);
+  expect(sheet.rulesetData.skills.find((s) => s.id === "escape_artist")?.rank).toBe(2);
+  expect(sheet.rulesetData.skills.find((s) => s.id === "endurance")?.rank).toBe(2);
+  expect(sheet.rulesetData.skillRankCaps.dodge).toBe(20);
+  expect(sheet.rulesetData.senses).toContain("Can see in total darkness");
+  expect(needsThirdFloorRace(sheet)).toBeFalsy();
+  expect(needsThirdFloorClass(sheet)).toBeTruthy();
+
+  sheet = applyThirdFloorClass(
+    dungeonCrawlerCarlProfile,
+    sheet,
+    THIRD_FLOOR_CLASS_CATALOG.gray_man_field_operative,
+    3
+  );
+
+  expect(sheet.info.class).toBe("Gray Man Field Operative");
+  expect(sheet.attrs.int).toBe(11);
+  expect(sheet.attrs.dex).toBe(11);
+  expect(sheet.attrs.con).toBe(12);
+  expect(sheet.attrs.cha).toBe(3);
+  expect(sheet.rulesetData.skills.find((s) => s.id === "investigation")?.rank).toBe(3);
+  expect(sheet.rulesetData.skills.find((s) => s.id === "stealth")?.rank).toBe(2);
+  expect(sheet.rulesetData.skills.find((s) => s.id === "tactics")?.rank).toBe(2);
 });

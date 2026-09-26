@@ -54,6 +54,16 @@ const SKILL_DESCRIPTIONS = {
   taunt: "Charisma Interrupt within 30 feet. After seeing where enemy attacks are going, make an opposed check; on success, redirect one attack to yourself, with higher success redirecting more.",
   throwing: "Throw objects up to your Strength in pounds out to Strength x10 feet. Use an Unopposed check to hit an area or an Attack Skill Check against Evade to hit a creature.",
   tracking: "Use Intelligence to find and follow tracks. Conditions affect Difficulty, and you normally recheck periodically to keep following the trail.",
+  cat_like_reflexes: "",
+  acute_ears: "",
+  escape_plan: "",
+  diplomacy: "",
+  leadership: "",
+  zone_of_control: "",
+  regeneration: "",
+  bite: "",
+  tongue_lashing: "",
+  web: "",
 
   unarmed_combat: "Basic melee Strength attack known by every crawler. Deals 1d4 + Strength Bludgeoning, grants AI Favor 1, and cannot use a hand-to-hand Damage Effect.",
   slice_attack: "Melee Dexterity attack. Deals 1d4 + Strength Slashing and grants AI Favor 1; higher Ranks increase damage.",
@@ -182,6 +192,13 @@ export const SKILL_CATALOG = Object.fromEntries(
     s("religion", "Religion", "int"),
     s("basic_science", "Basic Science", "int"),
     s("aliens_and_ufos", "Aliens & UFOs", "int"),
+    s("cat_like_reflexes", "Cat-like Reflexes", "dex"),
+    s("acute_ears", "Acute Ears", null),
+    s("escape_plan", "Escape Plan", null),
+    s("diplomacy", "Diplomacy", "cha"),
+    s("leadership", "Leadership", "cha"),
+    s("zone_of_control", "Zone of Control", null),
+    s("regeneration", "Regeneration", null),
 
     // Attack skills
     /* attack_stat = the TO-HIT stat for the canonical attack row —
@@ -208,6 +225,13 @@ export const SKILL_CATALOG = Object.fromEntries(
     s("foot_soldier", "Foot Soldier", null, "attack", { allowed_damage_effects: ["smush"], ai_favor: AI_FAVOR_NO_DAMAGE_EFFECT(1) }),
     s("noggin_nocker", "Noggin Nocker", null, "attack", { allowed_damage_effects: ["skullcracker"], ai_favor: AI_FAVOR_NO_DAMAGE_EFFECT(1) }),
     s("wrasslin", "Wrasslin'", null, "attack", { allowed_damage_effects: ["toss"], ai_favor: AI_FAVOR_NO_DAMAGE_EFFECT(1) }),
+    s("bite", "Bite", null, "attack"),
+    s("tongue_lashing", "Tongue Lashing", "dex", "attack", {
+      attack_stat: "dex",
+      damage: { dice: "1d8", plus_mod_stat: "str" },
+      damage_type: "Bludgeoning",
+      rank_rule: { kind: "floor_level", extra_damage_d8_at_ranks: [5, 10, 15] },
+    }),
 
     // Damage Effect skills — ranked skills linked to their attack skill
     s("iron_punch", "Iron Punch", null, "damage_effect", { linked_attack_skill: "pugilism" }),
@@ -253,6 +277,7 @@ export const SKILL_CATALOG = Object.fromEntries(
 
     // Spells
     s("heal", "Heal", null, "spell"),
+    s("web", "Web", null, "spell"),
     s("drain_life", "Drain Life", null, "spell"),
     s("heal_others", "Heal Others", null, "spell"),
     s("heal_self", "Heal Self", null, "spell"),

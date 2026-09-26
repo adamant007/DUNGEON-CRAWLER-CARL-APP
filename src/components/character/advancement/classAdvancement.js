@@ -187,6 +187,40 @@ const adjustSkill = (sheet, profile, id, delta, className, log, forcedRank = nul
 
 const expandSkillKey = (key) => (key === "all_hand_to_hand" ? HAND_TO_HAND_IDS : [key]);
 
+const skillsForGroup = (profile, group) => {
+  const catalog = profile?.skills?.catalog ?? {};
+  if (group === "charisma_based") {
+    return Object.values(catalog).filter((s) => s.stat === "cha").map((s) => s.id);
+  }
+  if (group === "edged_weapons") {
+    return ["axe", "dagger", "longsword", "rapier"].filter((id) => catalog[id]);
+  }
+  if (group === "trap_and_explosive") {
+    return ["explosives_handling", "goblin_explosives", "improvised_explosive_device"]
+      .filter((id) => catalog[id]);
+  }
+  if (group === "crafting") {
+    return ["engineering", "fabricate", "repair", "salvage"].filter((id) => catalog[id]);
+  }
+  return [];
+};
+
+const applyGroupSkillBonus = (sheet, profile, group, bonus, sourceName, log) => {
+  const rules = ensureRules(sheet);
+  rules.groupSkillRankBonuses = { ...(rules.groupSkillRankBonuses ?? {}) };
+  rules.groupSkillRankBonuses[group] = n(rules.groupSkillRankBonuses[group]) + n(bonus);
+  for (const id of skillsForGroup(profile, group)) {
+    adjustSkill(sheet, profile, id, bonus, sourceName, log);
+  }
+};
+
+const applyGroupSkillCap = (sheet, profile, group, value, log) => {
+  const rules = ensureRules(sheet);
+  rules.groupSkillRankCaps = { ...(rules.groupSkillRankCaps ?? {}) };
+  rules.groupSkillRankCaps[group] = value;
+  for (const id of skillsForGroup(profile, group)) setSkillCap(sheet, id, value, log);
+};
+
 const addDefenseTag = (sheet, tag, log) => {
   if (!tag) return;
   const pieces = String(sheet.defense?.resist ?? "")
@@ -228,6 +262,8 @@ const makeLog = (floor, classEntry) => ({
   skillCapsBefore: {},
   statCapsBefore: {},
   skillAdvantagesBefore: {},
+  movementBefore: null,
+  sizeBefore: null,
 });
 
 const customBullets = (entry) => {
@@ -296,6 +332,49 @@ export function classBenefitBullets(entry) {
   if (!entry) return [];
   if (Array.isArray(entry.benefits)) return entry.benefits.map((text) => ({ kind: "text", text }));
   return customBullets(entry);
+}
+
+export function raceBenefitBullets(entry) {
+  if (!entry) return [];
+  const bullets = customBullets(entry);
+  for (const sense of entry.senses ?? []) {
+    bullets.push({ kind: "sense", text: sense });
+  }
+  if (Number.isFinite(Number(entry.movement_bonus_ft))) {
+    bullets.push({ kind: "move_bonus", feet: Number(entry.movement_bonus_ft), text: `Move +${entry.movement_bonus_ft} ft` });
+  }
+  for (const rule of entry.group_skill_rank_bonuses ?? []) {
+    bullets.push({
+      kind: "group_skill_bonus",
+      group: rule.group,
+      bonus: rule.bonus,
+      text: `${cap(rule.group)} Skills +${rule.bonus}`,
+    });
+  }
+  for (const rule of entry.group_skill_rank_caps ?? []) {
+    bullets.push({
+      kind: "group_skill_cap",
+      group: rule.group,
+      cap: rule.cap,
+      text: `${cap(rule.group)} Skills may reach Rank ${rule.cap}`,
+    });
+  }
+  for (const id of entry.stat_check_advantage ?? []) {
+    bullets.push({ kind: "stat_advantage", id, text: `Advantage on ${STAT_LABELS[id] ?? cap(id)} Stat Checks` });
+  }
+  for (const id of entry.stat_skill_advantage ?? []) {
+    bullets.push({ kind: "stat_skill_advantage", id, text: `Advantage on all ${STAT_LABELS[id] ?? cap(id)}-based Skill Checks` });
+  }
+  for (const rule of entry.conditional_skill_advantage ?? []) {
+    bullets.push({ kind: "conditional_skill_advantage", ...rule, text: `Advantage on ${cap(rule.id)}: ${rule.condition}` });
+  }
+  for (const reward of entry.rewards ?? []) {
+    bullets.push({ kind: "reward", reward, text: reward.text ?? reward.name ?? cap(reward.id) });
+  }
+  for (const choice of entry.pending_choices ?? []) {
+    bullets.push({ kind: "pending_choice", text: choice });
+  }
+  return bullets;
 }
 
 const namesInText = (profile, text) => {
@@ -410,6 +489,59 @@ const applyDescriptor = (sheet, profile, descriptor, classEntry, floor, log, eff
     case "defense":
       addDefenseTag(sheet, descriptor.tag, log);
       return;
+    case "move_bonus": {
+      const current = Number(sheet.defense?.move);
+      const base = Number.isFinite(current) && current > 0 ? current : 20;
+      if (log && log.movementBefore === null) log.movementBefore = sheet.defense?.move ?? "";
+      sheet.defense = { ...(sheet.defense ?? {}), move: base + Number(descriptor.feet || 0) };
+      return;
+    }
+    case "sense": {
+      const rules = ensureRules(sheet);
+      rules.senses = Array.isArray(rules.senses) ? rules.senses : [];
+      if (!rules.senses.includes(descriptor.text)) rules.senses.push(descriptor.text);
+      effects.push(descriptor.text);
+      return;
+    }
+    case "reward": {
+      const rules = ensureRules(sheet);
+      rules.rewards = Array.isArray(rules.rewards) ? rules.rewards : [];
+      if (!rules.rewards.some((r) => r?.id === descriptor.reward?.id && r?.source === className)) {
+        rules.rewards.push({ ...(descriptor.reward ?? {}), source: className });
+      }
+      effects.push(descriptor.text);
+      return;
+    }
+    case "group_skill_bonus":
+      applyGroupSkillBonus(sheet, profile, descriptor.group, descriptor.bonus, className, log);
+      return;
+    case "group_skill_cap":
+      applyGroupSkillCap(sheet, profile, descriptor.group, descriptor.cap, log);
+      return;
+    case "stat_advantage": {
+      const rules = ensureRules(sheet);
+      rules.statCheckAdvantages = Array.isArray(rules.statCheckAdvantages) ? rules.statCheckAdvantages : [];
+      if (!rules.statCheckAdvantages.includes(descriptor.id)) rules.statCheckAdvantages.push(descriptor.id);
+      effects.push(descriptor.text);
+      return;
+    }
+    case "stat_skill_advantage": {
+      const rules = ensureRules(sheet);
+      rules.statSkillCheckAdvantages = Array.isArray(rules.statSkillCheckAdvantages) ? rules.statSkillCheckAdvantages : [];
+      if (!rules.statSkillCheckAdvantages.includes(descriptor.id)) rules.statSkillCheckAdvantages.push(descriptor.id);
+      effects.push(descriptor.text);
+      return;
+    }
+    case "conditional_skill_advantage": {
+      const rules = ensureRules(sheet);
+      rules.conditionalSkillAdvantages = Array.isArray(rules.conditionalSkillAdvantages) ? rules.conditionalSkillAdvantages : [];
+      rules.conditionalSkillAdvantages.push({ id: descriptor.id, condition: descriptor.condition, source: className });
+      effects.push(descriptor.text);
+      return;
+    }
+    case "pending_choice":
+      pendingChoices.push(descriptor.text);
+      return;
     case "skill_advantage": {
       const rules = ensureRules(sheet);
       rules.skillCheckAdvantages = Array.isArray(rules.skillCheckAdvantages) ? rules.skillCheckAdvantages : [];
@@ -450,6 +582,54 @@ const finishClassApplication = (sheet, profile, oldMaxHp, oldMaxMana) => {
   refreshVitals(sheet, profile, oldMaxHp, oldMaxMana);
   refreshSkillMods(sheet, profile);
 };
+
+export function applyThirdFloorRace(profile, sourceSheet, raceEntry, floor = 3) {
+  const sheet = clone(sourceSheet);
+  const rules = ensureRules(sheet);
+  const existing = rules.advancement?.thirdFloor?.raceId;
+  if (existing) return sheet;
+
+  const oldMaxHp = sheet.maxHp;
+  const oldMaxMana = sheet.maxMana;
+  const log = makeLog(floor, raceEntry);
+  const effects = [];
+  const pendingChoices = [];
+
+  for (const descriptor of raceBenefitBullets(raceEntry)) {
+    applyDescriptor(sheet, profile, descriptor, raceEntry, floor, log, effects, pendingChoices);
+  }
+
+  const size = raceEntry?.size;
+  sheet.info = {
+    ...(sheet.info ?? {}),
+    race: raceEntry.name,
+    floor: Math.max(3, n(sheet.info?.floor, floor)),
+    ...(size?.label ? { size: size.value == null ? size.label : `${size.label} (${size.value})` } : {}),
+  };
+
+  rules.identity = {
+    ...(rules.identity ?? {}),
+    currentRace: raceEntry.name,
+    thirdFloorRaceId: raceEntry.id,
+    raceEarthBased: raceEntry.earth_race === true,
+    raceClassAccess: raceEntry.class_access ?? [],
+  };
+
+  rules.advancement.thirdFloor = {
+    ...(rules.advancement.thirdFloor ?? {}),
+    raceId: raceEntry.id,
+    raceName: raceEntry.name,
+    raceSource: raceEntry.source ?? "",
+    raceChosenAtFloor: Number(floor),
+    raceEarthBased: raceEntry.earth_race === true,
+    raceEffects: effects.filter(Boolean),
+    racePendingChoices: [...(raceEntry.pending_choices ?? []), ...pendingChoices].filter((v, i, a) => a.indexOf(v) === i),
+    raceApplicationLog: log,
+  };
+
+  finishClassApplication(sheet, profile, oldMaxHp, oldMaxMana);
+  return sheet;
+}
 
 export function applyThirdFloorClass(profile, sourceSheet, classEntry, floor = 3) {
   const sheet = clone(sourceSheet);
@@ -656,10 +836,16 @@ export function applyCharacterActorFloor(profile, sourceSheet, classEntry, rolle
   return sheet;
 }
 
+export function needsThirdFloorRace(sheet) {
+  const floor = n(sheet?.info?.floor, 1);
+  const existing = sheet?.rulesetData?.advancement?.thirdFloor?.raceId;
+  return floor >= 3 && !existing;
+}
+
 export function needsThirdFloorClass(sheet) {
   const floor = n(sheet?.info?.floor, 1);
-  const existing = sheet?.rulesetData?.advancement?.thirdFloor?.classId;
-  return floor >= 3 && !existing && !String(sheet?.info?.class ?? "").trim();
+  const third = sheet?.rulesetData?.advancement?.thirdFloor ?? {};
+  return floor >= 3 && !!third.raceId && !third.classId && !String(sheet?.info?.class ?? "").trim();
 }
 
 export function needsCharacterActorFloor(sheet) {
