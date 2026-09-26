@@ -86,6 +86,11 @@ const SKILL_DESCRIPTIONS = {
   quarterstaff: "Two-handed 10-foot reach Strength weapon. Deals 1d6 + Strength Bludgeoning; higher Ranks add damage and Evade bonuses.",
 
   heal: "Self-only Interrupt spell. Costs 2 Mana, restores 2 Health Bar slots, and is capped at Rank 1.",
+  drain_life: "",
+  heal_others: "",
+  heal_self: "",
+  cockroach: "",
+  draining_shadows: "Melee Intelligence attack. Deals 1d8 + Intelligence Necrotic damage; add another d8 at Ranks 5, 10, and 15. Its Rank equals the current floor level and only increases by floor. When it deals damage, you may heal 1 of your Health Bars, up to 5 times per combat.",
   dirt_clod: "100-foot Bludgeoning attack spell. Costs 1 Mana, deals 1d2 + Intelligence damage, and grants AI Favor 2.",
   fire_fingers: "Melee Fire attack spell. Costs 3 Mana, deals 1d4 + Intelligence Fire damage, and grants AI Favor 1.",
   frost_scar: "Melee Ice attack spell. Costs 2 Mana, deals 1d4 + Intelligence Ice damage, and grants AI Favor 1; higher Ranks interfere with healing and add Debuffs.",
@@ -228,8 +233,21 @@ export const SKILL_CATALOG = Object.fromEntries(
     s("polearm", "Polearm", null, "weapon"),
     s("quarterstaff", "Quarterstaff", null, "weapon"),
 
+    // Class-linked general / attack skills
+    s("cockroach", "Cockroach", null, "general"),
+    s("draining_shadows", "Draining Shadows", "int", "attack", {
+      attack_stat: "int",
+      damage: { dice: "1d8", plus_mod_stat: "int" },
+      damage_type: "Necrotic",
+      rank_rule: { kind: "floor_level", extra_damage_d8_at_ranks: [5, 10, 15] },
+      self_heal: { health_bars: 1, max_uses_per_combat: 5, trigger: "on_damage" },
+    }),
+
     // Spells
     s("heal", "Heal", null, "spell"),
+    s("drain_life", "Drain Life", null, "spell"),
+    s("heal_others", "Heal Others", null, "spell"),
+    s("heal_self", "Heal Self", null, "spell"),
     s("dirt_clod", "Dirt Clod", null, "spell", { attack_spell: true, ai_favor: AI_FAVOR_STANDARD(2) }),
     s("fire_fingers", "Fire Fingers", null, "spell", { attack_spell: true, ai_favor: AI_FAVOR_STANDARD(1) }),
     s("frost_scar", "Frost Scar", null, "spell", { attack_spell: true, ai_favor: AI_FAVOR_STANDARD(1) }),
