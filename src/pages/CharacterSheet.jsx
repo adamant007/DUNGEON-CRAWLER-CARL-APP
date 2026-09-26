@@ -41,7 +41,6 @@ import {
   allocateStatPoints,
   descendFloor,
   eligibleCatalog,
-  initializeThirdFloorStatPool,
   levelUpCharacter,
   optionEligibility,
   progressionState,
@@ -1091,7 +1090,7 @@ export default function CharacterSheet() {
               onPrint={() => setDialog("print")}
               onPigments={() => setDialog("pigments")}
               onAdvance={openAdvancement}
-              showProgression={profile?.systemKey === "dungeon_crawler_carl" && !!currentId}
+              showProgression={profile?.systemKey === "dungeon_crawler_carl" && !loading && (!!currentId || !!name)}
               onLevelUp={handleLevelUp}
               onDescend={handleDescend}
               onSpendStats={() => setDialog("statAllocate")}
