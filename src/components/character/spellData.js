@@ -38,13 +38,60 @@ const parseRangeFromNotes = (notes) => {
   return m ? m[1].trim() : "";
 };
 
+const profileSpellMeta = (profile, name) => {
+  if (!profile || !name) return null;
+  const catalog = profile?.skills?.catalog ?? {};
+  const target = String(name).toLowerCase();
+  const id = Object.keys(catalog).find(
+    (key) => String(catalog[key]?.name ?? "").toLowerCase() === target
+  );
+  if (!id) return null;
+
+  const heal = profile?.spells?.starting_spell ?? null;
+  if (heal?.id === id) {
+    return {
+      id,
+      description: heal.desc ?? "",
+      rank: heal.rank ?? "",
+      mana: heal.mana_cost ?? "",
+      range: heal.range ?? "",
+      damage: "",
+    };
+  }
+
+  const details =
+    profile?.creation_flow?.steps
+      ?.find((step) => step.id === "combat_approach")
+      ?.options?.find((option) => option.id === "attack_spell")
+      ?.spell_details ?? {};
+  const det = details[id];
+  if (!det) return null;
+  return {
+    id,
+    description: det.desc ?? "",
+    rank: det.rank ?? "",
+    mana: det.mana_cost ?? "",
+    range: det.range ?? "",
+    damage: det.damage?.dice
+      ? `${det.damage.dice}${det.damage.plus_int_mod ? " + INT Mod" : ""}`
+      : "",
+  };
+};
+
+const withoutLeadingDescription = (detail, description) => {
+  const d = String(detail ?? "").trim();
+  const desc = String(description ?? "").trim();
+  if (!d || !desc || !d.toLowerCase().startsWith(desc.toLowerCase())) return d;
+  return d.slice(desc.length).replace(/^\s*[·—-]\s*/, "").trim();
+};
+
 /* Known spells/abilities — traced from BOTH the preserved ruleset hotlist
    (pregen characters) and the canonical spell rows (wizard characters),
    so every known spell gets the same Spell Action Card regardless of how
    the character was created. Pregen hotlist entries are filtered to
    spell-identified items only; canonical spell rows are all known spells
    by construction. The two sources are merged, de-duplicated by name. */
-export function knownSpells(rulesetData, spells) {
+export function knownSpells(rulesetData, spells, profile = null) {
   const result = [];
   const seen = new Set();
 
@@ -57,12 +104,16 @@ export function knownSpells(rulesetData, spells) {
     const detail = h?.detail ?? "";
     const attack = matchByName(rulesetData?.attacks, name);
     const skill = matchByName(rulesetData?.skills, name);
+    const meta = profileSpellMeta(profile, name);
     result.push({
       name,
-      rank: parseRank(detail) || String(skill?.rank ?? ""),
-      mana: parseMana(detail),
-      detail,
-      attack,
+      rank: parseRank(detail) || String(skill?.rank ?? meta?.rank ?? ""),
+      mana: parseMana(detail) || String(meta?.mana ?? ""),
+      description: meta?.description ?? "",
+      detail: withoutLeadingDescription(detail, meta?.description),
+      attack:
+        attack ??
+        (meta?.damage || meta?.range ? { damage: meta?.damage ?? "", range: meta?.range ?? "" } : null),
       skill,
     });
     seen.add(name.toLowerCase());
@@ -75,13 +126,15 @@ export function knownSpells(rulesetData, spells) {
     if (!name || seen.has(name.toLowerCase())) continue;
     const notes = r?.notes ?? "";
     const skill = matchByName(rulesetData?.skills, name);
-    const damage = parseDamageFromNotes(notes);
-    const range = parseRangeFromNotes(notes);
+    const meta = profileSpellMeta(profile, name);
+    const damage = parseDamageFromNotes(notes) || meta?.damage || "";
+    const range = parseRangeFromNotes(notes) || meta?.range || "";
     result.push({
       name,
-      rank: parseRank(notes) || String(skill?.rank ?? ""),
-      mana: r?.cost ?? parseMana(notes),
-      detail: notes,
+      rank: parseRank(notes) || String(skill?.rank ?? meta?.rank ?? ""),
+      mana: r?.cost ?? parseMana(notes) ?? String(meta?.mana ?? ""),
+      description: meta?.description ?? "",
+      detail: withoutLeadingDescription(notes, meta?.description),
       attack: damage || range ? { damage, range } : null,
       skill,
     });
