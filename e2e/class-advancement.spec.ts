@@ -77,3 +77,18 @@ test("Former Child Actor gets three stable offers and replaces temporary floor b
   expect(sheet.attrs.str).toBe(5);
   expect(sheet.rulesetData.skills.find((s) => s.id === "character_actor")?.rank).toBe(4);
 });
+
+
+test("Gray Man applies its complete 30-point build", async () => {
+  const cls = THIRD_FLOOR_CLASS_CATALOG.gray_man_field_operative;
+  const sheet = applyThirdFloorClass(dungeonCrawlerCarlProfile, baseSheet(), cls, 3);
+
+  expect(sheet.attrs.int).toBe(9);
+  expect(sheet.attrs.dex).toBe(8);
+  expect(sheet.attrs.con).toBe(8);
+  expect(sheet.rulesetData.skills.find((s) => s.id === "investigation")?.rank).toBe(3);
+  expect(sheet.rulesetData.skills.find((s) => s.id === "stealth")?.rank).toBe(2);
+  expect(sheet.rulesetData.skills.find((s) => s.id === "tactics")?.rank).toBe(2);
+  expect(sheet.rulesetData.skillRankCaps.investigation).toBe(20);
+  expect(sheet.rulesetData.skillCheckAdvantages).toContain("investigation");
+});

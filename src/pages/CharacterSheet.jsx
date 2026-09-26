@@ -457,12 +457,16 @@ export default function CharacterSheet() {
   const rollSkillCheck = (skill, index) => {
     const statMod = parseInt(String(skill?.mod ?? "").replace(/[+\s]/g, ""), 10) || 0;
     const rank = Number(skill?.rank) || 0;
-    const die = 1 + Math.floor(Math.random() * 20);
+    const hasAdvantage = Array.isArray(rulesetData?.skillCheckAdvantages) &&
+      rulesetData.skillCheckAdvantages.includes(skill?.id);
+    const first = 1 + Math.floor(Math.random() * 20);
+    const second = hasAdvantage ? 1 + Math.floor(Math.random() * 20) : null;
+    const die = hasAdvantage ? Math.max(first, second) : first;
     const total = die + statMod + rank;
     showRoll(`${skill?.name ?? "Skill"} — Skill Check`, {
-      display: `d20${statMod >= 0 ? " +" : " −"} ${Math.abs(statMod)} + Rank ${rank}`,
+      display: `${hasAdvantage ? "2d20 keep highest" : "d20"}${statMod >= 0 ? " +" : " −"} ${Math.abs(statMod)} + Rank ${rank}`,
       sides: 20,
-      dice: [die],
+      dice: hasAdvantage ? [first, second] : [first],
       mod: statMod + rank,
       total,
     });

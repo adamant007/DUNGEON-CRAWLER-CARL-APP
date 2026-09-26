@@ -1305,6 +1305,56 @@ export const CUSTOM_THIRD_FLOOR_CLASSES = [
     ],
     restrictions: ["Cannot choose this Class if you have access to Club Vanquisher."],
   },
+  {
+    id: "gray_man_field_operative",
+    name: "Gray Man Field Operative",
+    class_type: "Earth Class",
+    class_types: ["Rogue"],
+    source_stage: "third_floor",
+    source: "user_supplied",
+    earth_class: true,
+    build_points: { spent: 30, total: 30 },
+    build_breakdown: [
+      { benefit: "Intelligence +4", points: 4 },
+      { benefit: "Dexterity +3", points: 3 },
+      { benefit: "Constitution +3", points: 3 },
+      { benefit: "Investigation Skill +3", points: 6 },
+      { benefit: "Stealth Skill +2", points: 4 },
+      { benefit: "Tactics Skill +2", points: 4 },
+      { benefit: "Investigation may reach Rank 20", points: 1 },
+      { benefit: "Stealth may reach Rank 20", points: 1 },
+      { benefit: "Tactics may reach Rank 20", points: 1 },
+      { benefit: "Advantage on Investigation Skill Checks", points: 3 },
+    ],
+    description:
+      "Congratulations, crawler. You have selected the Gray Man Field Operative, the class for people who spent years entering rooms, noticing all the exits, remembering everyone’s shoes, and pretending that was normal. You do not kick in doors. You quietly determine which door is least likely to explode, who lied about the hallway, and why the vending machine has moved six inches since yesterday. Other crawlers call this paranoia. You call it staying alive. The Dungeon calls it deeply irritating.",
+    stat_bonuses: { int: 4, dex: 3, con: 3 },
+    skill_rank_bonuses: {
+      investigation: 3,
+      stealth: 2,
+      tactics: 2,
+    },
+    skill_rank_caps: {
+      investigation: 20,
+      stealth: 20,
+      tactics: 20,
+    },
+    skill_check_advantage: ["investigation"],
+    effects: [
+      {
+        id: "pattern_analysis",
+        name: "Pattern Analysis",
+        text:
+          "Roll with Advantage on Investigation Skill Checks. Apparently staring at something suspicious until everybody else gets uncomfortable is a legitimate professional technique.",
+      },
+      {
+        id: "silver_earth_box",
+        name: "Silver Earth Box",
+        text:
+          "Gain a Silver Earth Box with a guaranteed Earth Hobby Potion. The Dungeon would like to remind you that opening unfamiliar containers is exactly the sort of thing your training should have taught you not to do.",
+      },
+    ],
+  },
 ];
 
 export const CUSTOM_THIRD_FLOOR_CLASS_CATALOG = Object.fromEntries(
