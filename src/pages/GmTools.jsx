@@ -12,7 +12,48 @@ export default function GmTools() {
   useEffect(() => {
     const previous = document.body.dataset.gdsPage || "";
     document.body.dataset.gdsPage = "gm-tools";
+
+    const hidden = new Map();
+    const hideLegacyBottomDock = () => {
+      const all = Array.from(document.body.querySelectorAll("body *"));
+      for (const el of all) {
+        if (!(el instanceof HTMLElement)) continue;
+        const text = (el.innerText || "").replace(/\s+/g, " ").trim().toUpperCase();
+        if (!text) continue;
+        const looksLikeDock =
+          (text.includes("PARTY") && text.includes("MAP") && text.includes("DICE") && text.includes("NOTES") && text.includes("GM")) ||
+          text.includes("CRAWLERS IN PARTY");
+        if (!looksLikeDock) continue;
+
+        let node = el;
+        while (node && node !== document.body) {
+          const style = getComputedStyle(node);
+          const bottom = Number.parseFloat(style.bottom || "9999");
+          if ((style.position === "fixed" || style.position === "sticky") && (Number.isFinite(bottom) ? bottom <= 40 : style.bottom === "0px")) {
+            if (!hidden.has(node)) {
+              hidden.set(node, node.style.display);
+              node.style.setProperty("display", "none", "important");
+            }
+            break;
+          }
+          node = node.parentElement;
+        }
+      }
+    };
+
+    hideLegacyBottomDock();
+    const observer = new MutationObserver(() => hideLegacyBottomDock());
+    observer.observe(document.body, { childList: true, subtree: true });
+    const timer = window.setInterval(hideLegacyBottomDock, 500);
+
     return () => {
+      observer.disconnect();
+      window.clearInterval(timer);
+      hidden.forEach((display, el) => {
+        if (!el.isConnected) return;
+        if (display) el.style.display = display;
+        else el.style.removeProperty("display");
+      });
       if (previous) document.body.dataset.gdsPage = previous;
       else delete document.body.dataset.gdsPage;
     };
