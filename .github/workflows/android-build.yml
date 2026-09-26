@@ -15,6 +15,7 @@ on:
       - "scripts/apply-android-native-polish.mjs"
       - "scripts/restore-brand-icon.mjs"
       - "payload/ginger-dragon-app-icon.*.b64part"
+      - "payload/android-launcher-icon.*.b64part"
       - ".github/workflows/android-build.yml"
   workflow_dispatch:
 
@@ -106,8 +107,20 @@ jobs:
       - name: Apply approved Ginger Dragon launcher icon
         run: |
           mkdir -p android/app/src/main/res/drawable-nodpi
-          cp public/brand/ginger-dragon-app-icon.png \
-            android/app/src/main/res/drawable-nodpi/ginger_dragon_icon.png
+          cat \
+            payload/android-launcher-icon.00.b64part \
+            payload/android-launcher-icon.01.b64part \
+            payload/android-launcher-icon.02.b64part \
+            payload/android-launcher-icon.03.b64part \
+            payload/android-launcher-icon.04.b64part \
+            payload/android-launcher-icon.05.b64part \
+            payload/android-launcher-icon.06.b64part \
+            payload/android-launcher-icon.070.b64part \
+            payload/android-launcher-icon.071.b64part \
+            payload/android-launcher-icon.072.b64part \
+            payload/android-launcher-icon.073.b64part \
+            | base64 -d > android/app/src/main/res/drawable-nodpi/ginger_dragon_icon.jpg
+          file android/app/src/main/res/drawable-nodpi/ginger_dragon_icon.jpg | grep -q "JPEG image data"
           python - <<'PY'
           from pathlib import Path
           p = Path("android/app/src/main/AndroidManifest.xml")
