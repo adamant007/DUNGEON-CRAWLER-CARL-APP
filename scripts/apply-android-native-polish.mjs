@@ -101,15 +101,10 @@ public class MainActivity extends BridgeActivity {
         final String query = data.getEncodedQuery();
 
         webView.postDelayed(() -> {
-            String origin = "https://localhost";
-            try {
-                Uri current = Uri.parse(webView.getUrl());
-                if (current.getScheme() != null && current.getAuthority() != null) {
-                    origin = current.getScheme() + "://" + current.getAuthority();
-                }
-            } catch (Exception ignored) {
-            }
-
+            // Always return OAuth to the Capacitor app origin. During Google
+            // sign-in the WebView may still be sitting on accounts.google.com
+            // or Supabase; deriving the origin from webView.getUrl() sends the
+            // callback to the wrong host and drops the user back at login.
             String suffix = "";
             if (fragment != null && !fragment.isEmpty()) {
                 suffix = "#" + fragment;
@@ -117,7 +112,7 @@ public class MainActivity extends BridgeActivity {
                 suffix = "?" + query;
             }
 
-            webView.loadUrl(origin + "/dashboard?oauth_return=1" + suffix);
+            webView.loadUrl("https://localhost/dashboard?oauth_return=1" + suffix);
         }, 250);
     }
 }
