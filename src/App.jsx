@@ -22,6 +22,7 @@ import Campaign from './pages/Campaign';
 import GmTools from './pages/GmTools';
 import ClaimCharacter from './pages/ClaimCharacter';
 import NavLayout from './components/NavLayout';
+import GdsHomeButton from './components/GdsHomeButton';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -49,6 +50,8 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <>
+    {/* Persistent return-to-home control — on every page except home. */}
+    <GdsHomeButton />
     <Routes>
     {/* Add your page Route elements here */}
     <Route path="/" element={<Home />} />
