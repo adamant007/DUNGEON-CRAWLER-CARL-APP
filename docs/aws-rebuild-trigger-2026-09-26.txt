@@ -1,0 +1,1 @@
+AWS frontend rebuild trigger after hotbar spell and Standard Mana Potion fixes. No application behavior changes in this file.
