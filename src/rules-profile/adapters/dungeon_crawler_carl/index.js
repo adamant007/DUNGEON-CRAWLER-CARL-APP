@@ -24,6 +24,7 @@ import {
   ATTACK_SPELL_GRANTS,
 } from "./combat";
 import { STARTING_GEAR_EXAMPLES, USEFUL_ITEM_EXAMPLES } from "./startingGear";
+import { THIRD_FLOOR_CLASS_CATALOG } from "./classCatalog";
 
 export const SYSTEM_KEY = "dungeon_crawler_carl";
 
@@ -360,9 +361,16 @@ export const dungeonCrawlerCarlProfile = defineProfile({
   advancement: {
     stages: {
       starting: { id: "starting" },
-      // Third-Floor mechanics (skill rolls, six Tutorial Experiences + loot,
-      // 27-point distribution, Favor, Popularity, Race/Class) await Data Block 2.
-      third_floor: { id: "third_floor", status: "pending_data_block_2" },
+      // Third-Floor advancement remains incomplete, but verified/supplied
+      // Race/Class entries can land incrementally without inventing missing rules.
+      third_floor: {
+        id: "third_floor",
+        status: "partial_data_block_2",
+        classes: {
+          completeness: "partial",
+          catalog: THIRD_FLOOR_CLASS_CATALOG,
+        },
+      },
     },
   },
 });
