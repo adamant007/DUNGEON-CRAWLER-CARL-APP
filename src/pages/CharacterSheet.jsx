@@ -711,16 +711,16 @@ export default function CharacterSheet() {
     if (loading || gmMode || !activeRulesProfile || dialog) return;
     const sheet = currentSheetRef.current?.() ?? currentSheet();
     const floor = Number(sheet?.info?.floor) || 1;
-    if (needsCharacterActorFloor(sheet)) {
-      setDialog("characterActor");
-      return;
-    }
     if (needsThirdFloorRace(sheet)) {
       const key = `${currentId ?? "guest"}:${floor}:floor3-race`;
       if (advancementPromptRef.current !== key) {
         advancementPromptRef.current = key;
         setDialog("raceAdvance");
       }
+      return;
+    }
+    if (needsCharacterActorFloor(sheet)) {
+      setDialog("characterActor");
       return;
     }
     if (needsThirdFloorClass(sheet)) {
@@ -858,7 +858,7 @@ export default function CharacterSheet() {
   const floor3ClassNeeded = activeRulesProfile ? needsThirdFloorClass(advancementSheet()) : false;
   const actorFloorNeeded = activeRulesProfile ? needsCharacterActorFloor(advancementSheet()) : false;
   const openAdvancement = () =>
-    setDialog(actorFloorNeeded ? "characterActor" : floor3RaceNeeded ? "raceAdvance" : "classAdvance");
+    setDialog(floor3RaceNeeded ? "raceAdvance" : actorFloorNeeded ? "characterActor" : "classAdvance");
 
   const loadCharacter = (rec) => {
     apply(rec);
