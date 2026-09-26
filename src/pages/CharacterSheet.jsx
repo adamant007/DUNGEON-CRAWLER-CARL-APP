@@ -30,6 +30,7 @@ import RaceAdvancementDialog from "@/components/character/advancement/RaceAdvanc
 import StatAllocationDialog from "@/components/character/advancement/StatAllocationDialog";
 import DescendFloorDialog from "@/components/character/advancement/DescendFloorDialog";
 import GuidedHomebrewBuilderDialog from "@/components/character/homebrew/GuidedHomebrewBuilderDialog";
+import { validateUserCreatedText } from "@/lib/textSafety";
 import {
   applyThirdFloorRace,
   applyThirdFloorClass,
@@ -898,6 +899,11 @@ export default function CharacterSheet() {
 
   const saveGuidedHomebrew = async (entry) => {
     if (!entry?.id) return false;
+    const safety = validateUserCreatedText({
+      name: entry?.name ?? "",
+      description: entry?.description ?? "",
+    });
+    if (!safety.ok) return false;
     const next = JSON.parse(JSON.stringify(currentSheet()));
     const rules = next.rulesetData ?? {};
     const homebrew = {
