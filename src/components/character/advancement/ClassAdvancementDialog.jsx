@@ -50,13 +50,16 @@ function ClassCard({ entry, selected, onClick }) {
   );
 }
 
-function ThirdFloorPicker({ catalog, onConfirm, onClose }) {
+function ThirdFloorPicker({ catalog, sheet, onConfirm, onClose }) {
   const [source, setSource] = React.useState("homebrew");
   const [search, setSearch] = React.useState("");
   const [selectedId, setSelectedId] = React.useState("");
+  const raceEarthBased = sheet?.rulesetData?.advancement?.thirdFloor?.raceEarthBased !== false;
   const entries = React.useMemo(
-    () => Object.values(catalog ?? {}).sort((a, b) => String(a.name).localeCompare(String(b.name))),
-    [catalog]
+    () => Object.values(catalog ?? {})
+      .filter((entry) => raceEarthBased || entry?.earth_class !== true)
+      .sort((a, b) => String(a.name).localeCompare(String(b.name))),
+    [catalog, raceEarthBased]
   );
   const visible = entries.filter((entry) => {
     const sourceOk =
@@ -73,7 +76,8 @@ function ThirdFloorPicker({ catalog, onConfirm, onClose }) {
       <div className="flex h-full min-h-0 flex-col gap-3">
         <p className="font-fell text-[14px] text-[#24180f]">
           Choose your permanent Third-Floor Class. Homebrew classes are available alongside the Core catalog.
-          Confirming applies its stat, Skill, Spell, defense, and special-effect changes to this character.
+          Earth-only Classes are automatically hidden for Alien Races. Confirming applies its stat, Skill, Spell,
+          defense, and special-effect changes to this character.
         </p>
 
         <div className="flex flex-wrap gap-1.5">
