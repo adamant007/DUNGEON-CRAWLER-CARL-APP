@@ -577,11 +577,14 @@ const applyDescriptor = (sheet, profile, descriptor, classEntry, floor, log, eff
   }
 };
 
-const finishClassApplication = (sheet, profile, oldMaxHp, oldMaxMana) => {
+export const refreshProgressionDerived = (sheet, profile, oldMaxHp = sheet.maxHp, oldMaxMana = sheet.maxMana) => {
   refreshSkillMods(sheet, profile);
   refreshVitals(sheet, profile, oldMaxHp, oldMaxMana);
   refreshSkillMods(sheet, profile);
+  return sheet;
 };
+
+const finishClassApplication = refreshProgressionDerived;
 
 export function applyThirdFloorRace(profile, sourceSheet, raceEntry, floor = 3) {
   const sheet = clone(sourceSheet);

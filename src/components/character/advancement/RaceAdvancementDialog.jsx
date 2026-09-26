@@ -38,7 +38,7 @@ function RaceCard({ entry, selected, onClick }) {
 }
 
 export default function RaceAdvancementDialog({ catalog, onConfirm, onClose }) {
-  const [filter, setFilter] = React.useState("homebrew");
+  const [filter, setFilter] = React.useState("all");
   const [search, setSearch] = React.useState("");
   const [selectedId, setSelectedId] = React.useState("");
 
@@ -63,9 +63,9 @@ export default function RaceAdvancementDialog({ catalog, onConfirm, onClose }) {
     <ParchmentDialog title="Floor 3 — Choose Race" large onClose={onClose}>
       <div className="flex h-full min-h-0 flex-col gap-3">
         <p className="font-fell text-[14px] text-[#24180f]">
-          Choose your Third-Floor Race first. Confirming applies its Stats, Skills, Rank caps,
-          Size, Move, senses, defenses, and stored special rules to this same character. Your
-          Class selection opens immediately afterward.
+          These are the Third-Floor Races this crawler currently qualifies for. Confirming applies
+          its Stats, Skills, Rank caps, Size, Move, senses, defenses, and stored special rules to
+          this same character. Class selection opens immediately afterward.
         </p>
 
         <div className="flex flex-wrap gap-1.5">
@@ -91,6 +91,9 @@ export default function RaceAdvancementDialog({ catalog, onConfirm, onClose }) {
         <div className="grid min-h-0 flex-1 gap-3 md:grid-cols-[0.9fr_1.1fr]">
           <div className="scrollbar-thin min-h-0 overflow-y-auto pr-1">
             <div className="space-y-2">
+              {!visible.length ? (
+                <p className="font-fell italic text-[12px] text-[var(--ink-soft)]">No qualifying Races match this filter.</p>
+              ) : null}
               {visible.map((entry) => (
                 <RaceCard
                   key={entry.id}

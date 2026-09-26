@@ -51,7 +51,7 @@ function ClassCard({ entry, selected, onClick }) {
 }
 
 function ThirdFloorPicker({ catalog, sheet, onConfirm, onClose }) {
-  const [source, setSource] = React.useState("homebrew");
+  const [source, setSource] = React.useState("all");
   const [search, setSearch] = React.useState("");
   const [selectedId, setSelectedId] = React.useState("");
   const raceEarthBased = sheet?.rulesetData?.advancement?.thirdFloor?.raceEarthBased !== false;
@@ -75,9 +75,9 @@ function ThirdFloorPicker({ catalog, sheet, onConfirm, onClose }) {
     <ParchmentDialog title="Floor 3 — Choose Class" large onClose={onClose}>
       <div className="flex h-full min-h-0 flex-col gap-3">
         <p className="font-fell text-[14px] text-[#24180f]">
-          Choose your permanent Third-Floor Class. Homebrew classes are available alongside the Core catalog.
-          Earth-only Classes are automatically hidden for Alien Races. Confirming applies its stat, Skill, Spell,
-          defense, and special-effect changes to this character.
+          These are the permanent Third-Floor Classes this crawler currently qualifies for. Race compatibility,
+          Skill Rank, Popularity, gender, and recorded Achievement prerequisites are checked before an option appears.
+          Confirming applies its Stat, Skill, Spell, defense, and special-effect changes to this character.
         </p>
 
         <div className="flex flex-wrap gap-1.5">
@@ -101,6 +101,9 @@ function ThirdFloorPicker({ catalog, sheet, onConfirm, onClose }) {
         <div className="grid min-h-0 flex-1 gap-3 md:grid-cols-[0.9fr_1.1fr]">
           <div className="scrollbar-thin min-h-0 overflow-y-auto pr-1">
             <div className="space-y-2">
+              {!visible.length ? (
+                <p className="font-fell italic text-[12px] text-[var(--ink-soft)]">No qualifying Classes match this filter.</p>
+              ) : null}
               {visible.map((entry) => (
                 <ClassCard
                   key={entry.id}
