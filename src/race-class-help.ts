@@ -37,6 +37,7 @@ const classHelp:Record<string,string>={
  necromancer:'A magic specialist focused on death-themed effects, minions, attrition, and battlefield control.',
  gunslinger:'A precision ranged combatant built around firearms, positioning, and high-impact attacks.',
  healer:'A support specialist focused on keeping the party alive, restoring resources, and preventing damage.',
+ 'health embezzeler':'An Earth Class built around necrotic life-draining, enhanced healing, doubled Mana regeneration, and redistributing stolen health to allies.',
  tank:'A defensive front-liner designed to absorb pressure, protect allies, and control enemy attention.'
 };
 
