@@ -941,7 +941,7 @@ export default function CharacterSheet() {
 
   const confirmCharacterActorClass = async (classId, rolls) => {
     if (!activeRulesProfile) return;
-    const entry = advancementClassCatalog[classId];
+    const entry = classCatalogWithCustom[classId];
     if (!entry) return;
     const floor = Math.max(3, Number(info?.floor) || 3);
     const next = applyCharacterActorFloor(activeRulesProfile, currentSheet(), entry, rolls, floor);
