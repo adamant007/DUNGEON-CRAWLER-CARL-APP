@@ -29,6 +29,7 @@ import ClassAdvancementDialog from "@/components/character/advancement/ClassAdva
 import RaceAdvancementDialog from "@/components/character/advancement/RaceAdvancementDialog";
 import StatAllocationDialog from "@/components/character/advancement/StatAllocationDialog";
 import DescendFloorDialog from "@/components/character/advancement/DescendFloorDialog";
+import GuidedHomebrewBuilderDialog from "@/components/character/homebrew/GuidedHomebrewBuilderDialog";
 import {
   applyThirdFloorRace,
   applyThirdFloorClass,
@@ -85,6 +86,12 @@ export default function CharacterSheet() {
   const activeRulesProfile = resolvedProfileNow?.status === "ok" ? resolvedProfileNow.profile : null;
   const advancementClassCatalog = activeRulesProfile?.advancement?.stages?.third_floor?.classes?.catalog ?? {};
   const advancementRaceCatalog = activeRulesProfile?.advancement?.stages?.third_floor?.races?.catalog ?? {};
+  const savedCustomRaces = Array.isArray(rulesetData?.homebrew?.races) ? rulesetData.homebrew.races : [];
+  const savedCustomClasses = Array.isArray(rulesetData?.homebrew?.classes) ? rulesetData.homebrew.classes : [];
+  const customRaceCatalog = Object.fromEntries(savedCustomRaces.filter((x) => x?.id).map((x) => [x.id, x]));
+  const customClassCatalog = Object.fromEntries(savedCustomClasses.filter((x) => x?.id).map((x) => [x.id, x]));
+  const raceCatalogWithCustom = { ...advancementRaceCatalog, ...customRaceCatalog };
+  const classCatalogWithCustom = { ...advancementClassCatalog, ...customClassCatalog };
 
   const [loading, setLoading] = useState(true); // sheet is not editable until saved data (or its absence) is known
   const [currentId, setCurrentId] = useState(null); // null = unsaved draft
@@ -889,9 +896,26 @@ export default function CharacterSheet() {
     return doSave({ finishDraft: true, values: nextSheet });
   };
 
+  const saveGuidedHomebrew = async (entry) => {
+    if (!entry?.id) return false;
+    const next = JSON.parse(JSON.stringify(currentSheet()));
+    const rules = next.rulesetData ?? {};
+    const homebrew = {
+      races: Array.isArray(rules?.homebrew?.races) ? [...rules.homebrew.races] : [],
+      classes: Array.isArray(rules?.homebrew?.classes) ? [...rules.homebrew.classes] : [],
+    };
+    const key = entry.race_type ? "races" : "classes";
+    homebrew[key] = [...homebrew[key].filter((x) => x?.id !== entry.id), entry];
+    rules.homebrew = homebrew;
+    next.rulesetData = rules;
+    const ok = await persistAdvancedSheet(next);
+    if (ok) setDialog(null);
+    return ok;
+  };
+
   const confirmThirdFloorRace = async (raceId) => {
     if (!activeRulesProfile) return;
-    const entry = advancementRaceCatalog[raceId];
+    const entry = raceCatalogWithCustom[raceId];
     if (!entry) return;
     const eligibility = optionEligibility(entry, currentSheet(), activeRulesProfile, "race");
     if (!eligibility.eligible) return;
@@ -904,7 +928,7 @@ export default function CharacterSheet() {
 
   const confirmThirdFloorClass = async (classId) => {
     if (!activeRulesProfile) return;
-    const entry = advancementClassCatalog[classId];
+    const entry = classCatalogWithCustom[classId];
     if (!entry) return;
     const eligibility = optionEligibility(entry, currentSheet(), activeRulesProfile, "class");
     if (!eligibility.eligible) return;
@@ -931,10 +955,10 @@ export default function CharacterSheet() {
   const actorFloorNeeded = activeRulesProfile ? needsCharacterActorFloor(advancementSheet()) : false;
   const progression = progressionState(advancementSheet());
   const qualifiedRaceCatalog = activeRulesProfile
-    ? eligibleCatalog(advancementRaceCatalog, advancementSheet(), activeRulesProfile, "race")
+    ? eligibleCatalog(raceCatalogWithCustom, advancementSheet(), activeRulesProfile, "race")
     : {};
   const qualifiedClassCatalog = activeRulesProfile
-    ? eligibleCatalog(advancementClassCatalog, advancementSheet(), activeRulesProfile, "class")
+    ? eligibleCatalog(classCatalogWithCustom, advancementSheet(), activeRulesProfile, "class")
     : {};
   const openAdvancement = () => {
     if (floor3RaceNeeded && progression.statPointsAvailable > 0) setDialog("statAllocateRequired");
@@ -1089,6 +1113,8 @@ export default function CharacterSheet() {
               onLoad={openLoad}
               onPrint={() => setDialog("print")}
               onPigments={() => setDialog("pigments")}
+              onBuilder={() => setDialog("guidedBuilder")}
+              showBuilder={profile?.systemKey === "dungeon_crawler_carl" && !loading && (!!currentId || !!name)}
               onAdvance={openAdvancement}
               showProgression={profile?.systemKey === "dungeon_crawler_carl" && !loading && (!!currentId || !!name)}
               onLevelUp={handleLevelUp}
@@ -1162,6 +1188,15 @@ export default function CharacterSheet() {
 
       <RollResultCard result={lastRoll} onClose={() => setLastRoll(null)} />
 
+      {dialog === "guidedBuilder" && activeRulesProfile && (
+        <GuidedHomebrewBuilderDialog
+          profile={activeRulesProfile}
+          savedRaces={savedCustomRaces}
+          savedClasses={savedCustomClasses}
+          onSave={saveGuidedHomebrew}
+          onClose={() => setDialog(null)}
+        />
+      )}
       {dialog === "statAllocate" && activeRulesProfile && progression.statPointsAvailable > 0 && (
         <StatAllocationDialog
           sheet={currentSheet()}
@@ -1230,7 +1265,7 @@ export default function CharacterSheet() {
       {dialog === "characterActor" && activeRulesProfile && (
         <ClassAdvancementDialog
           mode="characterActor"
-          catalog={advancementClassCatalog}
+          catalog={classCatalogWithCustom}
           profile={activeRulesProfile}
           sheet={currentSheet()}
           floor={Math.max(3, Number(info?.floor) || 3)}
