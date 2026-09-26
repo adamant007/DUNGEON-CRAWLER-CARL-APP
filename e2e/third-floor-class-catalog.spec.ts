@@ -37,10 +37,19 @@ test("user-supplied third-floor additions remain complete", async () => {
   expect(THIRD_FLOOR_CLASS_CATALOG.gray_man_field_operative?.stat_bonuses).toEqual({ int: 4, dex: 3, con: 3 });
   expect(THIRD_FLOOR_CLASS_CATALOG.gray_man_field_operative?.skill_rank_caps?.investigation).toBe(20);
 
-  expect(THIRD_FLOOR_RACE_COUNTS.custom).toBe(4);
-  expect(Object.keys(CUSTOM_THIRD_FLOOR_RACE_CATALOG)).toHaveLength(4);
+  expect(THIRD_FLOOR_RACE_COUNTS.custom).toBe(5);
+  expect(Object.keys(CUSTOM_THIRD_FLOOR_RACE_CATALOG)).toHaveLength(5);
   expect(CUSTOM_THIRD_FLOOR_RACE_CATALOG.nigh?.size?.value).toBe(4);
   expect(CUSTOM_THIRD_FLOOR_RACE_CATALOG.ginger?.hybrid).toBe(true);
   expect(CUSTOM_THIRD_FLOOR_RACE_CATALOG.nullian?.stat_bonuses?.int).toBe(5);
   expect(CUSTOM_THIRD_FLOOR_RACE_CATALOG.soother_forsoothed?.skill_rank_caps?.persuasion).toBe(20);
+  expect(CUSTOM_THIRD_FLOOR_RACE_CATALOG.redacted_asset?.earth_race).toBe(true);
+  expect(CUSTOM_THIRD_FLOOR_RACE_CATALOG.redacted_asset?.build_points).toEqual({
+    benefits_spent: 26,
+    detriment_credit: 1,
+    net_spent: 25,
+    total: 25,
+  });
+  expect(CUSTOM_THIRD_FLOOR_RACE_CATALOG.redacted_asset?.stat_penalties?.cha).toBe(-2);
+  expect(CUSTOM_THIRD_FLOOR_RACE_CATALOG.redacted_asset?.movement_bonus_ft).toBe(5);
 });
