@@ -509,11 +509,3 @@
   }
 }
 
-/* GM Tools is a GM workspace, not a player-character view. Keep the
-   persistent active-crawler strip/dock out of this screen only. */
-body[data-gds-page="gm-tools"] .character-bar,
-body[data-cc-primary-tab="gm-tools"] .character-bar,
-body[data-gds-page="gm-tools"] #cc-mobile-resource-hud,
-body[data-cc-primary-tab="gm-tools"] #cc-mobile-resource-hud {
-  display: none !important;
-}
