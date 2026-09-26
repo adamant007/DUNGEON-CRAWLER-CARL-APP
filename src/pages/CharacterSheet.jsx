@@ -25,6 +25,13 @@ import LoadDialog from "@/components/character/LoadDialog";
 import PigmentsFlyout from "@/components/character/PigmentsFlyout";
 import { resolvePigment, pigmentAccentVars, pigmentAccentHex, pigmentAccentText, pigmentBorderVars } from "@/components/character/pigments";
 import { blankCharacter, blankSheet, recordFromSheet, sheetFromRecord } from "@/components/character/characterStorage";
+import ClassAdvancementDialog from "@/components/character/advancement/ClassAdvancementDialog";
+import {
+  applyThirdFloorClass,
+  applyCharacterActorFloor,
+  needsThirdFloorClass,
+  needsCharacterActorFloor,
+} from "@/components/character/advancement/classAdvancement";
 import "./character-handwritten.css";
 import "./character-tome.css";
 import "./character-dark.css";
@@ -61,6 +68,9 @@ export default function CharacterSheet() {
   const [characterSource, setCharacterSource] = useState("");
   const [sourceTemplateId, setSourceTemplateId] = useState("");
   const [rulesetData, setRulesetData] = useState({});
+  const resolvedProfileNow = profile?.systemKey ? resolveProfile({ system_key: profile.systemKey }) : null;
+  const activeRulesProfile = resolvedProfileNow?.status === "ok" ? resolvedProfileNow.profile : null;
+  const advancementClassCatalog = activeRulesProfile?.advancement?.stages?.third_floor?.classes?.catalog ?? {};
 
   const [loading, setLoading] = useState(true); // sheet is not editable until saved data (or its absence) is known
   const [currentId, setCurrentId] = useState(null); // null = unsaved draft
@@ -85,6 +95,7 @@ export default function CharacterSheet() {
   const [currency, setCurrency] = useState({ ...b.currency }); // canonical currency amounts (profile-defined id -> count)
   const [activeSheetPage, setActiveSheetPage] = useState(1); // four-page digital character sheet tabs
   const [gmAccessError, setGmAccessError] = useState("");
+  const advancementPromptRef = useRef("");
 
   /* Latest-value refs — saves fired from timers, Retry, and dialogs must
      always read the CURRENT sheet, character id, and snapshot, never a
@@ -681,6 +692,25 @@ export default function CharacterSheet() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name, portrait, portraitSettings, customization, info, gear, attrs, skills, hp, maxHp, mana, maxMana, defense, attacks, spells, hotbar, inventory, currency, notes, draft, creationStep, profile, rulesetData, loading, currentId, savedJson, signedIn]);
 
+  /* Floor milestone prompt. Normal Floor 3 selection may be dismissed and
+     reopened from the toolbar; Character Actor is a required floor-start flow. */
+  useEffect(() => {
+    if (loading || gmMode || !activeRulesProfile || dialog) return;
+    const sheet = currentSheetRef.current?.() ?? currentSheet();
+    const floor = Number(sheet?.info?.floor) || 1;
+    if (needsCharacterActorFloor(sheet)) {
+      setDialog("characterActor");
+      return;
+    }
+    if (needsThirdFloorClass(sheet)) {
+      const key = `${currentId ?? "guest"}:${floor}:floor3-class`;
+      if (advancementPromptRef.current !== key) {
+        advancementPromptRef.current = key;
+        setDialog("classAdvance");
+      }
+    }
+  }, [loading, gmMode, currentId, info?.floor, info?.class, rulesetData, dialog, activeRulesProfile]);
+
   /* Warn before leaving with unsaved changes — no last-second save on
      browser close; the debounce keeps the record current to the last edit. */
   useEffect(() => {
@@ -757,6 +787,44 @@ export default function CharacterSheet() {
     setActive(rec.id);
     setDialog(null);
   };
+
+  /* ===== Third-Floor Class Advancement =====
+     Applies to the SAME canonical character. A permanent class is applied
+     once; Former Child Actor's Character Actor layer is replaced each floor. */
+  const persistAdvancedSheet = async (nextSheet) => {
+    restoreSnapshot(nextSheet);
+    if (!authedRef.current) {
+      stashGuestDraft(recordFromSheet(nextSheet));
+      return true;
+    }
+    return doSave({ finishDraft: true, values: nextSheet });
+  };
+
+  const confirmThirdFloorClass = async (classId) => {
+    if (!activeRulesProfile) return;
+    const entry = advancementClassCatalog[classId];
+    if (!entry) return;
+    const floor = Math.max(3, Number(info?.floor) || 3);
+    const next = applyThirdFloorClass(activeRulesProfile, currentSheet(), entry, floor);
+    const ok = await persistAdvancedSheet(next);
+    if (!ok) return;
+    setDialog(entry.id === "former_child_actor" ? "characterActor" : null);
+  };
+
+  const confirmCharacterActorClass = async (classId, rolls) => {
+    if (!activeRulesProfile) return;
+    const entry = advancementClassCatalog[classId];
+    if (!entry) return;
+    const floor = Math.max(3, Number(info?.floor) || 3);
+    const next = applyCharacterActorFloor(activeRulesProfile, currentSheet(), entry, rolls, floor);
+    const ok = await persistAdvancedSheet(next);
+    if (ok) setDialog(null);
+  };
+
+  const advancementSheet = () => currentSheet();
+  const floor3Needed = activeRulesProfile ? needsThirdFloorClass(advancementSheet()) : false;
+  const actorFloorNeeded = activeRulesProfile ? needsCharacterActorFloor(advancementSheet()) : false;
+  const openAdvancement = () => setDialog(actorFloorNeeded ? "characterActor" : "classAdvance");
 
   const loadCharacter = (rec) => {
     apply(rec);
@@ -856,8 +924,7 @@ export default function CharacterSheet() {
     />
   );
 
-  const resolvedProfile = profile?.systemKey ? resolveProfile({ system_key: profile.systemKey }) : null;
-  const profileCurrencies = resolvedProfile?.status === "ok" ? (resolvedProfile.profile?.currency?.currencies ?? []) : [];
+  const profileCurrencies = resolvedProfileNow?.status === "ok" ? (resolvedProfileNow.profile?.currency?.currencies ?? []) : [];
   const saveVault = async (clean) => {
     setCurrency((cur) => ({ ...cur, ...clean }));
     await doSave({ values: { currency: { ...currency, ...clean } } });
@@ -907,6 +974,9 @@ export default function CharacterSheet() {
               onLoad={openLoad}
               onPrint={() => setDialog("print")}
               onPigments={() => setDialog("pigments")}
+              onAdvance={openAdvancement}
+              canAdvance={floor3Needed || actorFloorNeeded}
+              advanceLabel={actorFloorNeeded ? `Floor ${Number(info?.floor) || 3} Actor Class` : "Floor 3 Class"}
               saveState={saveState}
               dirty={dirty}
               onRetry={() => doSave()}
@@ -972,6 +1042,29 @@ export default function CharacterSheet() {
 
       <RollResultCard result={lastRoll} onClose={() => setLastRoll(null)} />
 
+      {dialog === "classAdvance" && activeRulesProfile && (
+        <ClassAdvancementDialog
+          mode="thirdFloor"
+          catalog={advancementClassCatalog}
+          profile={activeRulesProfile}
+          sheet={currentSheet()}
+          floor={Math.max(3, Number(info?.floor) || 3)}
+          seed={currentId ?? name ?? "crawler"}
+          onConfirm={confirmThirdFloorClass}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog === "characterActor" && activeRulesProfile && (
+        <ClassAdvancementDialog
+          mode="characterActor"
+          catalog={advancementClassCatalog}
+          profile={activeRulesProfile}
+          sheet={currentSheet()}
+          floor={Math.max(3, Number(info?.floor) || 3)}
+          seed={currentId ?? name ?? "crawler"}
+          onConfirm={confirmCharacterActorClass}
+        />
+      )}
       {dialog === "print" && (
         <PrintSheetDialog
           sheet={currentSheet()}
