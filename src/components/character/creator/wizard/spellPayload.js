@@ -28,7 +28,13 @@ export const canonicalSpellsFromDraft = (profile, draft) => {
         name,
         cost: String(heal.mana_cost ?? ""),
         type: "Heal",
-        notes: `Rank ${heal.rank}${heal.rank_is_max ? " (MAX)" : ""} · ${heal.range} · Heals ${heal.heals_slots} Health Bar slots${heal.interrupt ? " · Interrupt" : ""}`,
+        notes: [
+          heal.desc ?? "",
+          `Rank ${heal.rank}${heal.rank_is_max ? " (MAX)" : ""}`,
+          heal.range,
+          `Heals ${heal.heals_slots} Health Bar slots`,
+          heal.interrupt ? "Interrupt" : "",
+        ].filter(Boolean).join(" · "),
       });
       continue;
     }
@@ -38,7 +44,12 @@ export const canonicalSpellsFromDraft = (profile, draft) => {
       name,
       cost: String(det.mana_cost ?? ""),
       type: det.type ?? "",
-      notes: `Rank ${det.rank ?? 3} · Range ${det.range ?? ""} · Damage ${det.damage?.dice ?? ""}${det.damage?.plus_int_mod ? " + INT Mod" : ""}`,
+      notes: [
+        det.desc ?? "",
+        `Rank ${det.rank ?? 3}`,
+        `Range ${det.range ?? ""}`,
+        `Damage ${det.damage?.dice ?? ""}${det.damage?.plus_int_mod ? " + INT Mod" : ""}`,
+      ].filter(Boolean).join(" · "),
     });
   }
   return rows;

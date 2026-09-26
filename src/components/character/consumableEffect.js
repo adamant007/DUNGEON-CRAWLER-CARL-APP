@@ -28,6 +28,16 @@ export const parseConsumableEffect = (itemName, effectText) => {
   const text = String(effectText ?? "");
   const heal = text.match(HEAL_SLOTS_RE);
   if (heal) return { type: "heal_slots", slots: parseInt(heal[1], 10) };
+
+  const label = singularLabel(itemName);
+  /* Core Rulebook: a Standard Mana Potion / Mana Potion fully restores
+     Mana when consumed. Recognize the canonical item name even on older
+     wizard-created characters whose Inventory row was saved without the
+     effect text. Do NOT apply this to differently named mana items such as
+     Good Mana Refill Potions, which have different mechanics. */
+  if (/^(?:standard\s+)?mana\s+potion$/i.test(label)) {
+    return { type: "mana_full" };
+  }
   if (/full restore/i.test(text) && /mana/i.test(String(itemName ?? ""))) {
     return { type: "mana_full" };
   }

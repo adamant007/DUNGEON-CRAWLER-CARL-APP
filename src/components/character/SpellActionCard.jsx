@@ -46,8 +46,18 @@ export default function SpellActionCard({ spell, mana, maxMana, onCast, onRoll, 
           </span>
         </div>
 
+        {s.description && (
+          <div className="border border-[var(--rule)] bg-[rgba(255,248,220,0.22)] px-3 py-2">
+            <span className={`${LABEL} block mb-1`}>What It Does</span>
+            <p className="font-garamond text-[14px] leading-snug text-[#24180f]">{s.description}</p>
+          </div>
+        )}
+
         {s.detail && (
-          <p className="font-fell italic text-[15px] leading-snug text-[#24180f]">{s.detail}</p>
+          <div className="border border-[var(--rule)] bg-[rgba(255,248,220,0.14)] px-3 py-2">
+            <span className={`${LABEL} block mb-1`}>Mechanics</span>
+            <p className="font-fell italic text-[13px] leading-snug text-[#24180f]">{s.detail}</p>
+          </div>
         )}
 
         <div className="grid grid-cols-2 gap-x-3 gap-y-2">

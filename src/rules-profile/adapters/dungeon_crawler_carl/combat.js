@@ -78,7 +78,11 @@ export const STARTING_ATTACK_SPELLS = [
 ];
 export const ATTACK_SPELL_REQUIREMENT = { min_enhanced_int: 4 };
 export const ATTACK_SPELL_GRANTS = {
-  mana_potions: { item: "Standard Mana Potion", qty: 5 },
+  mana_potions: {
+    item: "Standard Mana Potion",
+    qty: 5,
+    notes: "Full restore · Spend an Action to drink one",
+  },
   to_skills: true,
   to_attacks: true,
   to_known_spells: true,

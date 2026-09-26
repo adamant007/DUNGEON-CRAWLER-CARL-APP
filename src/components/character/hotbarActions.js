@@ -30,13 +30,13 @@ const normalize = (name) =>
     .replace(/s$/, "")
     .trim();
 
-export function resolveHotbarSlot(slot, { spells, rulesetData, attacks, inventory }) {
+export function resolveHotbarSlot(slot, { spells, rulesetData, attacks, inventory, profile }) {
   const label = shortLabel(slot);
   if (!label) return null;
   const lower = label.toLowerCase();
 
   // 1 — known spell: opens the SAME spell action (CAST/ROLL, Mana rules).
-  const spell = knownSpells(rulesetData, spells).find(
+  const spell = knownSpells(rulesetData, spells, profile).find(
     (s) => (s.name ?? "").toLowerCase() === lower
   );
   if (spell) return { kind: "spell", spell };

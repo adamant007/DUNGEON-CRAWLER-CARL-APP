@@ -132,7 +132,11 @@ export function sheetFromWizard(profile, draft) {
   }
   const grants = combatStepDef(profile)?.options?.find((o) => o.id === "attack_spell")?.grants;
   if (sc.secondOptionType === "attack_spell" && sc.attackSpellId && grants?.mana_potions) {
-    inventory.push({ item: grants.mana_potions.item, qty: grants.mana_potions.qty, notes: "" });
+    inventory.push({
+      item: grants.mana_potions.item,
+      qty: grants.mana_potions.qty,
+      notes: grants.mana_potions.notes ?? "",
+    });
   }
   sheet.inventory = inventory;
 
