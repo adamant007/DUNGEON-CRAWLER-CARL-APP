@@ -12,7 +12,8 @@ const BTN =
 const CARD =
   "w-full border border-[var(--ink-soft)] bg-[rgba(255,248,220,0.2)] p-3 text-left transition-colors hover:bg-[rgba(74,55,39,0.14)]";
 
-const sourceLabel = (entry) => (entry?.source === "user_supplied" ? "Homebrew" : "Core");
+const isHomebrew = (entry) => ["user_supplied", "user_created"].includes(entry?.source);
+const sourceLabel = (entry) => (isHomebrew(entry) ? "Homebrew" : "Core");
 
 function BenefitList({ entry }) {
   const bullets = classBenefitBullets(entry);
@@ -64,8 +65,8 @@ function ThirdFloorPicker({ catalog, sheet, onConfirm, onClose }) {
   const visible = entries.filter((entry) => {
     const sourceOk =
       source === "all" ||
-      (source === "homebrew" && entry.source === "user_supplied") ||
-      (source === "core" && entry.source !== "user_supplied");
+      (source === "homebrew" && isHomebrew(entry)) ||
+      (source === "core" && !isHomebrew(entry));
     const q = search.trim().toLowerCase();
     return sourceOk && (!q || String(entry.name).toLowerCase().includes(q));
   });
