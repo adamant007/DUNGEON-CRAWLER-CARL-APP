@@ -24,7 +24,7 @@ import {
   ATTACK_SPELL_GRANTS,
 } from "./combat";
 import { STARTING_GEAR_EXAMPLES, USEFUL_ITEM_EXAMPLES } from "./startingGear";
-import { THIRD_FLOOR_CLASS_CATALOG } from "./classCatalog";
+import { THIRD_FLOOR_CLASS_CATALOG, THIRD_FLOOR_CLASS_COUNTS } from "./classCatalog";
 
 export const SYSTEM_KEY = "dungeon_crawler_carl";
 
@@ -367,7 +367,8 @@ export const dungeonCrawlerCarlProfile = defineProfile({
         id: "third_floor",
         status: "partial_data_block_2",
         classes: {
-          completeness: "partial",
+          completeness: "core_rulebook_complete_plus_custom",
+          counts: THIRD_FLOOR_CLASS_COUNTS,
           catalog: THIRD_FLOOR_CLASS_CATALOG,
         },
       },
