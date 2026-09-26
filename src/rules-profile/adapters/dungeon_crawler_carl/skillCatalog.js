@@ -91,6 +91,7 @@ const SKILL_DESCRIPTIONS = {
   heal_self: "",
   cockroach: "",
   draining_shadows: "Melee Intelligence attack. Deals 1d8 + Intelligence Necrotic damage; add another d8 at Ranks 5, 10, and 15. Its Rank equals the current floor level and only increases by floor. When it deals damage, you may heal 1 of your Health Bars, up to 5 times per combat.",
+  character_actor: "Former Child Actor only. Rank increases by 1 when descending to a new floor. At each floor start, choose from three random Classes (any available Class at Rank 15) and roll 1d2 for each listed benefit; on 2, gain it for that floor.",
   dirt_clod: "100-foot Bludgeoning attack spell. Costs 1 Mana, deals 1d2 + Intelligence damage, and grants AI Favor 2.",
   fire_fingers: "Melee Fire attack spell. Costs 3 Mana, deals 1d4 + Intelligence Fire damage, and grants AI Favor 1.",
   frost_scar: "Melee Ice attack spell. Costs 2 Mana, deals 1d4 + Intelligence Ice damage, and grants AI Favor 1; higher Ranks interfere with healing and add Debuffs.",
@@ -175,6 +176,12 @@ export const SKILL_CATALOG = Object.fromEntries(
     s("taunt", "Taunt", "cha"),
     s("throwing", "Throwing", "str"),
     s("tracking", "Tracking", "int"),
+    s("pathfinder", "Pathfinder", "int"),
+    s("find_crawler", "Find Crawler", "int"),
+    s("lore", "Lore", "int"),
+    s("religion", "Religion", "int"),
+    s("basic_science", "Basic Science", "int"),
+    s("aliens_and_ufos", "Aliens & UFOs", "int"),
 
     // Attack skills
     /* attack_stat = the TO-HIT stat for the canonical attack row —
@@ -235,6 +242,7 @@ export const SKILL_CATALOG = Object.fromEntries(
 
     // Class-linked general / attack skills
     s("cockroach", "Cockroach", null, "general"),
+    s("character_actor", "Character Actor", "cha", "general", { aliases: ["Pattern Recognition Disorder"] }),
     s("draining_shadows", "Draining Shadows", "int", "attack", {
       attack_stat: "int",
       damage: { dice: "1d8", plus_mod_stat: "int" },
@@ -248,6 +256,10 @@ export const SKILL_CATALOG = Object.fromEntries(
     s("drain_life", "Drain Life", null, "spell"),
     s("heal_others", "Heal Others", null, "spell"),
     s("heal_self", "Heal Self", null, "spell"),
+    s("bang_bro", "Bang Bro", null, "spell"),
+    s("confusing_fog", "Confusing Fog", null, "spell"),
+    s("hot_stuff_aura", "Hot Stuff Aura", null, "spell"),
+    s("panty_dropper", "Panty Dropper", null, "spell"),
     s("dirt_clod", "Dirt Clod", null, "spell", { attack_spell: true, ai_favor: AI_FAVOR_STANDARD(2) }),
     s("fire_fingers", "Fire Fingers", null, "spell", { attack_spell: true, ai_favor: AI_FAVOR_STANDARD(1) }),
     s("frost_scar", "Frost Scar", null, "spell", { attack_spell: true, ai_favor: AI_FAVOR_STANDARD(1) }),
