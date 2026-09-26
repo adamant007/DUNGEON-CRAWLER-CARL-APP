@@ -28,6 +28,10 @@ concurrency:
 
 jobs:
   build-apk:
+    # TEMP RELEASE HOLD: push builds are intentionally blocked while the
+    # Android source is reconciled with the current Ginger Dragon web app.
+    # A maintainer may still run this workflow manually when the audit is done.
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
