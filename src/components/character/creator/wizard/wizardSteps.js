@@ -119,13 +119,29 @@ const crawlerNumberRange = (profile) => {
 /* Crawler numbers already taken by the user's canonical Character
    records (the number is stored in details.crawler). Read-only — numbers
    are never reserved by viewing or abandoning the wizard. */
+export const crawlerNumberFromRecord = (rec) => {
+  const digits = String(rec?.details?.crawler ?? "").replace(/\D/g, "");
+  return digits === "" ? null : parseInt(digits, 10);
+};
+
 export const crawlerNumbersFromRecords = (records) => {
   const used = new Set();
   for (const rec of records ?? []) {
-    const digits = String(rec?.details?.crawler ?? "").replace(/\D/g, "");
-    if (digits !== "") used.add(parseInt(digits, 10));
+    const number = crawlerNumberFromRecord(rec);
+    if (number !== null) used.add(number);
   }
   return used;
+};
+
+export const crawlerNumberConflict = (records, crawlerNumber, excludeId = null) => {
+  const digits = String(crawlerNumber ?? "").replace(/\D/g, "");
+  if (digits === "") return null;
+  const wanted = parseInt(digits, 10);
+  return (
+    (records ?? []).find(
+      (rec) => rec?.id !== excludeId && crawlerNumberFromRecord(rec) === wanted
+    ) ?? null
+  );
 };
 
 /* ===== Step 2 — RACE / SPECIES (starting identity only, Step 3B.3) =====
