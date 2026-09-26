@@ -25,6 +25,7 @@ import {
 } from "./combat";
 import { STARTING_GEAR_EXAMPLES, USEFUL_ITEM_EXAMPLES } from "./startingGear";
 import { THIRD_FLOOR_CLASS_CATALOG, THIRD_FLOOR_CLASS_COUNTS } from "./classCatalog";
+import { CUSTOM_THIRD_FLOOR_RACE_CATALOG, THIRD_FLOOR_RACE_COUNTS } from "./raceCatalog";
 
 export const SYSTEM_KEY = "dungeon_crawler_carl";
 
@@ -370,6 +371,11 @@ export const dungeonCrawlerCarlProfile = defineProfile({
           completeness: "core_rulebook_complete_plus_custom",
           counts: THIRD_FLOOR_CLASS_COUNTS,
           catalog: THIRD_FLOOR_CLASS_CATALOG,
+        },
+        races: {
+          completeness: "custom_user_supplied",
+          counts: THIRD_FLOOR_RACE_COUNTS,
+          catalog: CUSTOM_THIRD_FLOOR_RACE_CATALOG,
         },
       },
     },
