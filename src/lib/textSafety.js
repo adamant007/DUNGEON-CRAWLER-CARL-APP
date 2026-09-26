@@ -70,8 +70,8 @@ const escaped = (ch) => ch.replace(/[.*+?^$(){}|[\]\\]/g, "\\$&");
 
 const obfuscatedTermRegex = (term) => {
   const letters = normalizeSafetyText(term).replace(/[^a-z0-9]/g, "").split("");
-  const body = letters.map((ch) => `\${escaped(ch)}+[^a-z0-9]*`).join("").replace(/\[\^a-z0-9\]\*$/, "");
-  return new RegExp(`(^|[^a-z0-9])\${body}($|[^a-z0-9])`, "i");
+  const body = letters.map((ch) => escaped(ch) + "+[^a-z0-9]*").join("").replace(/\\[\\^a-z0-9\\]\\*$/, "");
+  return new RegExp("(^|[^a-z0-9])" + body + "($|[^a-z0-9])", "i");
 };
 
 const TERM_PATTERNS = BLOCKED_TERMS.map((term) => ({ term, regex: obfuscatedTermRegex(term) }));
