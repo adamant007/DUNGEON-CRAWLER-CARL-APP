@@ -1,3 +1,5 @@
+import { validateUserCreatedText } from "../../../lib/textSafety";
+
 export const STAT_KEYS = ["str", "int", "con", "dex", "cha"];
 export const STAT_LABELS = {
   str: "Strength",
@@ -167,6 +169,11 @@ export function validateBuild(build) {
   const math = buildMath(build);
   const errors = [];
   if (!String(build?.name ?? "").trim()) errors.push("Give the Race or Class a name.");
+  const textSafety = validateUserCreatedText({
+    name: build?.name ?? "",
+    description: build?.description ?? "",
+  });
+  if (!textSafety.ok) errors.push(textSafety.reason);
   if (math.benefitsSpent <= 0) errors.push("Choose at least one mechanical benefit.");
   if (math.benefitsSpent > math.available) errors.push(`This build is ${math.benefitsSpent - math.available} BP over budget.`);
   if (math.rawDetrimentCredit > MAX_DETRIMENT_CREDIT) errors.push("Detriments can grant at most 5 extra Build Points.");
