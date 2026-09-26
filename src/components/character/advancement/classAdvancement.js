@@ -122,9 +122,13 @@ const ensureSpellRow = (sheet, def, rank, className, log) => {
   const idx = sheet.spells.findIndex((r) => String(r?.name ?? "").toLowerCase() === String(name).toLowerCase());
   const note = `Rank ${rank} · Class: ${className}`;
   if (idx >= 0) {
+    if (log && !(name in log.spellRowsBefore)) log.spellRowsBefore[name] = { ...sheet.spells[idx] };
     sheet.spells[idx] = { ...sheet.spells[idx], notes: [sheet.spells[idx].notes, note].filter(Boolean).join(" · ") };
   } else {
-    sheet.spells.push({ name, cost: "", type: "", notes: note });
+    const blank = sheet.spells.findIndex((r) => !String(r?.name ?? "").trim());
+    const row = { name, cost: "", type: "", notes: note };
+    if (blank >= 0) sheet.spells[blank] = row;
+    else sheet.spells.push(row);
     if (log) log.spellRowsAdded.push(name);
   }
 };
@@ -135,9 +139,12 @@ const ensureAttackRow = (sheet, profile, id, rank, className, log) => {
   sheet.attacks = Array.isArray(sheet.attacks) ? sheet.attacks : [];
   const idx = sheet.attacks.findIndex((r) => String(r?.name ?? "").toLowerCase() === String(row.name).toLowerCase());
   if (idx >= 0) {
+    if (log && !(row.name in log.attackRowsBefore)) log.attackRowsBefore[row.name] = { ...sheet.attacks[idx] };
     sheet.attacks[idx] = { ...sheet.attacks[idx], ...row };
   } else {
-    sheet.attacks.push(row);
+    const blank = sheet.attacks.findIndex((r) => !String(r?.name ?? "").trim());
+    if (blank >= 0) sheet.attacks[blank] = row;
+    else sheet.attacks.push(row);
     if (log) log.attackRowsAdded.push(row.name);
   }
 };
@@ -216,6 +223,8 @@ const makeLog = (floor, classEntry) => ({
   defenseTags: [],
   spellRowsAdded: [],
   attackRowsAdded: [],
+  spellRowsBefore: {},
+  attackRowsBefore: {},
   skillCapsBefore: {},
   statCapsBefore: {},
 });
@@ -287,12 +296,20 @@ export function classBenefitBullets(entry) {
 
 const namesInText = (profile, text) => {
   const lower = String(text).toLowerCase();
-  const found = [];
+  const candidates = [];
   for (const def of Object.values(profile?.skills?.catalog ?? {})) {
-    const names = [def.name, def.display_name, ...(def.aliases ?? [])].filter(Boolean);
-    if (names.some((name) => lower.includes(String(name).toLowerCase()))) found.push(def.id);
+    for (const name of [def.name, def.display_name, ...(def.aliases ?? [])].filter(Boolean)) {
+      const needle = String(name).toLowerCase();
+      if (lower.includes(needle)) candidates.push({ id: def.id, needle });
+    }
   }
-  return [...new Set(found)];
+  candidates.sort((a, b) => b.needle.length - a.needle.length);
+  const accepted = [];
+  for (const candidate of candidates) {
+    if (accepted.some((a) => a.needle.includes(candidate.needle))) continue;
+    accepted.push(candidate);
+  }
+  return [...new Set(accepted.map((c) => c.id))];
 };
 
 const applyOfficialText = (sheet, profile, text, className, log) => {
@@ -382,6 +399,9 @@ const applyDescriptor = (sheet, profile, descriptor, classEntry, floor, log, eff
       return;
     case "stat_cap":
       setStatCap(sheet, descriptor.id, descriptor.cap, log);
+      if (Number(sheet.attrs?.[descriptor.id]) > Number(descriptor.cap)) {
+        adjustStat(sheet, profile, descriptor.id, Number(descriptor.cap) - Number(sheet.attrs[descriptor.id]), log);
+      }
       return;
     case "defense":
       addDefenseTag(sheet, descriptor.tag, log);
@@ -472,7 +492,7 @@ const seededRandom = (seedText) => {
 export function characterActorRank(sheet, floor = null) {
   const f = floor ?? n(sheet?.info?.floor, 3);
   const row = (sheet?.rulesetData?.skills ?? []).find((s) => s.id === "character_actor");
-  return Math.max(3, n(row?.rank, Math.max(3, f)));
+  return Math.max(3, Number(f) || 3, n(row?.rank, 0));
 }
 
 export function characterActorClassOptions(catalog, floor, seed, rank = floor) {
@@ -537,6 +557,15 @@ export function expireCharacterActorFloor(profile, sourceSheet) {
     rules.statCaps = { ...(rules.statCaps ?? {}) };
     if (before === undefined) delete rules.statCaps[id];
     else rules.statCaps[id] = before;
+  }
+
+  for (const [name, row] of Object.entries(log.spellRowsBefore ?? {})) {
+    const idx = (sheet.spells ?? []).findIndex((r) => String(r?.name ?? "").toLowerCase() === String(name).toLowerCase());
+    if (idx >= 0) sheet.spells[idx] = row;
+  }
+  for (const [name, row] of Object.entries(log.attackRowsBefore ?? {})) {
+    const idx = (sheet.attacks ?? []).findIndex((r) => String(r?.name ?? "").toLowerCase() === String(name).toLowerCase());
+    if (idx >= 0) sheet.attacks[idx] = row;
   }
 
   const removeTags = new Set(log.defenseTags ?? []);
