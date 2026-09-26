@@ -8,10 +8,10 @@ import { Switch } from "@/components/ui/switch";
    sheet; all persistence logic lives there). Formatting follows the
    approved ink-box style. */
 const BTN =
-  "whitespace-nowrap rounded-md border border-[#4a3a26] bg-[#15120f] px-3 py-2 text-[11px] font-semibold tracking-[0.03em] text-[#e8dfd1] transition-colors hover:border-[#d4a055] hover:bg-[#211a12] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d4a055] disabled:pointer-events-none disabled:opacity-50";
+  "font-fell-sc text-[15px] font-bold tracking-[0.04em] text-[#24180f] whitespace-nowrap px-1.5 py-1 border border-[var(--ink-soft)] bg-[rgba(255,248,220,0.25)] transition-colors hover:bg-[rgba(74,55,39,0.18)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ink)] disabled:opacity-60 disabled:pointer-events-none";
 
 const SWITCH =
-  "h-7 w-12 border border-[#5b4a34] data-[state=checked]:bg-[#8c641f] data-[state=unchecked]:bg-[#302a23] [&>span]:h-5 [&>span]:w-5 [&>span]:bg-[#efe7d8] data-[state=checked]:[&>span]:translate-x-6";
+  "h-7 w-12 border border-[var(--ink-soft)] data-[state=checked]:bg-[#4a3727] data-[state=unchecked]:bg-[#c4b18d] [&>span]:h-5 [&>span]:w-5 data-[state=checked]:[&>span]:translate-x-6";
 
 export default function CharacterBar({
   className = "",
@@ -38,7 +38,7 @@ export default function CharacterBar({
   else if (saveState === "success") status = "Saved";
 
   return (
-    <div className={`gd-toolbar flex flex-col gap-3 rounded-lg border border-[#3c352a] bg-[#0f0e0c]/95 p-3 sm:flex-row sm:items-center sm:justify-between ${className}`}>
+    <div className={`gd-toolbar flex items-start justify-between gap-x-5 ${className}`}>
       <div className="flex min-w-0 flex-1 flex-wrap md:flex-nowrap items-center gap-1.5 gap-y-1">
         {/* Rulebooks — the same private Rulebook Library the Character
             Creator reaches; never a gate before New Character. */}
@@ -113,7 +113,7 @@ export default function CharacterBar({
           className="flex items-center gap-2 cursor-pointer select-none"
           title="OFF is normal play — your sheet is protected from accidental edits. Turn ON to deliberately edit the character; finish with SAVE CHANGES or CANCEL."
         >
-          <span className="whitespace-nowrap text-[10px] font-bold tracking-[0.14em] text-[#c5a059]">
+          <span className="font-fell-sc text-[15px] font-bold tracking-[0.04em] whitespace-nowrap text-[#24180f]">
             EDIT CHARACTER
           </span>
           <Switch
@@ -123,13 +123,13 @@ export default function CharacterBar({
             className={SWITCH}
           />
         </label>
-        <p aria-live="polite" className="min-h-[1em] text-[10px] text-[#9f978b]">
+        <p aria-live="polite" className="font-fell italic text-[11px] text-[var(--ink-soft)] min-h-[1em]">
           {status}
           {saveState === "error" && (
             <button
               type="button"
               onClick={onRetry}
-              className="ml-1.5 text-[10px] font-semibold tracking-[0.05em] text-[#e8c87a] underline"
+              className="ml-1.5 font-fell-sc text-[11px] tracking-[0.06em] underline text-[var(--hp)]"
             >
               Retry
             </button>
