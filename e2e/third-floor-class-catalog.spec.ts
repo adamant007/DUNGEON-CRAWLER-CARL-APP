@@ -11,11 +11,11 @@ import {
 
 test("third-floor class catalog keeps every imported class entry", async () => {
   expect(THIRD_FLOOR_CLASS_COUNTS.official).toBe(52);
-  expect(THIRD_FLOOR_CLASS_COUNTS.custom).toBe(6);
-  expect(THIRD_FLOOR_CLASS_COUNTS.total).toBe(58);
+  expect(THIRD_FLOOR_CLASS_COUNTS.custom).toBe(7);
+  expect(THIRD_FLOOR_CLASS_COUNTS.total).toBe(59);
 
   expect(Object.keys(OFFICIAL_THIRD_FLOOR_CLASS_CATALOG)).toHaveLength(52);
-  expect(Object.keys(THIRD_FLOOR_CLASS_CATALOG)).toHaveLength(58);
+  expect(Object.keys(THIRD_FLOOR_CLASS_CATALOG)).toHaveLength(59);
 
   expect(THIRD_FLOOR_CLASS_CATALOG.boring_ol_arcanist?.name).toBe("Boring Ol’ Arcanist");
   expect(THIRD_FLOOR_CLASS_CATALOG.swashbuckler?.class_types).toEqual(["Bard", "Fighter", "Rogue"]);
@@ -33,6 +33,9 @@ test("user-supplied third-floor additions remain complete", async () => {
   expect(THIRD_FLOOR_CLASS_CATALOG.sports_entertainer?.class_types).toEqual(["Barbarian", "Bard"]);
   expect(THIRD_FLOOR_CLASS_CATALOG.carney_promoter?.class_types).toEqual(["Bard", "Rogue"]);
   expect(THIRD_FLOOR_CLASS_CATALOG.ripper_rogue?.skill_rank_bonuses?.stealth).toBe(3);
+  expect(THIRD_FLOOR_CLASS_CATALOG.gray_man_field_operative?.build_points).toEqual({ spent: 30, total: 30 });
+  expect(THIRD_FLOOR_CLASS_CATALOG.gray_man_field_operative?.stat_bonuses).toEqual({ int: 4, dex: 3, con: 3 });
+  expect(THIRD_FLOOR_CLASS_CATALOG.gray_man_field_operative?.skill_rank_caps?.investigation).toBe(20);
 
   expect(THIRD_FLOOR_RACE_COUNTS.custom).toBe(4);
   expect(Object.keys(CUSTOM_THIRD_FLOOR_RACE_CATALOG)).toHaveLength(4);
