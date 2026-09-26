@@ -21,6 +21,8 @@ export default function CharacterBar({
   onLoad,
   onPrint,
   onPigments,
+  onBuilder,
+  showBuilder = false,
   onAdvance,
   canAdvance = false,
   advanceLabel = "Advance",
@@ -93,6 +95,11 @@ export default function CharacterBar({
         {!gmMode && (
           <button type="button" className={BTN} onClick={onLoad} disabled={busy}>
             Load Character
+          </button>
+        )}
+        {showBuilder && !gmMode && (
+          <button type="button" className={BTN} onClick={onBuilder} disabled={busy}>
+            Build Race/Class
           </button>
         )}
         {showProgression && !gmMode && (
