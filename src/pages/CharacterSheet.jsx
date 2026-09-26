@@ -1067,6 +1067,7 @@ export default function CharacterSheet() {
       playMode={!editMode}
       spells={spells}
       rulesetData={rulesetData}
+      profile={activeRulesProfile}
       attacks={attacks}
       inventory={inventory}
       mana={mana}
