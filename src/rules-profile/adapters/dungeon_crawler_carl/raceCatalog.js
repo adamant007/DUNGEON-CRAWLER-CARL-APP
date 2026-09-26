@@ -139,6 +139,63 @@ export const CUSTOM_THIRD_FLOOR_RACES = [
       },
     ],
   },
+  {
+    id: "redacted_asset",
+    name: "Redacted Asset",
+    race_type: "Earth Race",
+    source_stage: "third_floor",
+    source: "user_supplied",
+    earth_race: true,
+    class_access: ["Earth-based"],
+    size: { label: "Medium", value: 4 },
+    build_points: {
+      benefits_spent: 26,
+      detriment_credit: 1,
+      net_spent: 25,
+      total: 25,
+    },
+    build_breakdown: [
+      { benefit: "Constitution +4", points: 4 },
+      { benefit: "Dexterity +3", points: 3 },
+      { benefit: "Intelligence +2", points: 2 },
+      { benefit: "Dodge Skill +2", points: 4 },
+      { benefit: "Escape Artist Skill +2", points: 4 },
+      { benefit: "Endurance Skill +2", points: 4 },
+      { benefit: "Can see in total darkness", points: 1 },
+      { benefit: "+5 ft Move", points: 3 },
+      { benefit: "Dodge may reach Rank 20", points: 1 },
+      { detriment: "Charisma -2", points_credit: 1 },
+    ],
+    description:
+      "Congratulations, crawler. Your paperwork has been reviewed, misplaced, reclassified, shredded, reconstructed, and then redacted for reasons nobody is willing to explain. You look human enough until someone checks the records and discovers you officially died in 1987, were born in 2004, and currently owe parking tickets in three countries that do not exist. Redacted Assets are durable, quick, difficult to restrain, and unusually talented at leaving situations before anyone can ask a second question. The Dungeon assures you this is all perfectly normal.",
+    stat_bonuses: { con: 4, dex: 3, int: 2 },
+    stat_penalties: { cha: -2 },
+    skill_rank_bonuses: {
+      dodge: 2,
+      escape_artist: 2,
+      endurance: 2,
+    },
+    skill_rank_caps: {
+      dodge: 20,
+    },
+    senses: ["Can see in total darkness"],
+    movement_bonus_ft: 5,
+    effects: [
+      {
+        id: "move_bonus",
+        move_bonus_ft: 5,
+        text:
+          "+5 ft Move. When someone says, 'Hold on, I just have one question,' you are already halfway down the corridor.",
+      },
+    ],
+    rewards: [
+      {
+        id: "silver_earth_box",
+        text:
+          "Gain a Silver Earth Box with a guaranteed Earth Hobby Potion. The label has been blacked out, naturally.",
+      },
+    ],
+  },
 ];
 
 export const CUSTOM_THIRD_FLOOR_RACE_CATALOG = Object.fromEntries(
