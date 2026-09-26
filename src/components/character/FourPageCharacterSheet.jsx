@@ -22,14 +22,14 @@ const GEAR_ROWS = [
   ["other", "Accessories / Other"],
 ];
 
-const box = "border border-[var(--rule)] bg-[rgba(255,248,220,0.10)]";
-const label = "font-fell-sc text-[8px] tracking-[0.08em] text-[var(--ink-soft)]";
-const value = "font-garamond text-[12px] font-semibold text-[var(--ink)]";
+const box = "rounded-md border border-[#3c352a] bg-[#12100e]";
+const label = "text-[8px] font-bold uppercase tracking-[0.12em] text-[#8d8578]";
+const value = "text-[12px] font-semibold text-[#f0e8dc]";
 
 function SheetTitle({ children, action }) {
   return (
-    <div className="mb-1 flex items-center gap-2 border-b-2 border-[var(--ink)] bg-[rgba(32,25,19,0.88)] px-2 py-1 text-[#f2e5cb]">
-      <span className="flex-1 text-center font-display text-[10px] font-bold tracking-[0.18em]">{children}</span>
+    <div className="mb-2 flex items-center gap-2 rounded-md border border-[#4a3a26] bg-[#18130e] px-3 py-2 text-[#f2e5cb]">
+      <span className="flex-1 text-left font-display text-[11px] font-bold tracking-[0.14em] text-[#d4a055]">{children}</span>
       {action}
     </div>
   );
@@ -71,10 +71,11 @@ function ResourceStrip({ current, max, setCurrent, tone = "hp" }) {
 
 function Tabs({ page, setPage, onCrafting }) {
   const tabs = [
-    [1, "CORE"],
+    [1, "OVERVIEW"],
     [2, "INVENTORY"],
     [3, "SKILLS"],
-    [4, "HOTLIST / GEAR"],
+    [4, "EQUIPMENT"],
+    [5, "NOTES"],
   ];
   return (
     <div className="mb-2 flex flex-wrap items-center justify-center gap-1.5">
@@ -84,10 +85,10 @@ function Tabs({ page, setPage, onCrafting }) {
           type="button"
           onClick={() => setPage(id)}
           aria-current={page === id ? "page" : undefined}
-          className={`rounded-sm border px-3 py-1.5 font-fell-sc text-[9px] tracking-[0.08em] ${
+          className={`rounded-md border px-3 py-2 text-[9px] font-bold tracking-[0.09em] transition-colors ${
             page === id
-              ? "border-[var(--ink)] bg-[rgba(47,38,32,0.9)] text-[#f3e6cf]"
-              : "border-[var(--rule)] bg-[rgba(255,248,220,0.14)] text-[var(--ink)]"
+              ? "border-[#d4a055] bg-[#2d2518] text-[#f0d89b]"
+              : "border-[#3c352a] bg-[#11100e] text-[#aaa197] hover:border-[#8a6b3b] hover:text-white"
           }`}
         >
           {id}. {text}
@@ -96,7 +97,7 @@ function Tabs({ page, setPage, onCrafting }) {
       <button
         type="button"
         onClick={onCrafting}
-        className="rounded-sm border border-[var(--rule)] bg-[rgba(255,248,220,0.14)] px-3 py-1.5 font-fell-sc text-[9px] tracking-[0.08em] text-[var(--ink)]"
+        className="rounded-md border border-[#3c352a] bg-[#11100e] px-3 py-2 text-[9px] font-bold tracking-[0.09em] text-[#aaa197] hover:border-[#8a6b3b] hover:text-white"
       >
         CRAFTING
       </button>
@@ -411,16 +412,38 @@ function HotlistGearPage({ hotbar, gear, rulesetData, notes, onManageHotlist }) 
   );
 }
 
+function NotesPage({ rulesetData, notes }) {
+  const story = rulesetData?.storyHooks ?? {};
+  const rows = [
+    ["Past Trauma", story.pastTrauma],
+    ["Loose Ends", story.looseEnd],
+    ["Regrets", story.regret],
+  ];
+  return (
+    <div className="space-y-3">
+      <SheetTitle>STORY & NOTES</SheetTitle>
+      <div className="grid gap-2 md:grid-cols-3">
+        {rows.map(([k, v]) => <Field key={k} label={k}>{v}</Field>)}
+      </div>
+      <div className="min-h-[260px] rounded-md border border-[#3c352a] bg-[#12100e] p-4">
+        <div className={label}>Notes</div>
+        <div className="mt-3 whitespace-pre-wrap text-[13px] leading-6 text-[#e8dfd1]">{notes || "No notes yet."}</div>
+      </div>
+    </div>
+  );
+}
+
 export default function FourPageCharacterSheet(props) {
   const { page, setPage, onCrafting } = props;
   return (
-    <section className="mx-auto w-full max-w-[1040px]">
+    <section className="mx-auto w-full">
       <Tabs page={page} setPage={setPage} onCrafting={onCrafting} />
-      <div className="min-h-[620px] border-2 border-[var(--ink-soft)] bg-[rgba(255,248,220,0.09)] p-2 sm:p-3">
+      <div className="min-h-[620px] rounded-lg border border-[#3c352a] bg-[#0c0b0a] p-3 sm:p-4">
         {page === 1 && <CorePage {...props} />}
         {page === 2 && <InventoryPage {...props} />}
         {page === 3 && <SkillsPage {...props} />}
         {page === 4 && <HotlistGearPage {...props} />}
+        {page === 5 && <NotesPage {...props} />}
       </div>
     </section>
   );
