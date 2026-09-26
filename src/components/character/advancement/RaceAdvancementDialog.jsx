@@ -7,7 +7,8 @@ const BTN =
 const CARD =
   "w-full border border-[var(--ink-soft)] bg-[rgba(255,248,220,0.2)] p-3 text-left transition-colors hover:bg-[rgba(74,55,39,0.14)]";
 
-const sourceLabel = (entry) => (entry?.source === "user_supplied" ? "Homebrew" : "Core");
+const isHomebrew = (entry) => ["user_supplied", "user_created"].includes(entry?.source);
+const sourceLabel = (entry) => (isHomebrew(entry) ? "Homebrew" : "Core");
 
 function RaceCard({ entry, selected, onClick }) {
   return (
@@ -49,8 +50,8 @@ export default function RaceAdvancementDialog({ catalog, onConfirm, onClose }) {
   const visible = entries.filter((entry) => {
     const sourceOk =
       filter === "all" ||
-      (filter === "homebrew" && entry.source === "user_supplied") ||
-      (filter === "core" && entry.source !== "user_supplied") ||
+      (filter === "homebrew" && isHomebrew(entry)) ||
+      (filter === "core" && !isHomebrew(entry)) ||
       (filter === "earth" && entry.earth_race === true) ||
       (filter === "alien" && entry.earth_race === false);
     const q = search.trim().toLowerCase();
