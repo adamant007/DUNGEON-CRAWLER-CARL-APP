@@ -227,6 +227,7 @@ const makeLog = (floor, classEntry) => ({
   attackRowsBefore: {},
   skillCapsBefore: {},
   statCapsBefore: {},
+  skillAdvantagesBefore: {},
 });
 
 const customBullets = (entry) => {
@@ -256,6 +257,9 @@ const customBullets = (entry) => {
   }
   for (const [id, value] of Object.entries(entry?.stat_caps ?? {})) {
     bullets.push({ kind: "stat_cap", id, cap: value, text: `${STAT_LABELS[id] ?? cap(id)} is capped at ${value}` });
+  }
+  for (const id of entry?.skill_check_advantage ?? []) {
+    bullets.push({ kind: "skill_advantage", id, text: `Advantage on ${cap(id)} Skill Checks` });
   }
   for (const resistance of entry?.resistances ?? []) {
     bullets.push({ kind: "defense", tag: `Resistance: ${resistance}`, text: `Resistance to ${resistance}` });
@@ -406,6 +410,15 @@ const applyDescriptor = (sheet, profile, descriptor, classEntry, floor, log, eff
     case "defense":
       addDefenseTag(sheet, descriptor.tag, log);
       return;
+    case "skill_advantage": {
+      const rules = ensureRules(sheet);
+      rules.skillCheckAdvantages = Array.isArray(rules.skillCheckAdvantages) ? rules.skillCheckAdvantages : [];
+      if (log && !(descriptor.id in log.skillAdvantagesBefore)) {
+        log.skillAdvantagesBefore[descriptor.id] = rules.skillCheckAdvantages.includes(descriptor.id);
+      }
+      if (!rules.skillCheckAdvantages.includes(descriptor.id)) rules.skillCheckAdvantages.push(descriptor.id);
+      return;
+    }
     case "granted_skill": {
       const skill = descriptor.skill ?? {};
       const forced =
@@ -557,6 +570,12 @@ export function expireCharacterActorFloor(profile, sourceSheet) {
     rules.statCaps = { ...(rules.statCaps ?? {}) };
     if (before === undefined) delete rules.statCaps[id];
     else rules.statCaps[id] = before;
+  }
+  rules.skillCheckAdvantages = Array.isArray(rules.skillCheckAdvantages) ? rules.skillCheckAdvantages : [];
+  for (const [id, before] of Object.entries(log.skillAdvantagesBefore ?? {})) {
+    const has = rules.skillCheckAdvantages.includes(id);
+    if (before && !has) rules.skillCheckAdvantages.push(id);
+    if (!before && has) rules.skillCheckAdvantages = rules.skillCheckAdvantages.filter((x) => x !== id);
   }
 
   for (const [name, row] of Object.entries(log.spellRowsBefore ?? {})) {
