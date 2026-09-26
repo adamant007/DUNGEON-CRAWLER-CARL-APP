@@ -121,6 +121,7 @@ export function buildMath(build) {
   const drCost = Math.max(0, Math.min(3, n(build?.drBonus))) * 2;
   const commonResistanceCost = build?.commonResistance ? 4 : 0;
   const uncommonResistanceCost = build?.uncommonResistance ? 2 : 0;
+  const sizeCost = kind === "race" && build?.size === "Small" ? 3 : 0;
 
   const benefitsSpent =
     statCost +
@@ -131,7 +132,8 @@ export function buildMath(build) {
     specialCost +
     drCost +
     commonResistanceCost +
-    uncommonResistanceCost;
+    uncommonResistanceCost +
+    sizeCost;
 
   const statPenaltyTotal = STAT_KEYS.reduce((sum, key) => sum + Math.abs(Math.min(0, n(build?.statPenalties?.[key]))), 0);
   const statPenaltyCredit = Math.floor(statPenaltyTotal / 2);
@@ -285,9 +287,12 @@ export function buildEntry(build, skillCatalog = {}) {
       class_type: build.earth ? "Earth Class" : `${build.classType || "Custom"} Class`,
       class_types: [build.classType || "Custom"],
       earth_class: !!build.earth,
-      rewards: build.earth
-        ? [{ id: "silver_earth_box", text: "Gain a Silver Earth Box with a guaranteed Earth Hobby Potion." }]
-        : [],
+      effects: [
+        ...(common.effects ?? []),
+        ...(build.earth
+          ? [{ id: "silver_earth_box", text: "Gain a Silver Earth Box with a guaranteed Earth Hobby Potion." }]
+          : []),
+      ],
     },
     math: check.math,
   };
