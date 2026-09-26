@@ -1339,6 +1339,7 @@ export const CUSTOM_THIRD_FLOOR_CLASSES = [
       stealth: 20,
       tactics: 20,
     },
+    skill_check_advantage: ["investigation"],
     effects: [
       {
         id: "pattern_analysis",
