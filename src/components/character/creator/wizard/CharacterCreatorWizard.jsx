@@ -145,6 +145,9 @@ export default function CharacterCreatorWizard({ selection, onCancel, onCreate }
       setCreating(false);
       setCreateError(
         error?.code === "CRAWLER_NUMBER_DUPLICATE" ||
+        error?.code === "23505" ||
+        error?.data?.code === "23505" ||
+        /crawler_characters_user_crawler_number_unique/i.test(String(error?.message ?? "")) ||
         /crawler number.*already in use/i.test(String(error?.message ?? ""))
           ? "That crawler number is already in use. Choose another number or press Randomize."
           : "Couldn\u2019t create this character. Nothing was saved — please try again."
