@@ -1,0 +1,79 @@
+import { test, expect } from "@playwright/test";
+import { dungeonCrawlerCarlProfile } from "../src/rules-profile/adapters/dungeon_crawler_carl/index.js";
+import {
+  THIRD_FLOOR_CLASS_CATALOG,
+} from "../src/rules-profile/adapters/dungeon_crawler_carl/classCatalog.js";
+import {
+  applyThirdFloorClass,
+  applyCharacterActorFloor,
+  characterActorClassOptions,
+  classBenefitBullets,
+} from "../src/components/character/advancement/classAdvancement.js";
+
+const baseSheet = () => ({
+  name: "Test Crawler",
+  info: { race: "Human", class: "", level: 9, floor: 3 },
+  attrs: { str: 5, dex: 5, con: 5, int: 5, cha: 5 },
+  hp: 20,
+  maxHp: 20,
+  mana: 5,
+  maxMana: 5,
+  defense: { resist: "", evade: "", move: 20, step: 10, favor: 1 },
+  attacks: [],
+  spells: [],
+  hotbar: [],
+  gear: {},
+  inventory: [],
+  currency: {},
+  notes: "",
+  profile: { systemKey: "dungeon_crawler_carl" },
+  rulesetData: {
+    stats: Object.fromEntries(
+      ["str", "dex", "con", "int", "cha"].map((k) => [k, { enhanced: 5, unenhanced: 5, mod: 2 }])
+    ),
+    skills: [],
+    advancement: {},
+    identity: {},
+  },
+});
+
+test("Health Embezzeler applies once to the canonical sheet", async () => {
+  const cls = THIRD_FLOOR_CLASS_CATALOG.health_embezzeler;
+  const first = applyThirdFloorClass(dungeonCrawlerCarlProfile, baseSheet(), cls, 3);
+
+  expect(first.info.class).toBe("Health Embezzeler");
+  expect(first.attrs.int).toBe(6);
+  expect(first.attrs.con).toBe(6);
+  expect(first.maxHp).toBe(30);
+  expect(first.maxMana).toBe(6);
+  expect(first.rulesetData.skills.find((s) => s.id === "drain_life")?.rank).toBe(2);
+  expect(first.rulesetData.skills.find((s) => s.id === "draining_shadows")?.rank).toBe(3);
+  expect(first.attacks.some((a) => a.name === "Draining Shadows")).toBeTruthy();
+
+  const second = applyThirdFloorClass(dungeonCrawlerCarlProfile, first, cls, 3);
+  expect(second.attrs.int).toBe(6);
+  expect(second.attrs.con).toBe(6);
+});
+
+test("Former Child Actor gets three stable offers and replaces temporary floor benefits", async () => {
+  const former = THIRD_FLOOR_CLASS_CATALOG.former_child_actor;
+  let sheet = applyThirdFloorClass(dungeonCrawlerCarlProfile, baseSheet(), former, 3);
+  expect(sheet.rulesetData.skills.find((s) => s.id === "character_actor")?.rank).toBe(3);
+
+  const offersA = characterActorClassOptions(THIRD_FLOOR_CLASS_CATALOG, 3, "crawler-7", 3);
+  const offersB = characterActorClassOptions(THIRD_FLOOR_CLASS_CATALOG, 3, "crawler-7", 3);
+  expect(offersA).toHaveLength(3);
+  expect(offersA.map((x) => x.id)).toEqual(offersB.map((x) => x.id));
+
+  const storm = THIRD_FLOOR_CLASS_CATALOG.storm_lancer;
+  const granted = classBenefitBullets(storm).map((b, index) => ({ ...b, index, roll: 2, granted: true }));
+  sheet = applyCharacterActorFloor(dungeonCrawlerCarlProfile, sheet, storm, granted, 3);
+  expect(sheet.attrs.str).toBe(7);
+
+  sheet.info.floor = 4;
+  const health = THIRD_FLOOR_CLASS_CATALOG.health_embezzeler;
+  const missed = classBenefitBullets(health).map((b, index) => ({ ...b, index, roll: 1, granted: false }));
+  sheet = applyCharacterActorFloor(dungeonCrawlerCarlProfile, sheet, health, missed, 4);
+  expect(sheet.attrs.str).toBe(5);
+  expect(sheet.rulesetData.skills.find((s) => s.id === "character_actor")?.rank).toBe(4);
+});
