@@ -10,7 +10,7 @@ export default function GdsEmblem({ size = 44, className = "" }) {
       width={size}
       height={size}
       draggable={false}
-      className={`shrink-0 object-contain drop-shadow-[0_3px_10px_rgba(0,0,0,.55)] ${className}`}
+      className={`shrink-0 rounded-full object-cover drop-shadow-[0_3px_10px_rgba(0,0,0,.55)] ${className}`}
     />
   );
 }
