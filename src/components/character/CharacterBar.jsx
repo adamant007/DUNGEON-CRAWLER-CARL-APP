@@ -24,6 +24,11 @@ export default function CharacterBar({
   onAdvance,
   canAdvance = false,
   advanceLabel = "Advance",
+  showProgression = false,
+  onLevelUp,
+  onDescend,
+  onSpendStats,
+  statPointsAvailable = 0,
   saveState = "idle",
   busy = false,
   dirty = false,
@@ -89,6 +94,21 @@ export default function CharacterBar({
           <button type="button" className={BTN} onClick={onLoad} disabled={busy}>
             Load Character
           </button>
+        )}
+        {showProgression && !gmMode && (
+          <>
+            <button type="button" className={BTN} onClick={onLevelUp} disabled={busy} title="Gain one crawler Level">
+              Level Up
+            </button>
+            <button type="button" className={BTN} onClick={onDescend} disabled={busy} title="Resolve floor-end advancement and descend">
+              Descend Floor
+            </button>
+            {Number(statPointsAvailable) > 0 && (
+              <button type="button" className={BTN} onClick={onSpendStats} disabled={busy}>
+                Spend Stats ({statPointsAvailable})
+              </button>
+            )}
+          </>
         )}
         {canAdvance && !gmMode && (
           <button type="button" className={BTN} onClick={onAdvance} disabled={busy}>
